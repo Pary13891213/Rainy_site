@@ -1,0 +1,138 @@
+<!-- ../HTML/main.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>USER INTERFACE</title>
+    <link rel="stylesheet" href="/CSS/main.css">
+</head>
+<body>
+    <div class="main-page">
+        <!-- منوی بالای صفحه با گزینه‌های جدید -->
+        <div class="top-menu">
+            <div class="menu-title">USER TERMINAL [v1.0]</div>
+
+            <button class="hamburger-menu" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <div class="menu-links">
+                <a href="#" class="menu-link active" data-tab="chat">CHAT</a>
+                <a href="#" class="menu-link locked" data-tab="hack">HACK</a>
+                <a href="#" class="menu-link locked" data-tab="files">FILES</a>
+                <a href="#" class="menu-link" data-tab="setting">SETTING</a>
+                <a href="#" class="menu-link locked" data-tab="other">OTHER</a>
+                <a herf="#" class="menu-link" data-tab="game">GAME</a>
+            </div>
+            <div class="user-status">
+                <span class="status-indicator online"></span>
+                <span id="connection-status">CONNECTED</span>
+            </div>
+        </div>
+
+        <!-- تب‌های مختلف -->
+        <div class="tabs-container">
+            <!-- تب چت (فعال پیش‌فرض) -->
+            <div class="tab active" id="chat-tab">
+                <div class="chat-container">
+                    <div class="chat-header">
+                        <div class="chat-title">SECURE CHANNEL</div>
+                        <div class="chat-info" id="dev-status">DEV: ONLINE</div>
+                    </div>
+                    
+                    <div class="messages-box" id="user-messages-box">
+                        <!-- پیام‌ها اینجا با js اضافه می‌شن -->
+                    </div>
+                    
+                    <div class="message-input-area">
+                        <input type="text" id="user-message-input" class="message-input" placeholder="Type your message..." autocomplete="off">
+                        <button id="user-send-btn" class="send-btn" onclick="unlockHack()">SEND</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- تب setting (فعال) -->
+            <div class="tab" id="setting-tab">
+                <div class="settings-container">
+                    <div class="settings-header">SETTINGS</div>
+                    <div class="settings-body">
+                        <!-- آیتم ۱: نوتیفیکیشن -->
+                        <div class="setting-item">
+                            <span>Notifications:</span>
+                            <label class="toggle">
+                                <input type="checkbox" id="notifications" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <!-- آیتم ۲: صدا -->
+                        <div class="setting-item">
+                            <span>Sound effects:</span>
+                            <label class="toggle">
+                                <input type="checkbox" id="sound" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <!-- آیتم ۳: انتخاب تم -->
+                        <div class="setting-item">
+                            <div class="theme-selector">
+                                <span>Theme :</span>
+                                <div class="theme-buttons">
+                                    <button class="theme-btn" data-theme="default">Default</button>
+                                    <button class="theme-btn" data-theme="winered">WineRed✧♪</button>
+                                    <button class="theme-btn" data-theme="royalgreen">RoyalGreen</button>
+                                    <button class="theme-btn" data-theme="royalblue">RoyalBlue</button>
+                                    <button class="theme-btn" data-theme="white">White</button>
+                                </div>
+                            </div>
+                        </div> 
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab locked-tab" id="hack-tab">
+                <div class="terminal-container">
+                    <div class="terminal-header">
+                        <div class="terminal-title">HACK CONSOLE</div>
+                        <div class="terminal-status" id="hack-status">STATUS: STANDBY</div>
+                    </div>
+
+                    <div class="terminal-output" id="terminal-output">
+                        <!-- لاگ‌های ترمینال اینجا اضافه می‌شن -->
+                    </div>
+
+                    <div class="terminal-input-area">
+                        <input type="text" id="terminal-input" class="terminal-input" placeholder="Enter command..." autocomplete="off">
+                        <button id="terminal-send-btn" class="terminal-send-btn" onclick="sendCommand()">RUN</button>
+                    </div>
+                </div>
+            </div>
+            <div class="tab" id="game-tab">
+                <a href="games.html?game=2048" class="game-button" id="button-2048">2048</a>
+            </div>
+
+            <div class="tab locked-tab" id="files-tab"></div>
+            <div class="tab locked-tab" id="other-tab"></div>
+        </div>
+
+        <!-- دیالوگ سیستمی برای پیام‌های قفل -->
+        <div id="system-dialog" class="system-dialog">
+            <div class="dialog-content">
+                <span id="dialog-message"></span>
+            </div>
+        </div>
+
+        <!-- افکت scanlines -->
+        <div class="scanlines"></div>
+    </div>
+
+    <!-- ===== SOCKET.IO (اضافه شده) ===== -->
+    <script src="/socket.io/socket.io.js"></script>
+    
+    <script type="module" src="/JAVASCRIPT/main.js"></script>
+    <script src="/JAVASCRIPT/hack.js"></script>
+</body>
+</html>

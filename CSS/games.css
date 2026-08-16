@@ -1,0 +1,458 @@
+:root{
+    /* رنگ‌های اصلی */
+    --bg-color: #000000;
+    --dark-shadow: #00000080;
+    --main-color: #88ddff;
+    --main-dark: #000a14f2;
+    
+    /* سایه‌ها (فقط تا shadow-11) */
+    --shadow-1: #88ddff4d;
+    --shadow-2: #88ddff1a;
+    --shadow-3: #88ddff26;
+    --shadow-4: #88ddff33;
+    --shadow-5: #88ddff80;
+    --shadow-6: #88ddff66;
+    --shadow-7: #88ddff99;
+    --shadow-8: #88ddff08;
+    --shadow-9: #88ddff0d;
+    --shadow-10: #aaefff;
+    --shadow-11: #99eeff;
+    
+    /* سایر رنگ‌ها */
+    --other-message: #1e1e1ecc;
+    --menu-color: #001428f2;
+    --normal-red: #ff5555;
+    --normal-white: #ffffff;
+    --red-shadow: #ff00001a;
+}
+
+[data-theme="winered"] {
+    --main-color: #8f0000ff;
+    --main-dark: #0f0202;
+    --menu-color: #1a0303; 
+    --shadow-1:  #5801014d; 
+    --shadow-2:  #5801011a; 
+    --shadow-3:  #58010126; 
+    --shadow-4:  #58010133; 
+    --shadow-5:  #58010180; 
+    --shadow-6:  #58010166; 
+    --shadow-7:  #58010199; 
+    --shadow-8:  #58010108; 
+    --shadow-9:  #5801010d; 
+    --shadow-10: #580101cc; 
+    --shadow-11: #580101b3; 
+    --other-message: #2a0505cc; 
+}
+
+[data-theme="white"] {
+    --main-color: #ffffff;
+    --main-dark: #0a0a0a; 
+    --menu-color: #141414;
+    --shadow-1:  #ffffff4d;
+    --shadow-2:  #ffffff1a;
+    --shadow-3:  #ffffff26;
+    --shadow-4:  #ffffff33;
+    --shadow-5:  #ffffff80;
+    --shadow-6:  #ffffff66;
+    --shadow-7:  #ffffff99;
+    --shadow-8:  #ffffff08;
+    --shadow-9:  #ffffff0d;
+    --shadow-10: #ffffffcc;
+    --shadow-11: #ffffffb3;
+    --other-message: #1e1e1ecc;
+}
+
+[data-theme="royalblue"] {
+    --main-color: #234FC5ff;
+    --main-dark: #000a14; 
+    --menu-color: #001428; 
+    --shadow-1:  #00317a4d;
+    --shadow-2:  #00317a1a;
+    --shadow-3:  #00317a26;
+    --shadow-4:  #00317a33;
+    --shadow-5:  #00317a80;
+    --shadow-6:  #00317a66;
+    --shadow-7:  #00317a99;
+    --shadow-8:  #00317a08;
+    --shadow-9:  #00317a0d;
+    --shadow-10: #00317acc;
+    --shadow-11: #00317ab3;
+    --other-message: #0a152acc;
+}
+
+[data-theme="royalgreen"] {
+    --main-color: #025E1Fff;
+    --main-dark: #020f05; 
+    --menu-color: #031a0a; 
+    --shadow-1:  #013a134d;
+    --shadow-2:  #013a131a;
+    --shadow-3:  #013a1326;
+    --shadow-4:  #013a1333;
+    --shadow-5:  #013a1380;
+    --shadow-6:  #013a1366;
+    --shadow-7:  #013a1399;
+    --shadow-8:  #013a1308;
+    --shadow-9:  #013a130d;
+    --shadow-10: #013a13cc;
+    --shadow-11: #013a13b3;
+    --other-message: #051a0dcc;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--main-color);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* کانتینر اصلی هدر */
+.game-header {
+    width: 100%;
+    max-width: none; /* حداکثر عرض برای دسکتاپ */
+    background-color: var(--main-dark);
+    border-bottom: 2px solid var(--shadow-1);
+    box-shadow: 0 4px 15px var(--dark-shadow);
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between; /* دکمه‌ها چپ، امتیازات راست */
+    align-items: center;
+    box-sizing: border-box;
+    position: relative;
+}
+
+
+/* کانتینر دکمه‌ها */
+.controls-left {
+    display: flex;
+    gap: 12px; /* فاصله بین دکمه بازگشت و ری‌استارت */
+    align-items: center; /* تراز عمودی با باکس‌های امتیاز */
+}
+
+.control-button {
+    /* اندازه ثابت و مناسب برای همه دستگاه‌ها */
+    width: 48px; 
+    height: 48px;
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    background-color: var(--menu-color);
+    color: var(--main-color);
+    border: 2px solid var(--shadow-1);
+    border-radius: 12px; /* گوشه‌های گرد */
+    
+    box-shadow: 0 0 8px var(--shadow-3), inset 0 0 4px var(--shadow-8);
+    
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    font-size: 1.3rem; /* اندازه آیکون */
+    font-weight: bold;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* حالت هاور (برای دسکتاپ) */
+.control-button:hover {
+    background-color: var(--shadow-5);
+    border-color: var(--shadow-10);
+    box-shadow: 0 0 12px var(--shadow-7), inset 0 0 6px var(--shadow-8);
+    transform: translateY(-2px);
+}
+
+/* حالت کلیک (برای موبایل و دسکتاپ) */
+.control-button:active {
+    background-color: var(--shadow-10);
+    color: var(--main-dark);
+    box-shadow: 0 0 5px var(--shadow-5);
+    transform: translateY(1px);
+}
+
+
+
+/* --- بخش امتیازات (سمت راست) --- */
+.score-section {
+    display: flex;
+    gap: 15px;
+}
+
+.score-box {
+    background-color: var(--menu-color);
+    border: 2px solid var(--shadow-1); /* خط دور درخشان */
+    border-radius: 10px;
+    padding: 8px 12px;
+    text-align: center;
+    min-width: 80px;
+    box-shadow: 0 0 10px var(--shadow-3);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.score-box h3 {
+    margin: 0;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--shadow-10);
+    font-weight: 600;
+}
+
+.score-box p {
+    margin: 4px 0 0 0;
+    color: var(--main-color);
+    font-size: 1.2rem;
+    font-weight: bold;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+/* --- بخش زمین بازی (Game Board) --- */
+.game-main-area {
+    width: 100%;
+    max-width: 500px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-grow: 1;
+    padding: 20px 0;
+}
+
+#game-board {
+    width: 100%;
+    /* مربع کامل: عرض ۱۰۰٪ تا حداکثر ۴۰۰ پیکسل */
+    max-width: 400px; 
+    aspect-ratio: 1 / 1; /* تضمین مربع بودن */
+    background-color: var(--main-dark);
+    border: 3px solid var(--shadow-1);
+    border-radius: 15px;
+    box-shadow: 0 0 30px var(--shadow-6), inset 0 0 20px var(--shadow-8);
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* ۴ ستون */
+    grid-template-rows: repeat(4, 1fr);    /* ۴ ردیف */
+    gap: 8px; /* فاصله بین خانه‌ها */
+    padding: 8px;
+    position: relative;
+}
+
+/* خانه‌های بازی */
+.grid-cell {
+    background-color: var(--menu-color); 
+    color: var(--main-color);
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    box-shadow: inset 0 0 10px var(--shadow-8);
+    transition: all 0.2s ease;
+}
+
+/* انیمیشن برای اعداد جدید */
+.grid-cell.new-tile {
+    animation: popIn 0.2s ease-out;
+}
+
+@keyframes popIn {
+    0% { transform: scale(0); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* پیام‌های بازی */
+#game-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: var(--other-message);
+    color: var(--main-color);
+    padding: 20px 30px;
+    border-radius: 12px;
+    border: 2px solid var(--normal-red);
+    box-shadow: 0 0 20px var(--red-shadow);
+    text-align: center;
+    z-index: 10;
+    font-size: 1.2rem;
+    display: none;
+}
+
+#game-message.show {
+    display: block;
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translate(-50%, -40%); }
+    to { opacity: 1; transform: translate(-50%, -50%); }
+}
+
+/* عدد 2 */
+.grid-cell[data-val="2"] {
+    background-color: var(--shadow-2); /* سایه بسیار روشن */
+    color: var(--main-color); /* متن به رنگ اصلی تم */
+    border: 1px solid var(--shadow-1);
+}
+
+/* عدد 4 */
+.grid-cell[data-val="4"] {
+    background-color: var(--shadow-3);
+    color: var(--main-color);
+    border: 1px solid var(--shadow-2);
+}
+
+/* عدد 8 */
+.grid-cell[data-val="8"] {
+    background-color: var(--shadow-4);
+    color: var(--shadow-10); /* رنگ روشن */
+    box-shadow: 0 0 5px var(--shadow-5);
+}
+
+/* عدد 16 */
+.grid-cell[data-val="16"] {
+    background-color: var(--shadow-5);
+    color: var(--main-color);
+    box-shadow: 0 0 8px var(--shadow-6);
+}
+
+/* عدد 32 */
+grid-cell[data-val="32"] {
+    background-color: var(--shadow-6);
+    color: var(--main-color);
+    box-shadow: 0 0 10px var(--shadow-7);
+}
+
+/* عدد 64 */
+.grid-cell[data-val="64"] {
+    background-color: var(--shadow-7);
+    color: var(--main-color);
+    box-shadow: 0 0 12px var(--shadow-7);
+}
+
+/* عدد 128 */
+.grid-cell[data-val="128"] {
+    background-color: var(--shadow-10); /* رنگ بسیار روشن */
+    color: var(--main-dark); /* متن تیره برای کنتراست */
+    box-shadow: 0 0 15px var(--shadow-10);
+    font-size: 1.4rem;
+}
+
+/* عدد 256 */
+.grid-cell[data-val="256"] {
+    background-color: var(--shadow-11);
+    color: var(--main-dark);
+    box-shadow: 0 0 18px var(--shadow-11);
+    font-size: 1.4rem;
+}
+
+/* عدد 512 */
+.grid-cell[data-val="512"] {
+    background-color: var(--shadow-1); /* بازگشت به سایه اول اما با شدت بالا */
+    color: var(--main-color);
+    box-shadow: 0 0 20px var(--shadow-5);
+    font-size: 1.3rem;
+}
+
+/* عدد 1024 */
+.grid-cell[data-val="1024"] {
+    background-color: var(--shadow-11);
+    color: var(--main-color);
+    box-shadow: 0 0 25px var(--shadow-7);
+    font-size: 1.2rem;
+}
+
+/* عدد 2048 (مخصوص) */
+.grid-cell[data-val="2048"] {
+    background-color: var(--shadow-10);
+    color: var(--main-color);
+    box-shadow: 0 0 30px var(--shadow-7), 0 0 10px var(--shadow-1);
+    font-size: 1.2rem;
+    border: 2px solid var(--shadow-10);
+}
+
+/* اعداد بزرگتر از 2048 */
+.grid-cell[data-val="4096"],
+.grid-cell[data-val="8192"] {
+    background-color: var(--shadow-11);
+    color: var(--main-color);
+    box-shadow: 0 0 20px var(--shadow-6);
+    font-size: 1.1rem;
+}
+
+/* =========================================
+   تنظیمات مخصوص موبایل (فقط اینجا اعمال می‌شود)
+   ========================================= */
+@media (max-width: 480px) {
+    .game-header {
+        padding: 6px 8px;
+        gap: 6px;
+    }
+
+    .controls-left {
+        gap: 4px;
+    }
+
+    /* 
+       قفل کردن سایز دکمه‌ها در موبایل 
+       حذف تمام محدودیت‌های عرضی و ارتفاعی
+    */
+    .control-button {
+        width: 35px !important;
+        height: 35px !important;
+        
+        /* حذف هرگونه پدینگ یا مارجین داخلی که باعث بزرگنمایی شود */
+        padding: 0 !important;
+        margin: 0 !important;
+        
+        /* تنظیم دقیق محتوا */
+        font-size: 1rem !important;
+        line-height: 1 !important;
+        border-radius: 8px !important;
+        
+        /* اجبار به نمایش فلکس و تراز دقیق */
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        
+        /* جلوگیری از تغییر سایز توسط مرورگر */
+        min-width: 35px !important;
+        max-width: 35px !important;
+        min-height: 35px !important;
+        max-height: 35px !important;
+        
+        box-sizing: border-box !important;
+    }
+
+    .score-section {
+        gap: 4px;
+    }
+
+    .score-box {
+        padding: 3px 6px;
+        min-width: 50px;
+        max-width: 65px;
+    }
+
+    .score-box h3 { font-size: 0.6rem; }
+    .score-box p { font-size: 0.85rem; }
+
+    #game-board {
+        max-width: 90vw; /* در موبایل ۹۰٪ عرض صفحه */
+        gap: 6px;
+        padding: 6px;
+    }
+
+    .grid-cell {
+        font-size: 1.2rem;
+        border-radius: 6px;
+    }
+    .grid-cell[data-val="128"],
+    .grid-cell[data-val="256"] { font-size: 1.2rem; }
+    .grid-cell[data-val="512"],
+    .grid-cell[data-val="1024"],
+    .grid-cell[data-val="2048"] { font-size: 1rem; }
+}

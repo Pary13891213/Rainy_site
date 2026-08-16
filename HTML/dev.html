@@ -1,0 +1,82 @@
+<!-- ../HTML/dev.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DEV PANEL</title>
+    <link rel="stylesheet" href="/CSS/dev.css">
+</head>
+<body>
+    <div class="dev-page">
+        <!-- منوی بالای صفحه -->
+        <div class="top-menu">
+            <div class="menu-title">DEV PANEL [v1.0]</div>
+            <div class="menu-links">
+                <a href="#" class="menu-link active" data-tab="chat">CHAT</a>
+                <a href="#" class="menu-link" data-tab="terminal">TERMINAL</a>
+                <a href="#" class="menu-link" data-tab="files">FILES</a>
+                <a href="#" class="menu-link" data-tab="setting">SETTING</a>
+                <a href="#" class="menu-link" data-tab="secret">SECRET</a>
+                <a href="#" class="menu-link" data-tab="notes">NOTES</a>
+                <a href="#" class="menu-link" data-tab="codes">CODES</a>
+                <a href="#" class="menu-link" data-tab="she">SHE</a>
+                <a href="#" class="menu-link" data-tab="share">SHARE</a>
+            </div>
+            <div class="user-status">
+                <span class="status-indicator"></span>
+                <span id="user-status-text">USER: OFFLINE</span>
+            </div>
+        </div>
+
+        <!-- تب‌های مختلف -->
+        <div class="tabs-container">
+            <!-- تب چت (فعال پیش‌فرض) -->
+            <div class="tab active" id="chat-tab">
+                <div class="chat-container">
+                    <div class="chat-header">
+                        <div class="chat-title">USER COMMUNICATION</div>
+                        <div class="chat-actions">
+                            <button id="clear-chat-btn" class="action-btn">CLEAR</button>
+                        </div>
+                    </div>
+                    
+                    <div class="messages-box" id="dev-messages-box">
+                        <!-- پیام‌ها اینجا با js اضافه می‌شن -->
+                    </div>
+                    
+                    <div class="message-input-area">
+                        <input type="text" id="dev-message-input" class="message-input" placeholder="Type your message to user..." autocomplete="off">
+                        <button id="dev-send-btn" class="send-btn">SEND</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- بقیه تب‌ها (فعلاً ساده می‌ذاریم) -->
+            <div class="tab" id="terminal-tab">
+                <div class="terminal-container">
+                    <div class="terminal-header">TERMINAL</div>
+                    <div class="terminal-body" id="terminal-body">
+                        <div>Terminal ready</div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab" id="files-tab">Files</div>
+            <div class="tab" id="setting-tab">Settings</div>
+            <div class="tab" id="secret-tab">Secret</div>
+            <div class="tab" id="notes-tab">Notes</div>
+            <div class="tab" id="codes-tab">Codes</div>
+            <div class="tab" id="she-tab">She</div>
+            <div class="tab" id="share-tab">Share</div>
+        </div>
+
+        <!-- افکت scanlines -->
+        <div class="scanlines"></div>
+    </div>
+
+    <!-- ===== SOCKET.IO (اضافه شده) ===== -->
+    <script src="/socket.io/socket.io.js"></script>
+    
+    <script src="/JAVASCRIPT/dev.js"></script>
+</body>
+</html>

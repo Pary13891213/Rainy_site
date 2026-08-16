@@ -1,0 +1,163 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: black;
+    overflow: hidden;
+    height: 100vh;
+    font-family: 'Courier New', Courier, monospace;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.welcome-page {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.typing-text {
+    color: #88ddff;
+    font-size: 24px;
+    line-height: 1.6;
+    max-width: 800px;
+    max-height: 70vh;
+    padding: 20px;
+    text-align: center;
+    font-weight: bold;
+    direction: ltr;
+    position: relative;
+    z-index: 2;
+    text-shadow: 
+        0 0 3px #aaefff,
+        0 0 6px #99eeff;
+    
+    /* اسکرول بدون نوار */
+    overflow-y: scroll;
+    overflow-x: hidden;
+    
+    /* مخفی کردن نوار اسکرول */
+    -ms-overflow-style: none;  /* Internet Explorer 10+ */
+    scrollbar-width: none;     /* Firefox */
+    will-change: transform;
+    transition: transform 0.08s ease-out;
+}
+
+#welcome-text, #greeting-text, .name-input-container {
+    transition: transform 0.08s ease-out;
+    will-change: transform;
+}
+/* مخفی کردن نوار اسکرول در WebKit browsers */
+.typing-text::-webkit-scrollbar {
+    display: none; /* Safari and Chrome */
+}
+
+#welcome-text, #greeting-text {
+    margin-bottom: 15px;
+    white-space: pre-wrap;
+}
+
+.name-input-container {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.scanlines {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        to bottom,
+        transparent 50%,
+        rgba(100, 200, 255, 0.03) 50%
+    );
+    background-size: 100% 4px;
+    pointer-events: none;
+    z-index: 1;
+    animation: scanlines 6s linear infinite;
+}
+
+@keyframes scanlines {
+    0% {
+        background-position: 0 0;
+    }
+    100% {
+        background-position: 0 100%;
+    }
+}
+
+.glitch-rectangle {
+    position: absolute;
+    background: rgba(50, 50, 50, 0.95);
+    pointer-events: none;
+    z-index: 3;
+    animation: glitch-rectangle 0.15s forwards;
+}
+
+@keyframes glitch-rectangle {
+    0% { opacity: 0; }
+    50% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+.glitch-rectangle.white {
+    background: rgba(255, 255, 255, 0.95);
+}
+
+.glitch-rectangle.black {
+    background: rgba(0, 0, 0, 0.98);
+}
+
+.name-input {
+    width: 300px;
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(136, 221, 255, 0.5);
+    color: #88ddff;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 18px;
+    padding: 12px 20px;
+    outline: none;
+    border-radius: 5px;
+    text-align: center;
+    
+    text-shadow: 
+        0 0 3px #aaefff,
+        0 0 6px #99eeff;
+    
+    box-shadow: 
+        inset 0 0 10px rgba(136, 221, 255, 0.3),
+        0 0 15px rgba(136, 221, 255, 0.2),
+        0 3px 0 rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.name-input:focus {
+    background: rgba(136, 221, 255, 0.1);
+    text-shadow: 
+        0 0 5px #aaefff,
+        0 0 10px #99eeff,
+        0 0 15px #88ddff;
+    box-shadow: 
+        inset 0 0 15px rgba(136, 221, 255, 0.4),
+        0 0 25px rgba(136, 221, 255, 0.5),
+        0 0 35px rgba(136, 221, 255, 0.3);
+    border: 1px solid rgba(170, 239, 255, 0.8);
+    transform: scale(1.02);
+}
+
+.name-input::placeholder {
+    color: rgba(136, 221, 255, 0.5);
+}

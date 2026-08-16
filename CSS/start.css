@@ -1,0 +1,190 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: black;
+    overflow: hidden;
+    height: 100vh;
+    font-family: 'Courier New', Courier, monospace;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.start-page {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.glitch-rectangle {
+    position: absolute;
+    background: rgba(50, 50, 50, 0.95);
+    pointer-events: none;
+    z-index: 3;
+    animation: glitch-rectangle 0.15s forwards;
+}
+
+@keyframes glitch-rectangle {
+    0% { opacity: 0; }
+    50% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+.glitch-rectangle.white {
+    background: rgba(255, 255, 255, 0.95);
+}
+
+.glitch-rectangle.black {
+    background: rgba(0, 0, 0, 0.98);
+}
+
+.typing-text {
+    color: #88ddff;
+    font-size: 24px;
+    line-height: 1.6;
+    max-width: 800px;
+    padding: 20px;
+    text-align: center;
+    font-weight: bold;
+    direction: ltr;
+    position: relative;
+    z-index: 2;
+    text-shadow: 
+        0 0 3px #aaefff,
+        0 0 6px #99eeff;
+}
+
+#text-one, #text-two {
+    margin-bottom: 15px;
+    white-space: pre-wrap;
+}
+
+.continue-btn {
+    position: absolute;
+    bottom: 60px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: transparent;
+    border: none;
+    color: #88ddff;
+    padding: 12px 40px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 5px;
+    border-width: 2px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 10;
+    text-shadow: 
+        0 0 3px #aaefff,
+        0 0 6px #99eeff;
+    box-shadow: 
+        inset 0 0 10px rgba(136, 221, 255, 0.3),
+        0 0 15px rgba(136, 221, 255, 0.2),
+        0 3px 0 rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(136, 221, 255, 0.5);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.continue-btn:hover {
+    background: rgba(136, 221, 255, 0.1);
+    text-shadow: 
+        0 0 5px #aaefff,
+        0 0 10px #99eeff,
+        0 0 15px #88ddff;
+    box-shadow: 
+        inset 0 0 15px rgba(136, 221, 255, 0.4),
+        0 0 25px rgba(136, 221, 255, 0.5),
+        0 0 35px rgba(136, 221, 255, 0.3);
+    border: 1px solid rgba(170, 239, 255, 0.8);
+    transform: translateX(-50%) translateY(20px) scale(1.05);
+}
+
+.continue-btn:active {
+    transform: translateX(-50%) translateY(20px) scale(0.98);
+    background: rgba(136, 221, 255, 0.2);
+}
+
+.continue-btn.show {
+    opacity: 1;
+    visibility: visible;
+    animation: btn-glow 2s infinite alternate, btn-float 3s ease-in-out infinite;
+}
+
+@keyframes btn-glow {
+    0% {
+        text-shadow: 
+            0 0 3px #aaefff,
+            0 0 6px #99eeff;
+        box-shadow: 
+            inset 0 0 10px rgba(136, 221, 255, 0.3),
+            0 0 15px rgba(136, 221, 255, 0.2);
+    }
+    100% {
+        text-shadow: 
+            0 0 5px #aaefff,
+            0 0 12px #99eeff,
+            0 0 18px #88ddff;
+        box-shadow: 
+            inset 0 0 15px rgba(136, 221, 255, 0.4),
+            0 0 20px rgba(136, 221, 255, 0.4),
+            0 0 30px rgba(136, 221, 255, 0.3);
+    }
+}
+
+@keyframes btn-float {
+    0%, 100% {
+        transform: translateX(-50%) translateY(20px);
+    }
+    50% {
+        transform: translateX(-50%) translateY(15px);
+    }
+}
+
+.glitch-btn-rectangle {
+    position: absolute;
+    background: rgba(136, 221, 255, 0.7);
+    pointer-events: none;
+    z-index: 9;
+    animation: glitch-rectangle 0.15s forwards;
+    border-radius: 8px;
+    mix-blend-mode: screen;
+}
+
+.scanlines {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        to bottom,
+        transparent 50%,
+        rgba(100, 200, 255, 0.03) 50%
+    );
+    background-size: 100% 4px;
+    pointer-events: none;
+    z-index: 1;
+    animation: scanlines 6s linear infinite;
+}
+
+@keyframes scanlines {
+    0% {
+        background-position: 0 0;
+    }
+    100% {
+        background-position: 0 100%;
+    }
+}

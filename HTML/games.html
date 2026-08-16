@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Center</title>
+    <link rel="stylesheet" href="../CSS/games.css">
+</head>
+<body>
+
+<header class="game-header">
+        <!-- دکمه‌ها (چپ) -->
+        <div class="controls-left">
+            <a href="main.html" class="control-button" title="Back">←</a>
+            <button id="restart-btn" class="control-button" title="restart">↻</button>
+        </div>
+
+        <!-- امتیازات (راست) -->
+        <div class="score-section">
+            <div class="score-box">
+                <h3>Score</h3>
+                <p id="score">0</p>
+            </div>
+            <div class="score-box">
+                <h3>High Score</h3>
+                <p id="high-score">0</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- زمین بازی -->
+    <main class="game-main-area">
+        <div id="game-board">
+            <!-- خانه‌ها توسط جاوااسکریپت ساخته می‌شوند -->
+        </div>
+        
+        <!-- پیام پایان بازی -->
+        <div id="game-message"></div>
+    </main>
+
+    <script src="../JAVASCRIPT/games.js"></script>
+</body>
+</html>
