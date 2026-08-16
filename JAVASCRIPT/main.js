@@ -1,7 +1,7 @@
 import { DLAT1 , DLAT2 , DLAT3 , DLAT4 , DLAT5 , DLAT6 , DLAT7 , DLAT8 , DLAT9} from "./DLAT.js";
 
 // ===== SOCKET CONNECTION =====
-const socket = io('http://localhost:3000');
+const socket = io('https://rainy-server.onrender.com/');
 
 // ===== SOCKET EVENTS =====
 socket.on('chat-message', (data) => {
