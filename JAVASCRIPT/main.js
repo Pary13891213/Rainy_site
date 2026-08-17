@@ -4,14 +4,37 @@ import { DLAT1 , DLAT2 , DLAT3 , DLAT4 , DLAT5 , DLAT6 , DLAT7 , DLAT8 , DLAT9} 
 const socket = io('https://rainy-server.onrender.com/');
 
 // ===== SOCKET EVENTS =====
+socket.on('chat-history', (history) => {
+    // تاریخچه رو از دیتابیس بگیر و جایگزین کن
+    messages = history.map(msg => ({
+        sender: msg.username,
+        content: msg.message,
+        time: msg.time,
+        type: msg.username === 'DEV' ? 'dev' : 'other'
+    }));
+    saveMessages();
+    displayMessages();
+});
+
 socket.on('chat-message', (data) => {
     const userName = localStorage.getItem('userName') || 'User';
-    if (data.username !== userName) {
+    // اگه پیام از خودم نباشه
+    if (data.username !== userName && data.username !== 'DEV') {
         const newMessage = {
             sender: data.username,
             content: data.message,
             time: data.time,
             type: 'other'
+        };
+        messages.push(newMessage);
+        saveMessages();
+        displayMessages();
+    } else if (data.username === 'DEV') {
+        const newMessage = {
+            sender: 'DEV',
+            content: data.message,
+            time: data.time,
+            type: 'dev'
         };
         messages.push(newMessage);
         saveMessages();
@@ -31,7 +54,7 @@ socket.on('user-typing', (username) => {
     console.log(username + ' is typing...');
 });
 
-// بررسی اینکه آیا قبلاً وضعیت باز بودن تب 'hack' ثبت شده است یا خیر
+// ===== بررسی وضعیت تب hack =====
 if (localStorage.getItem('hack-unlocked') === 'true') {
     unlockTab('hack');
 } else {
@@ -72,6 +95,7 @@ function updateDate() {
 }
 setInterval(updateDate, 60000);
 updateDate();
+
 menuLinks.forEach(link => {
     link.addEventListener('click', (e) => {
         e.preventDefault();
@@ -93,6 +117,7 @@ menuLinks.forEach(link => {
         }
     });
 });
+
 function showLockedDialog() {
     dialogMessage.textContent = "ACCESS DENIED - STOP TRYING";
     
@@ -158,7 +183,6 @@ function loadMessages() {
 
 function displayMessages() {
     if (!messagesBox) return;
-    
     if (messages.length === lastMessageCount) return;
     
     messagesBox.innerHTML = '';
@@ -167,7 +191,6 @@ function displayMessages() {
     messages.forEach(msg => {
         const messageDiv = document.createElement('div');
         
-        // تشخیص بر اساس type
         if (msg.type === 'user') {
             messageDiv.className = 'message mine';
             msg.sender = 'You';
@@ -177,7 +200,6 @@ function displayMessages() {
         } else if (msg.type === 'system') {
             messageDiv.className = 'message system';
         } else {
-            // other - پیام از کاربر دیگه
             messageDiv.className = 'message other';
             msg.sender = msg.sender || 'Unknown';
         }
@@ -197,7 +219,6 @@ function displayMessages() {
     messagesBox.scrollTop = messagesBox.scrollHeight;
 }
 
-// تابع اضافه کردن پیام سیستمی
 function addSystemMessage(content) {
     const systemMsg = {
         sender: 'System',
@@ -211,7 +232,7 @@ function addSystemMessage(content) {
     displayMessages();
 }
 
-// ===== SEND MESSAGE FUNCTION =====
+// ===== SEND MESSAGE =====
 function sendMessage() {
     const content = messageInput.value.trim();
     if (!content) return;
@@ -244,6 +265,7 @@ function sendMessage() {
 }
 
 function checkNewMessages() {
+    // فقط پیام‌های محلی رو چک کن، دیتابیس از طریق socket میاد
     loadMessages();
     displayMessages();
 }
@@ -590,7 +612,7 @@ function unlockHack(){
     }
 }
 
-// ===== INIT FUNCTION =====
+// ===== INIT =====
 function init() {
     const userName = localStorage.getItem('userName') || 'Unknown User';
     if (profileName) {
@@ -618,6 +640,7 @@ function init() {
     window.addEventListener('beforeunload', () => {
         localStorage.setItem('user_online', 'false');
     });
+    
     const themeOptions = [
         { name: 'DEFAULT', value: 'default' },
         { name: 'WINERED', value: 'winered' },

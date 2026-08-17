@@ -2,6 +2,18 @@
 const socket = io('https://rainy-server.onrender.com/');
 
 // ===== SOCKET EVENTS =====
+socket.on('chat-history', (history) => {
+    // تاریخچه رو از دیتابیس بگیر و جایگزین کن
+    messages = history.map(msg => ({
+        sender: msg.username,
+        content: msg.message,
+        time: msg.time,
+        type: msg.username === 'DEV' ? 'dev' : 'other'
+    }));
+    saveMessages();
+    displayMessages();
+});
+
 socket.on('chat-message', (data) => {
     console.log('Dev received message:', data);
     
@@ -136,7 +148,6 @@ function displayMessages() {
     messages.forEach(msg => {
         const messageDiv = document.createElement('div');
         
-        // تشخیص بر اساس type
         if (msg.type === 'dev') {
             messageDiv.className = 'message mine';
             msg.sender = 'DEV';
@@ -146,7 +157,6 @@ function displayMessages() {
         } else if (msg.type === 'system') {
             messageDiv.className = 'message system';
         } else {
-            // other - پیام از کاربر دیگه
             messageDiv.className = 'message other';
             msg.sender = msg.sender || 'Unknown';
         }
@@ -270,7 +280,7 @@ function updateDevStatus(isOnline) {
     localStorage.setItem(DEV_STATUS_KEY, isOnline);
 }
 
-// ===== INIT FUNCTION =====
+// ===== INIT =====
 function init() {
     console.log('Initializing dev.js');
     
