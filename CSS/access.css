@@ -228,3 +228,60 @@ body {
         background-position: 0 100%;
     }
 }
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .access-box {
+        width: 90%;
+        height: auto;
+        padding: 25px;
+        min-height: 300px;
+    }
+    
+    .header-text {
+        font-size: 22px;
+        margin-bottom: 25px;
+    }
+    
+    .code-input {
+        font-size: 16px;
+        padding: 10px 12px;
+    }
+    
+    .verify-btn {
+        font-size: 16px;
+        padding: 10px;
+        margin-top: 25px;
+    }
+    
+    .input-group {
+        margin-bottom: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .access-box {
+        width: 95%;
+        padding: 20px;
+        min-height: 250px;
+    }
+    
+    .header-text {
+        font-size: 18px;
+        margin-bottom: 20px;
+    }
+    
+    .code-input {
+        font-size: 14px;
+        padding: 8px 10px;
+    }
+    
+    .verify-btn {
+        font-size: 14px;
+        padding: 8px;
+        margin-top: 20px;
+    }
+    
+    .input-group {
+        margin-bottom: 15px;
+    }
+}

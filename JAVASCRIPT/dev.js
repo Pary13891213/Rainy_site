@@ -17,8 +17,19 @@ socket.on('chat-history', (history) => {
 socket.on('chat-message', (data) => {
     console.log('Dev received message:', data);
     
-    // اگه پیام از خود Dev نباشه، نمایش بده
-    if (data.username !== 'DEV') {
+    if (data.username === 'DEV') {
+        // پیام از خود Dev
+        const newMessage = {
+            sender: 'DEV',
+            content: data.message,
+            time: data.time,
+            type: 'dev'
+        };
+        messages.push(newMessage);
+        saveMessages();
+        displayMessages();
+    } else {
+        // پیام از کاربر دیگه
         const newMessage = {
             sender: data.username,
             content: data.message,
@@ -302,8 +313,19 @@ function init() {
     }
     
     if (messageInput) {
-        messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
+        messageInput.addEventListener('keydown', (e) => {
+            // تشخیص گوشی بر اساس عرض صفحه
+            const isMobile = window.innerWidth < 768;
+            
+            // در گوشی، اینتر رو نادیده بگیر (فقط دکمه Send)
+            if (isMobile && e.key === 'Enter') {
+                e.preventDefault();
+                return;
+            }
+            
+            // در لپ‌تاپ: اینتر معمولی (Shift+Enter برای خط جدید)
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
                 sendMessage();
             }
         });

@@ -787,3 +787,196 @@ input:checked + .toggle-slider:before {
     z-index: 9999;
     animation: glitch-rectangle 0.15s forwards;
 }
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .top-menu {
+        padding: 10px 15px;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    
+    .menu-title {
+        font-size: 16px;
+    }
+    
+    .menu-links {
+        gap: 6px;
+    }
+    
+    .menu-link {
+        font-size: 11px;
+        padding: 4px 8px;
+    }
+    
+    .chat-container {
+        padding: 10px;
+    }
+    
+    .chat-header {
+        padding: 8px 12px;
+        flex-direction: column;
+        gap: 4px;
+        text-align: center;
+    }
+    
+    .chat-title {
+        font-size: 15px;
+    }
+    
+    .messages-box {
+        padding: 10px;
+        gap: 8px;
+    }
+    
+    .message {
+        max-width: 90%;
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+    
+    .message-content {
+        font-size: 14px;
+    }
+    
+    .message-input-area {
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 10px 0 5px 0;
+    }
+    
+    .message-input {
+        font-size: 14px;
+        padding: 8px 12px;
+        min-height: 38px;
+    }
+    
+    .send-btn {
+        font-size: 12px;
+        padding: 8px 16px;
+        min-height: 38px;
+    }
+    
+    .settings-body {
+        padding: 12px;
+    }
+    
+    .setting-item {
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 10px;
+    }
+    
+    .theme-buttons {
+        gap: 4px;
+    }
+    
+    .theme-btn {
+        padding: 4px 8px;
+        font-size: 10px;
+    }
+    
+    .terminal-container {
+        max-width: 100%;
+        margin: 8px;
+    }
+    
+    .terminal-output {
+        font-size: 12px;
+        padding: 8px;
+    }
+    
+    .terminal-input-area {
+        flex-wrap: wrap;
+    }
+    
+    .terminal-input {
+        font-size: 12px;
+        min-height: 32px;
+    }
+    
+    .terminal-send-btn {
+        font-size: 11px;
+        padding: 4px 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .top-menu {
+        padding: 6px 10px;
+        gap: 4px;
+    }
+    
+    .menu-title {
+        font-size: 13px;
+    }
+    
+    .menu-link {
+        font-size: 9px;
+        padding: 3px 6px;
+    }
+    
+    .chat-header {
+        padding: 6px 10px;
+    }
+    
+    .chat-title {
+        font-size: 13px;
+    }
+    
+    .message {
+        max-width: 95%;
+        padding: 6px 10px;
+        font-size: 13px;
+    }
+    
+    .message-content {
+        font-size: 13px;
+    }
+    
+    .message-input {
+        font-size: 13px;
+        padding: 6px 10px;
+        min-height: 34px;
+    }
+    
+    .send-btn {
+        font-size: 10px;
+        padding: 6px 12px;
+        min-height: 34px;
+        min-width: 50px;
+    }
+    
+    .settings-body {
+        padding: 8px;
+    }
+    
+    .setting-item {
+        padding: 8px;
+        font-size: 12px;
+    }
+    
+    .theme-btn {
+        padding: 3px 6px;
+        font-size: 9px;
+    }
+    
+    .terminal-output {
+        font-size: 11px;
+        padding: 6px;
+    }
+    
+    .terminal-input {
+        font-size: 11px;
+        min-height: 28px;
+    }
+    
+    .terminal-send-btn {
+        font-size: 10px;
+        padding: 3px 8px;
+    }
+    
+    .action-btn {
+        font-size: 11px;
+        padding: 4px 10px;
+    }
+}

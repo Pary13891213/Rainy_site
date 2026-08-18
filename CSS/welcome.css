@@ -161,3 +161,44 @@ body {
 .name-input::placeholder {
     color: rgba(136, 221, 255, 0.5);
 }
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .typing-text {
+        font-size: 18px;
+        max-width: 95%;
+        padding: 15px;
+        max-height: 80vh;
+    }
+    
+    .name-input {
+        width: 90%;
+        font-size: 16px;
+        padding: 10px 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .typing-text {
+        font-size: 14px;
+        max-width: 98%;
+        padding: 10px;
+        max-height: 85vh;
+        line-height: 1.4;
+    }
+    
+    #welcome-text, #greeting-text {
+        margin-bottom: 10px;
+    }
+    
+    .name-input {
+        width: 95%;
+        font-size: 14px;
+        padding: 8px 12px;
+    }
+    
+    .name-input-container {
+        gap: 10px;
+        margin-top: 12px;
+    }
+}

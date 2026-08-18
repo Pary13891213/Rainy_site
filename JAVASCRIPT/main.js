@@ -21,13 +21,14 @@ socket.on('chat-history', (history) => {
 
 socket.on('chat-message', (data) => {
     const userName = localStorage.getItem('userName') || 'User';
-    // اگه پیام از خودم نباشه
-    if (data.username !== userName && data.username !== 'DEV') {
+    
+    // اگه پیام از خودم باشه
+    if (data.username === userName) {
         const newMessage = {
-            sender: data.username,
+            sender: 'User',
             content: data.message,
             time: data.time,
-            type: 'other'
+            type: 'user'  // <-- اینجا باید 'user' باشه
         };
         messages.push(newMessage);
         saveMessages();
@@ -37,7 +38,18 @@ socket.on('chat-message', (data) => {
             sender: 'DEV',
             content: data.message,
             time: data.time,
-            type: 'dev'
+            type: 'dev'  // <-- اینجا باید 'dev' باشه
+        };
+        messages.push(newMessage);
+        saveMessages();
+        displayMessages();
+    } else {
+        // پیام از کاربر دیگه
+        const newMessage = {
+            sender: data.username,
+            content: data.message,
+            time: data.time,
+            type: 'other'
         };
         messages.push(newMessage);
         saveMessages();
@@ -634,8 +646,19 @@ function init() {
     
     sendBtn.addEventListener('click', sendMessage);
     
-    messageInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
+    messageInput.addEventListener('keydown', (e) => {
+        // تشخیص گوشی بر اساس عرض صفحه
+        const isMobile = window.innerWidth < 768;
+        
+        // در گوشی، اینتر رو نادیده بگیر (فقط دکمه Send)
+        if (isMobile && e.key === 'Enter') {
+            e.preventDefault();
+            return;
+        }
+        
+        // در لپ‌تاپ: اینتر معمولی (Shift+Enter برای خط جدید)
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
             sendMessage();
         }
     });
