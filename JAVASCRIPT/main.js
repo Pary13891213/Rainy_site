@@ -22,13 +22,13 @@ socket.on('chat-history', (history) => {
 socket.on('chat-message', (data) => {
     const userName = localStorage.getItem('userName') || 'User';
     
-    // اگه پیام از خودم باشه
+    // اگه پیام از خودم باشه یا از Dev باشه
     if (data.username === userName) {
         const newMessage = {
             sender: 'User',
             content: data.message,
-            time: data.time,
-            type: 'user'  // <-- اینجا باید 'user' باشه
+            time: data.time,  // از سرور
+            type: 'user'
         };
         messages.push(newMessage);
         saveMessages();
@@ -37,8 +37,8 @@ socket.on('chat-message', (data) => {
         const newMessage = {
             sender: 'DEV',
             content: data.message,
-            time: data.time,
-            type: 'dev'  // <-- اینجا باید 'dev' باشه
+            time: data.time,  // از سرور
+            type: 'dev'
         };
         messages.push(newMessage);
         saveMessages();
@@ -48,7 +48,7 @@ socket.on('chat-message', (data) => {
         const newMessage = {
             sender: data.username,
             content: data.message,
-            time: data.time,
+            time: data.time,  // از سرور
             type: 'other'
         };
         messages.push(newMessage);
@@ -247,30 +247,16 @@ function addSystemMessage(content) {
     displayMessages();
 }
 
-// ===== SEND MESSAGE =====
 function sendMessage() {
     const content = messageInput.value.trim();
     if (!content) return;
     
     const userName = localStorage.getItem('userName') || 'User';
     
-    // Send to server
     socket.emit('chat-message', {
         username: userName,
         message: content
     });
-    
-    // Display own message (فقط توی صفحه خودش)
-    const newMessage = {
-        sender: 'User',
-        content: content,
-        time: new Date().toLocaleTimeString(),
-        type: 'user'
-    };
-    
-    messages.push(newMessage);
-    saveMessages();
-    displayMessages();
     
     messageInput.value = '';
     

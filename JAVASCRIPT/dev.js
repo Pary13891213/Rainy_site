@@ -15,10 +15,7 @@ socket.on('chat-history', (history) => {
 });
 
 socket.on('chat-message', (data) => {
-    console.log('Dev received message:', data);
-    
     if (data.username === 'DEV') {
-        // پیام از خود Dev
         const newMessage = {
             sender: 'DEV',
             content: data.message,
@@ -29,7 +26,6 @@ socket.on('chat-message', (data) => {
         saveMessages();
         displayMessages();
     } else {
-        // پیام از کاربر دیگه
         const newMessage = {
             sender: data.username,
             content: data.message,
@@ -240,45 +236,20 @@ function createGlitchEffect() {
     }
 }
 
-// ===== SEND MESSAGE =====
 function sendMessage() {
-    console.log('Send button clicked');
-    
-    if (!messageInput) {
-        console.error('messageInput not found!');
-        return;
-    }
+    if (!messageInput) return;
     
     const content = messageInput.value.trim();
-    console.log('Message content:', content);
+    if (!content) return;
     
-    if (!content) {
-        console.log('Empty message');
-        return;
-    }
-    
-    // ===== SEND TO SERVER =====
+    // فقط به سرور بفرست
     socket.emit('chat-message', {
         username: 'DEV',
         message: content
     });
     
-    // ===== SAVE LOCALLY =====
-    const newMessage = {
-        sender: 'Dev',
-        content: content,
-        time: new Date().toLocaleTimeString(),
-        type: 'dev'
-    };
-    
-    messages.push(newMessage);
-    saveMessages();
-    displayMessages();
-    
     messageInput.value = '';
     createGlitchEffect();
-    
-    console.log('Message sent and saved');
 }
 
 function checkNewMessages() {

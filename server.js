@@ -135,7 +135,7 @@ io.on('connection', async (socket) => {
         const messageData = {
             username: data.username,
             message: data.message,
-            time: new Date().toLocaleTimeString()
+            time: new Date().toLocaleTimeString('fa-IR', { timeZone: 'Asia/Tehran' })
         };
         
         const savedMessage = await saveMessage(messageData);
