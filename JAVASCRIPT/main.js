@@ -1,14 +1,12 @@
 import { DLAT1 , DLAT2 , DLAT3 , DLAT4 , DLAT5 , DLAT6 , DLAT7 , DLAT8 , DLAT9} from "./DLAT.js";
 
 // ===== SOCKET CONNECTION =====
-// ===== SOCKET CONNECTION =====
 const socket = io('https://rainy-server.onrender.com', {
     transports: ['websocket', 'polling']
 });
 
 // ===== SOCKET EVENTS =====
 socket.on('chat-history', (history) => {
-    // تاریخچه رو از دیتابیس بگیر و جایگزین کن
     messages = history.map(msg => ({
         sender: msg.username,
         content: msg.message,
@@ -22,12 +20,11 @@ socket.on('chat-history', (history) => {
 socket.on('chat-message', (data) => {
     const userName = localStorage.getItem('userName') || 'User';
     
-    // اگه پیام از خودم باشه یا از Dev باشه
     if (data.username === userName) {
         const newMessage = {
             sender: 'User',
             content: data.message,
-            time: data.time,  // از سرور
+            time: data.time,
             type: 'user'
         };
         messages.push(newMessage);
@@ -37,18 +34,17 @@ socket.on('chat-message', (data) => {
         const newMessage = {
             sender: 'DEV',
             content: data.message,
-            time: data.time,  // از سرور
+            time: data.time,
             type: 'dev'
         };
         messages.push(newMessage);
         saveMessages();
         displayMessages();
     } else {
-        // پیام از کاربر دیگه
         const newMessage = {
             sender: data.username,
             content: data.message,
-            time: data.time,  // از سرور
+            time: data.time,
             type: 'other'
         };
         messages.push(newMessage);
@@ -266,7 +262,6 @@ function sendMessage() {
 }
 
 function checkNewMessages() {
-    // فقط پیام‌های محلی رو چک کن، دیتابیس از طریق socket میاد
     loadMessages();
     displayMessages();
 }
@@ -613,6 +608,20 @@ function unlockHack(){
     }
 }
 
+// ===== SAVE USER TO SERVER =====
+function saveUserToServer() {
+    const userName = localStorage.getItem('userName') || 'User';
+    const accessCode = localStorage.getItem('accessCode') || '';
+    const password = localStorage.getItem('userPassword') || '';
+    
+    socket.emit('save-user', {
+        username: userName,
+        displayName: userName,
+        password: password,
+        accessCode: accessCode
+    });
+}
+
 // ===== INIT =====
 function init() {
     const userName = localStorage.getItem('userName') || 'Unknown User';
@@ -620,8 +629,10 @@ function init() {
         profileName.textContent = userName;
     }
     
-    // Send username to server
     socket.emit('user-join', userName);
+    
+    // ===== SAVE USER TO SERVER =====
+    saveUserToServer();
     
     loadMessages();
     displayMessages();
@@ -633,26 +644,8 @@ function init() {
     sendBtn.addEventListener('click', sendMessage);
     
     messageInput.addEventListener('keydown', (e) => {
-        // ===== تشخیص گوشی =====
-        const isMobile = window.innerWidth < 768;
-        
-        // ===== در گوشی: اینتر رو نادیده بگیر (فقط دکمه Send) =====
-        if (isMobile && e.key === 'Enter') {
-            e.preventDefault();
-            return;
-        }
-        
-        // ===== در لپ‌تاپ: =====
         if (e.key === 'Enter') {
-            // Shift+Enter → خط جدید (همیشه مجاز)
-            if (e.shiftKey) {
-                // کاری نکن، خودش خط جدید میسازه
-                return;
-            }
-            
-            // فقط Enter (بدون Shift) → ارسال پیام
-            e.preventDefault();
-            sendMessage();
+            return;
         }
     });
     

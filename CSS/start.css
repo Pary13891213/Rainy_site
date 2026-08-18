@@ -222,3 +222,18 @@ body {
         border-width: 1px;
     }
 }
+
+/* ===== MOBILE HEIGHT FIX ===== */
+@media (max-width: 768px) {
+    .start-page {
+        height: 100dvh;
+        min-height: -webkit-fill-available;
+        padding: 20px;
+    }
+    
+    .typing-text {
+        max-height: 70vh;
+        padding: 10px;
+        font-size: 16px;
+    }
+}

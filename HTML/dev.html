@@ -12,7 +12,14 @@
         <!-- منوی بالای صفحه -->
         <div class="top-menu">
             <div class="menu-title">DEV PANEL [v1.0]</div>
-            
+
+            <!-- ===== دکمه همبرگر (فقط موبایل) ===== -->
+            <button class="hamburger-menu" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
             <div class="menu-links">
                 <a href="#" class="menu-link active" data-tab="chat">CHAT</a>
                 <a href="#" class="menu-link" data-tab="terminal">TERMINAL</a>
@@ -24,6 +31,7 @@
                 <a href="#" class="menu-link" data-tab="she">SHE</a>
                 <a href="#" class="menu-link" data-tab="share">SHARE</a>
             </div>
+
             <div class="user-status">
                 <span class="status-indicator"></span>
                 <span id="user-status-text">USER: OFFLINE</span>
@@ -47,13 +55,13 @@
                     </div>
                     
                     <div class="message-input-area">
-                        <input type="text" id="dev-message-input" class="message-input" placeholder="Type your message to user..." autocomplete="off">
+                        <textarea id="dev-message-input" class="message-input" placeholder="Type your message to user..." autocomplete="off" enterkeyhint="send" rows="1"></textarea>
                         <button id="dev-send-btn" class="send-btn">SEND</button>
                     </div>
                 </div>
             </div>
 
-            <!-- بقیه تب‌ها (فعلاً ساده می‌ذاریم) -->
+            <!-- بقیه تب‌ها -->
             <div class="tab" id="terminal-tab">
                 <div class="terminal-container">
                     <div class="terminal-header">TERMINAL</div>
@@ -75,10 +83,8 @@
         <div class="scanlines"></div>
     </div>
 
-    <!-- ===== SOCKET.IO (اضافه شده) ===== -->
     <!-- ===== SOCKET.IO (CDN) ===== -->
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-
     <script src="/JAVASCRIPT/dev.js"></script>
 </body>
 </html>

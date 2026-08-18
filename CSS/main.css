@@ -397,6 +397,14 @@ body {
     text-shadow: 0 0 3px var(--shadow-10), 0 0 6px var(--shadow-11);
     box-shadow: inset 0 0 10px var(--shadow-1), 0 0 15px var(--shadow-4);
     transition: all 0.3s ease;
+    
+    /* جدید برای textarea */
+    resize: none;
+    overflow-y: auto;
+    min-height: 40px;
+    max-height: 120px;
+    line-height: 1.6;
+    height: auto;
 }
 
 .message-input:focus {
@@ -1203,5 +1211,54 @@ body {
 
     .game-button:hover {
          transform: scale(0.95); 
+    }
+}
+/* ===== MOBILE HEIGHT FIX ===== */
+@media (max-width: 768px) {
+    .main-page {
+        height: 100dvh;
+        min-height: -webkit-fill-available;
+    }
+    
+    .top-menu {
+        padding: 8px 12px;
+        height: 50px;
+        min-height: 50px;
+    }
+    
+    .tabs-container {
+        height: calc(100dvh - 50px);
+        min-height: calc(100dvh - 50px);
+    }
+    
+    .chat-container {
+        height: 100%;
+        min-height: 0;
+        padding: 8px;
+    }
+    
+    .messages-box {
+        max-height: calc(100dvh - 150px);
+        min-height: calc(100dvh - 180px);
+        padding: 8px;
+    }
+    
+    .message-input-area {
+        padding: 8px 0;
+        flex-shrink: 0;
+    }
+    
+    .message-input {
+        min-height: 36px;
+        max-height: 80px;
+        font-size: 14px;
+        padding: 8px 12px;
+    }
+    
+    .send-btn {
+        min-height: 36px;
+        min-width: 50px;
+        font-size: 10px;
+        padding: 0 10px;
     }
 }

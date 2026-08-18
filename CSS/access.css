@@ -285,3 +285,19 @@ body {
         margin-bottom: 15px;
     }
 }
+
+/* ===== MOBILE HEIGHT FIX ===== */
+@media (max-width: 768px) {
+    .access-page {
+        height: 100dvh;
+        min-height: -webkit-fill-available;
+        padding: 20px;
+    }
+    
+    .access-box {
+        width: 90%;
+        height: auto;
+        min-height: 250px;
+        padding: 20px;
+    }
+}

@@ -284,26 +284,8 @@ function init() {
     }
     
     messageInput.addEventListener('keydown', (e) => {
-        // ===== تشخیص گوشی =====
-        const isMobile = window.innerWidth < 768;
-        
-        // ===== در گوشی: اینتر رو نادیده بگیر (فقط دکمه Send) =====
-        if (isMobile && e.key === 'Enter') {
-            e.preventDefault();
-            return;
-        }
-        
-        // ===== در لپ‌تاپ: =====
         if (e.key === 'Enter') {
-            // Shift+Enter → خط جدید (همیشه مجاز)
-            if (e.shiftKey) {
-                // کاری نکن، خودش خط جدید میسازه
-                return;
-            }
-            
-            // فقط Enter (بدون Shift) → ارسال پیام
-            e.preventDefault();
-            sendMessage();
+            return;
         }
     });
     
@@ -326,6 +308,33 @@ function init() {
     document.head.appendChild(style);
     
     console.log('dev.js initialization complete');
+
+    // ===== Hamburger Menu =====
+    const hamburger = document.querySelector('.hamburger-menu');
+    const menuLinks = document.querySelector('.menu-links');
+
+    if (hamburger && menuLinks) {
+        hamburger.addEventListener('click', () => {
+            hamburger.classList.toggle('active');
+            menuLinks.classList.toggle('active');
+        });
+        
+        // بستن منو با کلیک روی هر لینک
+        menuLinks.querySelectorAll('.menu-link').forEach(link => {
+            link.addEventListener('click', () => {
+                hamburger.classList.remove('active');
+                menuLinks.classList.remove('active');
+            });
+        });
+        
+        // بستن منو با کلیک بیرون
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.top-menu')) {
+                hamburger.classList.remove('active');
+                menuLinks.classList.remove('active');
+            }
+        });
+    }
 }
 
 if (document.readyState === 'loading') {

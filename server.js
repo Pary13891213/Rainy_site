@@ -26,7 +26,46 @@ const messageSchema = new mongoose.Schema({
 
 const Message = mongoose.model('Message', messageSchema);
 
-// ===== CORS (نسخه جدید با allowedOrigins) =====
+// ===== USER SCHEMA =====
+const userSchema = new mongoose.Schema({
+    username: { type: String, unique: true },
+    displayName: String,
+    password: String,
+    accessCode: String,
+    createdAt: { type: Date, default: Date.now },
+    lastLogin: Date,
+    isActive: { type: Boolean, default: true }
+});
+
+const User = mongoose.model('User', userSchema);
+
+// ===== FIND OR CREATE USER =====
+async function findOrCreateUser(data) {
+    try {
+        let user = await User.findOne({ username: data.username });
+        if (!user) {
+            user = new User({
+                username: data.username,
+                displayName: data.displayName || data.username,
+                password: data.password || '',
+                accessCode: data.accessCode || '',
+                lastLogin: new Date()
+            });
+            await user.save();
+            console.log('✅ New user created:', user.username);
+        } else {
+            user.lastLogin = new Date();
+            await user.save();
+            console.log('✅ User updated:', user.username);
+        }
+        return user;
+    } catch (err) {
+        console.error('Error finding/creating user:', err);
+        return null;
+    }
+}
+
+// ===== CORS =====
 const allowedOrigins = [
     'https://baroon.netlify.app',
     'http://localhost:3000',
@@ -46,7 +85,7 @@ app.use(cors({
     credentials: true
 }));
 
-// ===== SOCKET.IO با CORS جدید =====
+// ===== SOCKET.IO =====
 const io = require('socket.io')(http, {
     cors: {
         origin: function (origin, callback) {
@@ -131,11 +170,27 @@ io.on('connection', async (socket) => {
         });
     });
 
+    // ===== SAVE USER TO DATABASE =====
+    socket.on('save-user', async (data) => {
+        const user = await findOrCreateUser({
+            username: data.username,
+            displayName: data.displayName || data.username,
+            password: data.password || '',
+            accessCode: data.accessCode || ''
+        });
+        
+        if (user) {
+            socket.emit('user-saved', { success: true, user: user });
+        } else {
+            socket.emit('user-saved', { success: false });
+        }
+    });
+
     socket.on('chat-message', async (data) => {
         const messageData = {
             username: data.username,
             message: data.message,
-            time: new Date().toLocaleTimeString('fa-IR', { timeZone: 'Asia/Tehran' })
+            time: new Date().toLocaleTimeString('en-US', { timeZone: 'Asia/Tehran' })
         };
         
         const savedMessage = await saveMessage(messageData);
