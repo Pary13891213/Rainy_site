@@ -101,22 +101,47 @@ function showContinueButton() {
 function typeWriter(text, element, speed = 80, intensity = 0, callback = null) {
     let i = 0;
     element.innerHTML = '';
+    let isDeveloperTyping = false;
+    let developerSkipped = false;
+    const DEV_WORD = 'Developer';
     
     function type() {
-        if (i < text.length) {
-            if (text.charAt(i) === '\n') {
-                element.innerHTML += '<br>';
-            } else {
-                element.innerHTML += text.charAt(i);
-                
-                if (intensity > 0 && Math.random() < (element === element2 ? 0.08 : 0.04)) {
-                    createGlitchRectangle();
-                    if (Math.random() < (element === element2 ? 0.7 : 0.5)) {
-                        shiftText(element, element === element2 ? 15 : 5);
-                    }
+        if (i >= text.length) {
+            if (callback) {
+                callback();
+                if (element === element2) {
+                    showContinueButton();
                 }
             }
+            return;
+        }
+        
+        // اگه به کلمه Developer رسیدیم و هنوز تایپ نشده
+        if (text.slice(i, i + DEV_WORD.length) === DEV_WORD && !developerSkipped) {
+            isDeveloperTyping = true;
+            developerSkipped = true;
+            typeDeveloper(0);
+            return;
+        }
+        
+        // تایپ عادی (اگر در حال تایپ Developer نباشیم)
+        if (!isDeveloperTyping) {
+            const currentChar = text.charAt(i);
+            
+            if (currentChar === '\n') {
+                element.innerHTML += '<br>';
+            } else {
+                element.innerHTML += currentChar;
+            }
             i++;
+            
+            // افکت‌های گلیچ
+            if (intensity > 0 && Math.random() < (element === element2 ? 0.08 : 0.04)) {
+                createGlitchRectangle();
+                if (Math.random() < (element === element2 ? 0.7 : 0.5)) {
+                    shiftText(element, element === element2 ? 15 : 5);
+                }
+            }
             
             let currentSpeed = speed;
             const char = text.charAt(i-1);
@@ -129,18 +154,35 @@ function typeWriter(text, element, speed = 80, intensity = 0, callback = null) {
             }
             
             setTimeout(type, currentSpeed);
-        } else if (callback) {
-            callback();
-            if (element === element2) {
-                showContinueButton();
-            }
+        }
+    }
+    
+    function typeDeveloper(index) {
+        if (index < DEV_WORD.length) {
+            const beforeDev = text.slice(0, i);
+            const afterDev = text.slice(i + DEV_WORD.length);
+            const typedDev = DEV_WORD.slice(0, index + 1);
+            
+            element.innerHTML = beforeDev + 
+                `<span id="dev-trigger" style="user-select: none; -webkit-user-select: none;">${typedDev}</span>` + 
+                afterDev;
+            
+            setTimeout(() => {
+                typeDeveloper(index + 1);
+            }, speed);
+        } else {
+            // تایپ Developer تموم شد، i رو به اندازه کلمه جلو ببر
+            i += DEV_WORD.length;
+            isDeveloperTyping = false;
+            // ادامه تایپ بقیه متن
+            setTimeout(type, speed);
         }
     }
     
     type();
 }
 
-const TEST_MODE = false; // false کن وقتی می‌خوای ثبت بشه
+const TEST_MODE = true; // false کن وقتی می‌خوای ثبت بشه
 
 function startTyping() {
     if (!TEST_MODE && localStorage.getItem('deviceVerified') === 'true') {
@@ -209,10 +251,88 @@ continueBtn.addEventListener('click', function() {
     }, 1000);
 });
 
+// ===== KEYBOARD SHORTCUT: D (Desktop & Mobile with keyboard) =====
 document.addEventListener('keydown', function(event) {
     if (event.key === 'D' || event.key === 'd') {
-        window.location.href = "../HTML/dev.html";
+        // جلوگیری از تایپ در inputها
+        if (event.target.tagName !== 'INPUT' && event.target.tagName !== 'TEXTAREA') {
+            window.location.href = "../HTML/dev-enter.html";
+        }
     }
+});
+
+// ===== DEV PANEL ACCESS - DOUBLE TAP ON "Developer" (Mobile) =====
+// ===== DEV PANEL ACCESS - DOUBLE TAP ON "Developer" (Mobile) =====
+document.addEventListener('DOMContentLoaded', function() {
+    const textOne = document.getElementById('text-one');
+    
+    if (!textOne) return;
+    
+    let tapCount = 0;
+    let tapTimer = null;
+    const TAP_TIMEOUT = 400;
+    const REQUIRED_TAPS = 2;
+    const isMobile = window.innerWidth < 768;
+    
+    // فقط روی گوشی فعال باشه
+    if (!isMobile) return;
+    
+    function openDevEnter() {
+        if (navigator.vibrate) {
+            navigator.vibrate(20);
+        }
+        setTimeout(() => {
+            window.location.href = '/HTML/dev-enter.html';
+        }, 200);
+    }
+    
+    // ===== Event Delegation روی کل text-one =====
+    textOne.addEventListener('touchstart', function(e) {
+        // چک کن که آیا روی کلمه Developer کلیک شده
+        const target = e.target;
+        if (!target || target.id !== 'dev-trigger') return;
+        
+        e.preventDefault();
+        e.stopPropagation();
+        
+        tapCount++;
+        clearTimeout(tapTimer);
+        
+        if (tapCount >= REQUIRED_TAPS) {
+            tapCount = 0;
+            clearTimeout(tapTimer);
+            openDevEnter();
+            return;
+        }
+        
+        tapTimer = setTimeout(() => {
+            tapCount = 0;
+        }, TAP_TIMEOUT);
+    });
+    
+    // ===== برای کلیک (دسکتاپ) =====
+    textOne.addEventListener('click', function(e) {
+        const target = e.target;
+        if (!target || target.id !== 'dev-trigger') return;
+        
+        e.stopPropagation();
+        
+        tapCount++;
+        clearTimeout(tapTimer);
+        
+        if (tapCount >= REQUIRED_TAPS) {
+            tapCount = 0;
+            clearTimeout(tapTimer);
+            openDevEnter();
+            return;
+        }
+        
+        tapTimer = setTimeout(() => {
+            tapCount = 0;
+        }, TAP_TIMEOUT);
+    });
+    
+    console.log('📱 Double tap on "Developer" to enter Dev Panel (active always)');
 });
 
 document.addEventListener('DOMContentLoaded', startTyping);
