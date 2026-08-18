@@ -633,17 +633,24 @@ function init() {
     sendBtn.addEventListener('click', sendMessage);
     
     messageInput.addEventListener('keydown', (e) => {
-        // تشخیص گوشی بر اساس عرض صفحه
+        // ===== تشخیص گوشی =====
         const isMobile = window.innerWidth < 768;
         
-        // در گوشی، اینتر رو نادیده بگیر (فقط دکمه Send)
+        // ===== در گوشی: اینتر رو نادیده بگیر (فقط دکمه Send) =====
         if (isMobile && e.key === 'Enter') {
             e.preventDefault();
             return;
         }
         
-        // در لپ‌تاپ: اینتر معمولی (Shift+Enter برای خط جدید)
-        if (e.key === 'Enter' && !e.shiftKey) {
+        // ===== در لپ‌تاپ: =====
+        if (e.key === 'Enter') {
+            // Shift+Enter → خط جدید (همیشه مجاز)
+            if (e.shiftKey) {
+                // کاری نکن، خودش خط جدید میسازه
+                return;
+            }
+            
+            // فقط Enter (بدون Shift) → ارسال پیام
             e.preventDefault();
             sendMessage();
         }

@@ -283,25 +283,29 @@ function init() {
         console.error('sendBtn not found!');
     }
     
-    if (messageInput) {
-        messageInput.addEventListener('keydown', (e) => {
-            // تشخیص گوشی بر اساس عرض صفحه
-            const isMobile = window.innerWidth < 768;
-            
-            // در گوشی، اینتر رو نادیده بگیر (فقط دکمه Send)
-            if (isMobile && e.key === 'Enter') {
-                e.preventDefault();
+    messageInput.addEventListener('keydown', (e) => {
+        // ===== تشخیص گوشی =====
+        const isMobile = window.innerWidth < 768;
+        
+        // ===== در گوشی: اینتر رو نادیده بگیر (فقط دکمه Send) =====
+        if (isMobile && e.key === 'Enter') {
+            e.preventDefault();
+            return;
+        }
+        
+        // ===== در لپ‌تاپ: =====
+        if (e.key === 'Enter') {
+            // Shift+Enter → خط جدید (همیشه مجاز)
+            if (e.shiftKey) {
+                // کاری نکن، خودش خط جدید میسازه
                 return;
             }
             
-            // در لپ‌تاپ: اینتر معمولی (Shift+Enter برای خط جدید)
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-            }
-        });
-        console.log('Message input event listener added');
-    }
+            // فقط Enter (بدون Shift) → ارسال پیام
+            e.preventDefault();
+            sendMessage();
+        }
+    });
     
     if (clearChatBtn) {
         clearChatBtn.addEventListener('click', clearChat);
