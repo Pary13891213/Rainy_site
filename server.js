@@ -6,7 +6,7 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 
 // ===== MONGODB CONNECTION =====
-const MONGODB_URI = process.env.DATABASE_URL;
+const MONGODB_URI = "mongodb+srv://p30273766_db_user:ZWhUmERIUuWns5vT@r1dataset.mbskvlf.mongodb.net/?retryWrites=true&w=majority";
 
 mongoose.connect(MONGODB_URI)
 .then(() => {
