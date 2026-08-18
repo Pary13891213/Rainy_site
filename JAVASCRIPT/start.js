@@ -182,7 +182,7 @@ function typeWriter(text, element, speed = 80, intensity = 0, callback = null) {
     type();
 }
 
-const TEST_MODE = true; // false کن وقتی می‌خوای ثبت بشه
+const TEST_MODE = false; // false کن وقتی می‌خوای ثبت بشه
 
 function startTyping() {
     if (!TEST_MODE && localStorage.getItem('deviceVerified') === 'true') {
