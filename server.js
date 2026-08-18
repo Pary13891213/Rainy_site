@@ -5,7 +5,7 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 require('dotenv').config();
 
-// ===== MONGODB CONNECTION (بدون گزینه‌های اضافی) =====
+// ===== MONGODB CONNECTION =====
 const MONGODB_URI = process.env.MONGODB_URI;
 
 mongoose.connect(MONGODB_URI)
@@ -26,17 +26,37 @@ const messageSchema = new mongoose.Schema({
 
 const Message = mongoose.model('Message', messageSchema);
 
-// ===== CORS =====
+// ===== CORS (نسخه جدید با allowedOrigins) =====
+const allowedOrigins = [
+    'https://baroon.netlify.app',
+    'http://localhost:3000',
+    'http://127.0.0.1:5500'
+];
+
 app.use(cors({
-    origin: ['https://baroon.netlify.app', 'http://localhost:3000'],
+    origin: function (origin, callback) {
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     methods: ['GET', 'POST'],
     credentials: true
 }));
 
-// ===== SOCKET.IO =====
+// ===== SOCKET.IO با CORS جدید =====
 const io = require('socket.io')(http, {
     cors: {
-        origin: ['https://baroon.netlify.app', 'http://localhost:3000'],
+        origin: function (origin, callback) {
+            if (!origin) return callback(null, true);
+            if (allowedOrigins.indexOf(origin) !== -1) {
+                callback(null, true);
+            } else {
+                callback(new Error('Not allowed by CORS'));
+            }
+        },
         methods: ['GET', 'POST'],
         credentials: true
     }
@@ -99,7 +119,6 @@ async function saveMessage(data) {
 io.on('connection', async (socket) => {
     console.log('🟢 New user connected:', socket.id);
 
-    // Send chat history
     const history = await getChatHistory();
     socket.emit('chat-history', history);
 
