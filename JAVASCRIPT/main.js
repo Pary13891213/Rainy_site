@@ -719,3 +719,72 @@ function init() {
 
 document.addEventListener('DOMContentLoaded', init);
 window.unlockHack = unlockHack;
+
+// ============================================================
+// ===== SETTINGS EVENTS =====
+// ============================================================
+
+// ===== LOGOUT =====
+document.getElementById('logout-btn').addEventListener('click', function() {
+    localStorage.removeItem('deviceVerified');
+    localStorage.removeItem('userName');
+    localStorage.removeItem('accessCode');
+    localStorage.removeItem('userPassword');
+    localStorage.removeItem('displayName');
+    localStorage.removeItem('user_online');
+    
+    socket.emit('user-logout', {
+        username: localStorage.getItem('userName') || 'User'
+    });
+    
+    window.location.href = '/';
+});
+
+// ===== UPDATE USERNAME =====
+document.getElementById('update-username-btn').addEventListener('click', function() {
+    const newUsername = document.getElementById('new-username-input').value.trim();
+    if (!newUsername) {
+        showLockedDialogMessage('Username cannot be empty!');
+        return;
+    }
+    
+    localStorage.setItem('userName', newUsername);
+    
+    socket.emit('update-username', {
+        oldUsername: 'Rainy',
+        newUsername: newUsername
+    });
+    
+    showLockedDialogMessage('✅ Username updated to: ' + newUsername);
+});
+
+// ===== UPDATE ACCESS CODE =====
+document.getElementById('update-code-btn').addEventListener('click', function() {
+    const newCode = document.getElementById('new-code-input').value.trim();
+    if (!newCode) {
+        showLockedDialogMessage('Access code cannot be empty!');
+        return;
+    }
+    
+    localStorage.setItem('accessCode', newCode);
+    localStorage.setItem('userPassword', newCode);
+    
+    socket.emit('update-code', {
+        username: localStorage.getItem('userName') || 'Rainy',
+        newCode: newCode
+    });
+    
+    showLockedDialogMessage('✅ Access code updated!');
+});
+
+// ===== تابع کمکی =====
+function showLockedDialogMessage(message) {
+    const dialog = document.getElementById('system-dialog');
+    const dialogMsg = document.getElementById('dialog-message');
+    dialogMsg.textContent = message;
+    dialog.classList.add('show');
+    
+    setTimeout(() => {
+        dialog.classList.remove('show');
+    }, 2500);
+}

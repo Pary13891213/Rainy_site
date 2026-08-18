@@ -186,6 +186,59 @@ io.on('connection', async (socket) => {
         }
     });
 
+    // ===== UPDATE USERNAME =====
+    socket.on('update-username', async (data) => {
+        try {
+            const user = await User.findOne({ username: data.oldUsername });
+            if (user) {
+                user.username = data.newUsername;
+                user.displayName = data.newUsername;
+                await user.save();
+                console.log('✅ Username updated:', data.oldUsername, '→', data.newUsername);
+                socket.emit('username-updated', { success: true, newUsername: data.newUsername });
+            } else {
+                socket.emit('username-updated', { success: false, error: 'User not found' });
+            }
+        } catch (err) {
+            console.error('Error updating username:', err);
+            socket.emit('username-updated', { success: false, error: err.message });
+        }
+    });
+
+    // ===== UPDATE ACCESS CODE =====
+    socket.on('update-code', async (data) => {
+        try {
+            const user = await User.findOne({ username: data.username });
+            if (user) {
+                user.accessCode = data.newCode;
+                user.password = data.newCode;
+                await user.save();
+                console.log('✅ Access code updated for:', data.username);
+                socket.emit('code-updated', { success: true });
+            } else {
+                socket.emit('code-updated', { success: false, error: 'User not found' });
+            }
+        } catch (err) {
+            console.error('Error updating code:', err);
+            socket.emit('code-updated', { success: false, error: err.message });
+        }
+    });
+
+    // ===== LOGOUT =====
+    socket.on('user-logout', (data) => {
+        console.log('👤 User logged out:', data.username);
+        for (let [id, username] of Object.entries(users)) {
+            if (username === data.username) {
+                delete users[id];
+                break;
+            }
+        }
+        io.emit('user-left', {
+            username: data.username,
+            users: Object.values(users)
+        });
+    });
+
     socket.on('chat-message', async (data) => {
         const messageData = {
             username: data.username,

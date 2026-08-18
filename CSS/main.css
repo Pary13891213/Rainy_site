@@ -1262,3 +1262,86 @@ body {
         padding: 0 10px;
     }
 }
+
+/* ===== SETTINGS - NEW STYLES ===== */
+.setting-divider {
+    border-top: 1px solid var(--shadow-4);
+    margin: 15px 0;
+}
+
+.setting-input {
+    background: var(--bg-color);
+    border: 1px solid var(--shadow-4);
+    color: var(--main-color);
+    font-family: 'Courier New', Courier, 'Vazir', monospace;
+    font-size: 14px;
+    padding: 6px 12px;
+    border-radius: 4px;
+    outline: none;
+    flex: 1;
+    min-width: 100px;
+    transition: all 0.3s ease;
+}
+
+.setting-input:focus {
+    border-color: var(--main-color);
+    box-shadow: 0 0 10px var(--shadow-4);
+}
+
+.setting-btn {
+    background: transparent;
+    border: 1px solid var(--main-color);
+    color: var(--main-color);
+    font-family: 'Courier New', Courier, 'Vazir', monospace;
+    font-size: 12px;
+    padding: 6px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    white-space: nowrap;
+}
+
+.setting-btn:hover {
+    background: var(--shadow-3);
+    box-shadow: 0 0 15px var(--shadow-4);
+}
+
+.setting-btn:active {
+    transform: scale(0.95);
+}
+
+.logout-item {
+    border-top: 2px solid var(--red-shadow);
+    margin-top: 10px;
+    padding-top: 15px;
+}
+
+.logout-btn {
+    border-color: #ff5555;
+    color: #ff5555;
+}
+
+.logout-btn:hover {
+    background: rgba(255, 85, 85, 0.15);
+    box-shadow: 0 0 20px rgba(255, 85, 85, 0.3);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 480px) {
+    .setting-item {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .setting-input {
+        min-width: 100%;
+        font-size: 13px;
+        padding: 8px 12px;
+    }
+    .setting-btn {
+        font-size: 11px;
+        padding: 6px 14px;
+        width: 100%;
+    }
+}
