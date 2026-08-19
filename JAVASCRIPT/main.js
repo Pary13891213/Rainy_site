@@ -19,10 +19,12 @@ socket.on('chat-history', (history) => {
 
 socket.on('chat-message', (data) => {
     const userName = localStorage.getItem('userName') || 'User';
+    const isDev = localStorage.getItem('devAccess') === 'true';
     
+    // اگه پیام از خودم باشه (User)
     if (data.username === userName) {
         const newMessage = {
-            sender: 'User',
+            sender: 'You',
             content: data.message,
             time: data.time,
             type: 'user'
@@ -30,7 +32,9 @@ socket.on('chat-message', (data) => {
         messages.push(newMessage);
         saveMessages();
         displayMessages();
-    } else if (data.username === 'DEV') {
+    } 
+    // اگه پیام از Dev باشه
+    else if (data.username === 'DEV') {
         const newMessage = {
             sender: 'DEV',
             content: data.message,
@@ -40,7 +44,9 @@ socket.on('chat-message', (data) => {
         messages.push(newMessage);
         saveMessages();
         displayMessages();
-    } else {
+    } 
+    // اگه پیام از کاربر دیگه باشه (در اینجا نباید اتفاق بیفته چون چت دو نفره است)
+    else {
         const newMessage = {
             sender: data.username,
             content: data.message,
@@ -197,11 +203,11 @@ function displayMessages() {
     if (messages.length === lastMessageCount) return;
     
     messagesBox.innerHTML = '';
-    const userName = localStorage.getItem('userName') || 'User';
     
     messages.forEach(msg => {
         const messageDiv = document.createElement('div');
         
+        // تشخیص بر اساس نوع پیام
         if (msg.type === 'user') {
             messageDiv.className = 'message mine';
             msg.sender = 'You';
@@ -211,6 +217,7 @@ function displayMessages() {
         } else if (msg.type === 'system') {
             messageDiv.className = 'message system';
         } else {
+            // پیام از دیگران (در اینجا نباید بیاد)
             messageDiv.className = 'message other';
             msg.sender = msg.sender || 'Unknown';
         }
@@ -249,10 +256,23 @@ function sendMessage() {
     
     const userName = localStorage.getItem('userName') || 'User';
     
+    // ارسال به سرور با اسم واقعی کاربر
     socket.emit('chat-message', {
         username: userName,
         message: content
     });
+    
+    // نمایش پیام خودم در صفحه
+    const newMessage = {
+        sender: 'You',
+        content: content,
+        time: new Date().toLocaleTimeString(),
+        type: 'user'
+    };
+    
+    messages.push(newMessage);
+    saveMessages();
+    displayMessages();
     
     messageInput.value = '';
     
