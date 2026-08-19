@@ -340,6 +340,24 @@ function init() {
     console.log('dev.js initialization complete');
 }
 
+// ===== LOGOUT =====
+document.getElementById('dev-logout-btn').addEventListener('click', function() {
+    localStorage.removeItem('deviceVerified');
+    localStorage.removeItem('userName');
+    localStorage.removeItem('accessCode');
+    localStorage.removeItem('userPassword');
+    localStorage.removeItem('displayName');
+    localStorage.removeItem('user_online');
+    localStorage.removeItem('devAccess');
+    localStorage.removeItem('lastPanel');
+    
+    socket.emit('user-logout', {
+        username: 'DEV'
+    });
+    
+    window.location.href = '/';
+});
+
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
 } else {
