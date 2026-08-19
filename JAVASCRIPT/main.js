@@ -8,23 +8,24 @@ const socket = io('https://rainy-server.onrender.com', {
 // ===== SOCKET EVENTS =====
 socket.on('chat-history', (history) => {
     messages = history.map(msg => ({
-        sender: msg.username,
+        sender: msg.username === 'DEV' ? 'DEV' : msg.username,
         content: msg.message,
         time: msg.time,
         type: msg.username === 'DEV' ? 'dev' : 'other'
     }));
-    saveMessages();
     displayMessages();
 });
 
 socket.on('chat-message', (data) => {
     const userName = localStorage.getItem('userName') || 'User';
     
-    // ===== فقط پیام‌هایی که از خود User نیومدن رو ذخیره کن =====
+    // اگه پیام از خود کاربر باشه → نادیده بگیر (قبلاً توی sendMessage اضافه شده)
     if (data.username === userName) {
-        // پیام از خود User - کاری نکن (قبلاً توی sendMessage ذخیره شده)
         return;
-    } else if (data.username === 'DEV') {
+    }
+    
+    // اگه پیام از Dev باشه
+    if (data.username === 'DEV') {
         const newMessage = {
             sender: 'DEV',
             content: data.message,
@@ -32,20 +33,19 @@ socket.on('chat-message', (data) => {
             type: 'dev'
         };
         messages.push(newMessage);
-        saveMessages();
         displayMessages();
-    } else {
-        // پیام از کاربر دیگه (در اینجا نباید اتفاق بیفته چون چت دو نفره است)
-        const newMessage = {
-            sender: data.username,
-            content: data.message,
-            time: data.time,
-            type: 'other'
-        };
-        messages.push(newMessage);
-        saveMessages();
-        displayMessages();
+        return;
     }
+    
+    // پیام از دیگران (اگه باشه)
+    const newMessage = {
+        sender: data.username,
+        content: data.message,
+        time: data.time,
+        type: 'other'
+    };
+    messages.push(newMessage);
+    displayMessages();
 });
 
 socket.on('user-joined', (data) => {
@@ -67,12 +67,7 @@ if (localStorage.getItem('hack-unlocked') === 'true') {
     lockTab('hack');
 }
 
-const STORAGE_KEY = 'chat_messages';
-const CHECK_INTERVAL = 500;
-
 let messages = [];
-let lastMessageCount = 0;
-let checkInterval;
 
 const messagesBox = document.getElementById('user-messages-box');
 const messageInput = document.getElementById('user-message-input');
@@ -164,65 +159,51 @@ function createDialogGlitch() {
     }
 }
 
-function saveMessages() {
-    try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
-    } catch (e) {
-        console.error('Error saving messages:', e);
-    }
-}
-
-function loadMessages() {
-    try {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-            messages = JSON.parse(saved);
-        } else {
-            messages = [];
-            saveMessages();
-        }
-    } catch (e) {
-        console.error('Error loading messages:', e);
-        messages = [];
-    }
-}
-
 function displayMessages() {
     if (!messagesBox) return;
-    if (messages.length === lastMessageCount) return;
     
     messagesBox.innerHTML = '';
     
     messages.forEach(msg => {
         const messageDiv = document.createElement('div');
         
-        // تشخیص بر اساس نوع پیام
         if (msg.type === 'user') {
             messageDiv.className = 'message mine';
-            msg.sender = 'You';
+            messageDiv.innerHTML = `
+                <div class="message-header">
+                    <span class="message-sender">You</span>
+                </div>
+                <div class="message-content">${msg.content}</div>
+                <div class="message-time-bottom">${msg.time}</div>
+            `;
         } else if (msg.type === 'dev') {
             messageDiv.className = 'message other';
-            msg.sender = 'DEV';
+            messageDiv.innerHTML = `
+                <div class="message-header">
+                    <span class="message-sender">DEV</span>
+                </div>
+                <div class="message-content">${msg.content}</div>
+                <div class="message-time-bottom">${msg.time}</div>
+            `;
         } else if (msg.type === 'system') {
             messageDiv.className = 'message system';
+            messageDiv.innerHTML = `
+                <div class="message-content">${msg.content}</div>
+            `;
         } else {
-            // پیام از دیگران (در اینجا نباید بیاد)
             messageDiv.className = 'message other';
-            msg.sender = msg.sender || 'Unknown';
+            messageDiv.innerHTML = `
+                <div class="message-header">
+                    <span class="message-sender">${msg.sender || 'Unknown'}</span>
+                </div>
+                <div class="message-content">${msg.content}</div>
+                <div class="message-time-bottom">${msg.time}</div>
+            `;
         }
-        
-        messageDiv.innerHTML = `
-            <div class="message-header">
-                <span class="message-sender">${msg.sender}</span>
-            </div>
-            <div class="message-content">${msg.content}</div>
-            <div class="message-time-bottom">${msg.time}</div>
-        `;
         
         messagesBox.appendChild(messageDiv);
     });
     
-    lastMessageCount = messages.length;
     messagesBox.scrollTop = messagesBox.scrollHeight;
 }
 
@@ -235,23 +216,23 @@ function addSystemMessage(content) {
     };
     
     messages.push(systemMsg);
-    saveMessages();
     displayMessages();
 }
 
+// ===== SEND MESSAGE =====
 function sendMessage() {
     const content = messageInput.value.trim();
     if (!content) return;
     
     const userName = localStorage.getItem('userName') || 'User';
     
-    // ===== فقط به سرور بفرست =====
+    // ۱. به سرور بفرست
     socket.emit('chat-message', {
         username: userName,
         message: content
     });
     
-    // ===== نمایش پیام در صفحه خودش (به صورت محلی) =====
+    // ۲. برای نمایش فوری، به لیست پیام‌ها اضافه کن
     const newMessage = {
         sender: 'You',
         content: content,
@@ -260,7 +241,6 @@ function sendMessage() {
     };
     
     messages.push(newMessage);
-    saveMessages();
     displayMessages();
     
     messageInput.value = '';
@@ -268,11 +248,6 @@ function sendMessage() {
     if (profileName) {
         profileName.textContent = userName;
     }
-}
-
-function checkNewMessages() {
-    loadMessages();
-    displayMessages();
 }
 
 function unlockTab(name) {
@@ -640,21 +615,19 @@ function init() {
     
     socket.emit('user-join', userName);
     
-    // ===== SAVE USER TO SERVER =====
     saveUserToServer();
     
-    loadMessages();
     displayMessages();
     unlockHack();
 
-    checkInterval = setInterval(checkNewMessages, CHECK_INTERVAL);
     localStorage.setItem('user_online', 'true');
     
     sendBtn.addEventListener('click', sendMessage);
     
     messageInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            return;
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
         }
     });
     

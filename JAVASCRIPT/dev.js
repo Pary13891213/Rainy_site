@@ -1,37 +1,36 @@
 // ===== SOCKET CONNECTION =====
-const socket = io('https://rainy-server.onrender.com/');
+const socket = io('https://rainy-server.onrender.com/', {
+    transports: ['websocket', 'polling']
+});
 
 // ===== SOCKET EVENTS =====
 socket.on('chat-history', (history) => {
-    // تاریخچه رو از دیتابیس بگیر و جایگزین کن
     messages = history.map(msg => ({
-        sender: msg.username,
+        sender: msg.username === 'DEV' ? 'DEV' : msg.username,
         content: msg.message,
         time: msg.time,
         type: msg.username === 'DEV' ? 'dev' : 'other'
     }));
-    saveMessages();
     displayMessages();
 });
 
 socket.on('chat-message', (data) => {
     console.log('Dev received message:', data);
     
-    // ===== فقط پیام‌هایی که از خود Dev نیومدن رو ذخیره کن =====
-    // پیام‌های Dev توسط خودش ذخیره نمیشن و فقط از سرور می‌آن
-    if (data.username !== 'DEV') {
-        const newMessage = {
-            sender: data.username,
-            content: data.message,
-            time: data.time,
-            type: 'other'
-        };
-        messages.push(newMessage);
-        saveMessages();
-        displayMessages();
+    // اگه پیام از خود Dev باشه → نادیده بگیر (قبلاً توی sendMessage اضافه شده)
+    if (data.username === 'DEV') {
+        return;
     }
-    // پیام‌های DEV از سرور میان ولی نیازی به ذخیره دوباره ندارن
-    // چون توی sendMessage ذخیره شدن
+    
+    // پیام از User
+    const newMessage = {
+        sender: data.username,
+        content: data.message,
+        time: data.time,
+        type: 'other'
+    };
+    messages.push(newMessage);
+    displayMessages();
 });
 
 socket.on('user-joined', (data) => {
@@ -46,15 +45,11 @@ socket.on('user-typing', (username) => {
     console.log(username + ' is typing...');
 });
 
-// ../JAVASCRIPT/dev.js
-const STORAGE_KEY = 'chat_messages';
-const DEV_STATUS_KEY = 'dev_online';
-const CHECK_INTERVAL = 300;
-
+// ============================================================
+// ===== VARIABLES =====
+// ============================================================
 let messages = [];
-let lastMessageCount = 0;
 let userOnline = false;
-let checkInterval;
 
 const messagesBox = document.getElementById('dev-messages-box');
 const messageInput = document.getElementById('dev-message-input');
@@ -67,11 +62,10 @@ const userActiveStatus = document.getElementById('user-active-status');
 const clearChatBtn = document.getElementById('clear-chat-btn');
 
 console.log('Dev.js loaded');
-console.log('messagesBox:', messagesBox);
-console.log('messageInput:', messageInput);
-console.log('sendBtn:', sendBtn);
-console.log('clearChatBtn:', clearChatBtn);
 
+// ============================================================
+// ===== MENU TABS =====
+// ============================================================
 menuLinks.forEach(link => {
     link.addEventListener('click', (e) => {
         e.preventDefault();
@@ -89,61 +83,32 @@ menuLinks.forEach(link => {
     });
 });
 
-function saveMessages() {
-    try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
-        console.log('Messages saved:', messages.length);
-    } catch (e) {
-        console.error('Error saving messages:', e);
-    }
-}
-
-function loadMessages() {
-    try {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-            messages = JSON.parse(saved);
-            console.log('Messages loaded:', messages.length);
-        } else {
-            messages = [{
-                sender: 'System',
-                content: 'Chat initialized. Waiting for user...',
-                time: new Date().toLocaleTimeString(),
-                type: 'system'
-            }];
-            saveMessages();
-        }
-    } catch (e) {
-        console.error('Error loading messages:', e);
-        messages = [];
-    }
-}
-
+// ============================================================
+// ===== USER STATUS =====
+// ============================================================
 function checkUserStatus() {
     const userStatus = localStorage.getItem('user_online');
-    const wasOnline = userOnline;
     userOnline = userStatus === 'true';
     
     if (userOnline) {
         if (userStatusText) userStatusText.textContent = 'USER: ONLINE';
         if (userActiveStatus) userActiveStatus.textContent = 'YES';
         if (statusIndicator) statusIndicator.classList.add('online');
-        
     } else {
         if (userStatusText) userStatusText.textContent = 'USER: OFFLINE';
         if (userActiveStatus) userActiveStatus.textContent = 'NO';
         if (statusIndicator) statusIndicator.classList.remove('online');
-        
     }
 }
 
+// ============================================================
+// ===== DISPLAY MESSAGES =====
+// ============================================================
 function displayMessages() {
     if (!messagesBox) {
         console.error('messagesBox not found!');
         return;
     }
-    
-    if (messages.length === lastMessageCount) return;
     
     messagesBox.innerHTML = '';
     const userName = localStorage.getItem('userName') || 'User';
@@ -153,32 +118,47 @@ function displayMessages() {
         
         if (msg.type === 'dev') {
             messageDiv.className = 'message mine';
-            msg.sender = 'DEV';
-        } else if (msg.type === 'user') {
+            messageDiv.innerHTML = `
+                <div class="message-header">
+                    <span class="message-sender">DEV</span>
+                </div>
+                <div class="message-content">${msg.content}</div>
+                <div class="message-time-bottom">${msg.time}</div>
+            `;
+        } else if (msg.type === 'user' || msg.type === 'other') {
             messageDiv.className = 'message other';
-            msg.sender = userName;  // اسم واقعی کاربر
+            messageDiv.innerHTML = `
+                <div class="message-header">
+                    <span class="message-sender">${userName}</span>
+                </div>
+                <div class="message-content">${msg.content}</div>
+                <div class="message-time-bottom">${msg.time}</div>
+            `;
         } else if (msg.type === 'system') {
             messageDiv.className = 'message system';
+            messageDiv.innerHTML = `
+                <div class="message-content">${msg.content}</div>
+            `;
         } else {
             messageDiv.className = 'message other';
-            msg.sender = msg.sender || 'Unknown';
+            messageDiv.innerHTML = `
+                <div class="message-header">
+                    <span class="message-sender">${msg.sender || 'Unknown'}</span>
+                </div>
+                <div class="message-content">${msg.content}</div>
+                <div class="message-time-bottom">${msg.time}</div>
+            `;
         }
-        
-        messageDiv.innerHTML = `
-            <div class="message-header">
-                <span class="message-sender">${msg.sender}</span>
-            </div>
-            <div class="message-content">${msg.content}</div>
-            <div class="message-time-bottom">${msg.time}</div>
-        `;
         
         messagesBox.appendChild(messageDiv);
     });
     
-    lastMessageCount = messages.length;
     messagesBox.scrollTop = messagesBox.scrollHeight;
 }
 
+// ============================================================
+// ===== SYSTEM MESSAGES =====
+// ============================================================
 function addSystemMessage(content) {
     const systemMsg = {
         sender: 'System',
@@ -187,10 +167,12 @@ function addSystemMessage(content) {
         type: 'system'
     };
     messages.push(systemMsg);
-    saveMessages();
     displayMessages();
 }
 
+// ============================================================
+// ===== CLEAR CHAT =====
+// ============================================================
 function clearChat() {
     console.log('Clearing chat...');
     
@@ -201,11 +183,13 @@ function clearChat() {
         type: 'system'
     }];
     
-    saveMessages();
     displayMessages();
     createGlitchEffect();
 }
 
+// ============================================================
+// ===== GLITCH EFFECT =====
+// ============================================================
 function createGlitchEffect() {
     if (!messagesBox) return;
     
@@ -232,7 +216,9 @@ function createGlitchEffect() {
     }
 }
 
+// ============================================================
 // ===== SEND MESSAGE =====
+// ============================================================
 function sendMessage() {
     console.log('Send button clicked');
     
@@ -249,42 +235,47 @@ function sendMessage() {
         return;
     }
     
-    // ===== فقط به سرور بفرست =====
+    // ۱. به سرور بفرست
     socket.emit('chat-message', {
         username: 'DEV',
         message: content
     });
     
-    // ===== دیگر اینجا پیام رو به localStorage اضافه نکن! =====
-    // فقط input رو پاک کن
+    // ۲. برای نمایش فوری، به لیست پیام‌ها اضافه کن
+    const newMessage = {
+        sender: 'DEV',
+        content: content,
+        time: new Date().toLocaleTimeString(),
+        type: 'dev'
+    };
+    
+    messages.push(newMessage);
+    displayMessages();
+    
     messageInput.value = '';
     createGlitchEffect();
     
-    console.log('Message sent to server');
+    console.log('Message sent');
 }
 
-function checkNewMessages() {
-    loadMessages();
-    displayMessages();
-    checkUserStatus();
-}
-
+// ============================================================
+// ===== UPDATE DEV STATUS =====
+// ============================================================
 function updateDevStatus(isOnline) {
-    localStorage.setItem(DEV_STATUS_KEY, isOnline);
+    localStorage.setItem('dev_online', isOnline);
 }
 
+// ============================================================
 // ===== INIT =====
+// ============================================================
 function init() {
     console.log('Initializing dev.js');
     
-    loadMessages();
     displayMessages();
     checkUserStatus();
     
-    // Send username to server
     socket.emit('user-join', 'Dev');
     
-    checkInterval = setInterval(checkNewMessages, CHECK_INTERVAL);
     updateDevStatus(true);
     
     if (sendBtn) {
@@ -295,8 +286,9 @@ function init() {
     }
     
     messageInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            return;
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
         }
     });
     
@@ -309,17 +301,6 @@ function init() {
         updateDevStatus(false);
     });
     
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes glitch-rectangle {
-            0% { opacity: 0; }
-             100% { opacity: 0; }
-        }
-    `;
-    document.head.appendChild(style);
-    
-    console.log('dev.js initialization complete');
-
     // ===== Hamburger Menu =====
     const hamburger = document.querySelector('.hamburger-menu');
     const menuLinks = document.querySelector('.menu-links');
@@ -330,7 +311,6 @@ function init() {
             menuLinks.classList.toggle('active');
         });
         
-        // بستن منو با کلیک روی هر لینک
         menuLinks.querySelectorAll('.menu-link').forEach(link => {
             link.addEventListener('click', () => {
                 hamburger.classList.remove('active');
@@ -338,7 +318,6 @@ function init() {
             });
         });
         
-        // بستن منو با کلیک بیرون
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.top-menu')) {
                 hamburger.classList.remove('active');
@@ -346,6 +325,19 @@ function init() {
             }
         });
     }
+    
+    // ===== Glitch Animation Style =====
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes glitch-rectangle {
+            0% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    console.log('dev.js initialization complete');
 }
 
 if (document.readyState === 'loading') {
