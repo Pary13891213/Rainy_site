@@ -398,7 +398,6 @@ body {
     box-shadow: inset 0 0 10px var(--shadow-1), 0 0 15px var(--shadow-4);
     transition: all 0.3s ease;
     
-    /* جدید برای textarea */
     resize: none;
     overflow-y: auto;
     min-height: 40px;
@@ -973,293 +972,479 @@ body {
 }
 
 
-/* ========================================
-     Full Responsive Optimization for Mobile
-     Includes Hamburger Menu for Tabs
-   ======================================== */
-@media (max-width: 480px) {
+/* ============================================================
+   FULL RESPONSIVE FOR MOBILE
+   ============================================================ */
 
-    body {
-        font-size: 14px;
-    }
-
-    /* --- Top Menu & Hamburger Logic --- */
+/* ===== TABLET & SMALL LAPTOP (768px - 1024px) ===== */
+@media (max-width: 1024px) {
     .top-menu {
-        /* flex-direction: row; */ /* نیاز نیست چون default رو نگه میداره */
-        justify-content: space-between; /* برای اینکه عنوان سمت چپ و بقیه عناصر سمت راست باشن */
-        align-items: center;
-        padding: 8px 15px;
-        gap: 0;
-        border-bottom: 1px solid var(--menu-color);
-        position: relative; /* برای پوزیشن دادن به منوی باز شونده */
-        height: 60px; /* ارتفاع ثابت برای منوی بالا */
+        padding: 12px 20px;
     }
-
     .menu-title {
-        font-size: 14px;
-        order: 1; /* عنوان اول بیاد */
-        flex-shrink: 0; /* جلوگیری از کوچک شدن عنوان */
+        font-size: 15px;
     }
+    .menu-link {
+        font-size: 13px;
+        padding: 5px 10px;
+    }
+    .chat-container {
+        padding: 12px;
+    }
+    .message {
+        font-size: 15px;
+    }
+}
 
-    /* دکمه همبرگر */
+/* ===== MOBILE (481px - 767px) ===== */
+@media (max-width: 767px) {
+    .top-menu {
+        padding: 8px 15px;
+        height: 55px;
+        min-height: 55px;
+    }
+    
+    .menu-title {
+        font-size: 13px;
+    }
+    
+    .menu-links {
+        display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 55px;
+        left: 0;
+        width: 100%;
+        background: var(--menu-color);
+        padding: 12px 0;
+        z-index: 1000;
+        max-height: calc(100vh - 55px);
+        overflow-y: auto;
+        border-bottom: 2px solid var(--main-color);
+    }
+    
+    .menu-links.active {
+        display: flex;
+    }
+    
+    .menu-link {
+        font-size: 13px;
+        padding: 10px 20px;
+        width: 100%;
+        text-align: left;
+        border-radius: 0;
+        border: none;
+        border-bottom: 1px solid var(--shadow-2);
+        opacity: 0.9;
+    }
+    
+    .menu-link.active {
+        background: var(--shadow-3);
+        border-right: 3px solid var(--main-color);
+        border-radius: 0;
+        opacity: 1;
+    }
+    
+    .menu-link.locked {
+        opacity: 0.5;
+    }
+    
+    .user-status {
+        display: none;
+    }
+    
+    /* --- Hamburger --- */
     .hamburger-menu {
-        display: block; /* نمایش داده بشه */
-        order: 2; /* بعد از عنوان بیاد */
+        display: block !important;
         background: none;
         border: none;
         cursor: pointer;
         padding: 5px;
-        position: relative;
-        z-index: 1001; /* بالاتر از همه چیز باشه */
-        margin: 0 10px; /* فاصله از چپ و راست */
+        z-index: 1001;
+        margin: 0 8px;
     }
-
+    
     .hamburger-menu span {
         display: block;
-        width: 22px;
+        width: 24px;
         height: 2px;
-        background-color: var(--main-color); /* رنگ خطوط */
-        margin-bottom: 4px;
+        background: var(--main-color);
+        margin-bottom: 5px;
         border-radius: 2px;
-        transition: all 0.3s ease-in-out;
+        transition: all 0.3s ease;
     }
-
-    /* وقتی منو باز شد، خطوط همبرگر تغییر شکل بدن (اختیاری) */
+    
     .hamburger-menu.active span:nth-child(1) {
-        transform: translateY(6px) rotate(45deg);
+        transform: translateY(7px) rotate(45deg);
     }
     .hamburger-menu.active span:nth-child(2) {
         opacity: 0;
     }
     .hamburger-menu.active span:nth-child(3) {
-        transform: translateY(-6px) rotate(-45deg);
+        transform: translateY(-7px) rotate(-45deg);
     }
-
-    /* منوی لینک‌ها */
-    .menu-links {
-        display: none; /* در حالت عادی مخفی */
-        flex-direction: column;
-        position: absolute;
-        top: 60px; /* زیر منوی بالا (ارتفاع menu-top) */
-        left: 0;
-        width: 100%;
-        background-color: var(--menu-color); /* رنگ پس‌زمینه منو */
-        padding: 15px 0;
-        z-index: 1000;
-        max-height: calc(100vh - 60px); /* جلوگیری از رفتن بیش از حد پایین */
-        overflow-y: auto; /* فعال کردن اسکرول در صورت نیاز */
-    }
-
-    /* وقتی منو فعال شد، لینک‌ها نمایش داده بشن */
-    .menu-links.active {
-        display: flex;
-    }
-
-    .menu-link {
-        font-size: 13px; /* کمی بزرگتر از حالت قبل */
-        padding: 10px 15px;
-        width: 100%; /* عرض کامل */
-        text-align: left;
-        border-radius: 0; /* حذف گردی */
-        opacity: 0.9;
-    }
-    .menu-link:last-child {
-        border-bottom: none; /* حذف خط جداکننده برای آخرین آیتم */
-    }
-    .menu-link.active {
-        background-color: var(--shadow-4); /* هایلایت برای تب فعال */
-        opacity: 1;
-    }
-
-    .user-status {
-        display: none; /* در منوی همبرگری نمایش داده نشود */
-        order: 3; /* وضعیت کاربر سوم بیاید */
-    }
-
-    /* --- Chat Header --- */
+    
+    /* --- Chat --- */
     .chat-header {
         padding: 8px 12px;
-        margin-bottom: 15px;
+        margin-bottom: 12px;
         flex-direction: column;
-        gap: 5px;
+        gap: 4px;
         text-align: center;
     }
-
+    
     .chat-title {
-        font-size: 16px;
+        font-size: 15px;
     }
-
-    /* --- Chat Container --- */
+    
+    .chat-info {
+        font-size: 12px;
+    }
+    
     .chat-container {
         padding: 10px;
     }
-
+    
     .messages-box {
         padding: 10px;
-        gap: 10px;
+        gap: 8px;
+        max-height: calc(100vh - 200px);
     }
-
+    
     .message {
-        max-width: 95%;
+        max-width: 90%;
         padding: 10px 14px;
         font-size: 14px;
-        line-height: 1.4;
     }
-
-    .message-header {
-        font-size: 9px;
-    }
-
+    
     .message-content {
         font-size: 14px;
     }
-
-    /* --- Input Area --- */
+    
+    .message-header {
+        font-size: 10px;
+    }
+    
+    /* --- Input --- */
     .message-input-area {
         gap: 6px;
         padding: 10px 0 5px 0;
+        flex-wrap: wrap;
     }
-
+    
     .message-input {
         font-size: 14px;
         padding: 10px 14px;
+        min-height: 38px;
     }
-
+    
     .send-btn {
-        padding: 0 5px; 
-        font-size: 10px; 
-        width: 35px; 
-        display: inline-flex;
-        align-items: center; 
-        justify-content: center; 
+        font-size: 11px;
+        padding: 0 14px;
+        min-height: 38px;
+        min-width: 60px;
     }
-
-
-
-    /* --- Settings Page --- */
+    
+    /* --- Settings --- */
     .settings-body {
-        padding: 20px;
+        padding: 15px;
     }
-
+    
     .setting-item {
-        padding: 12px 10px;
-        font-size: 14px;
-    }
-
-    .setting-item.theme-selector {
-        padding: 12px;
-    }
-
-    .theme-buttons {
+        padding: 10px;
+        font-size: 13px;
+        flex-wrap: wrap;
         gap: 6px;
-        flex-wrap: wrap; /* برای اینکه دکمه‌ها ردیف بشن */
     }
-
+    
+    .theme-buttons {
+        gap: 5px;
+    }
+    
     .theme-btn {
-        padding: 6px 12px; /* کمی بزرگتر */
+        padding: 5px 10px;
         font-size: 11px;
     }
-
-    /* --- Profile / Help Layouts --- */
-    .profile-body,
-    .help-body {
-        padding: 20px;
-        font-size: 14px;
-    }
-
-    /* --- Terminal --- */
-    .terminal-container {
-        margin: 10px auto;
-        max-width: 100%;
-    }
-
-    .terminal-header {
+    
+    .setting-input {
+        min-width: 100%;
+        font-size: 13px;
         padding: 8px 12px;
     }
-
+    
+    .setting-btn {
+        font-size: 11px;
+        padding: 6px 14px;
+        width: 100%;
+    }
+    
+    /* --- Terminal --- */
+    .terminal-container {
+        max-width: 100%;
+        margin: 10px auto;
+        border-radius: 6px;
+    }
+    
+    .terminal-header {
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+    
     .terminal-output {
         padding: 10px;
-        font-size: 14px;
+        font-size: 13px;
     }
-
+    
     .terminal-input-area {
         padding: 6px 10px;
+        flex-wrap: wrap;
+        gap: 4px;
     }
-
+    
+    .terminal-input {
+        font-size: 13px;
+        min-height: 34px;
+    }
+    
     .terminal-send-btn {
-        padding: 4px 10px;
         font-size: 12px;
+        padding: 4px 12px;
+        min-height: 34px;
     }
-
-    /* --- System Dialog (Mobile Centered) --- */
+    
+    /* --- Game Button --- */
+    .game-button {
+        width: 75px;
+        height: 75px;
+        font-size: 20px;
+        border-radius: 12px;
+    }
+    
+    /* --- System Dialog --- */
     .system-dialog {
         width: 90%;
         padding: 20px 25px;
     }
-        .game-button {
-        width: 70px;
-        height: 70px;
-        font-size: 18px;
-        border-radius: 10px;
-        box-shadow: 0 0 8px var(--shadow-5),
-                    0 0 15px var(--shadow-6),
-                    0 0 20px var(--shadow-7);
-        
-        /* --- تنظیمات موقعیت متن در موبایل --- */
-        align-items: flex-end; /* همچنان پایین چین */
-    }
-
-    .game-button:hover {
-         transform: scale(0.95); 
+    
+    .dialog-content {
+        font-size: 15px;
     }
 }
+
+/* ===== MOBILE SMALL (up to 480px) ===== */
+@media (max-width: 480px) {
+    body {
+        font-size: 13px;
+    }
+    
+    .top-menu {
+        padding: 6px 10px;
+        height: 48px;
+        min-height: 48px;
+    }
+    
+    .menu-title {
+        font-size: 12px;
+    }
+    
+    .menu-links {
+        top: 48px;
+        max-height: calc(100vh - 48px);
+        padding: 10px 0;
+    }
+    
+    .menu-link {
+        font-size: 12px;
+        padding: 8px 16px;
+    }
+    
+    .hamburger-menu span {
+        width: 20px;
+        height: 2px;
+        margin-bottom: 4px;
+    }
+    
+    /* --- Chat --- */
+    .chat-title {
+        font-size: 13px;
+    }
+    
+    .chat-container {
+        padding: 8px;
+        border-radius: 6px;
+    }
+    
+    .messages-box {
+        padding: 8px;
+        gap: 6px;
+        max-height: calc(100vh - 170px);
+    }
+    
+    .message {
+        max-width: 95%;
+        padding: 8px 12px;
+        font-size: 13px;
+        border-radius: 4px;
+    }
+    
+    .message-content {
+        font-size: 13px;
+    }
+    
+    .message-header {
+        font-size: 9px;
+    }
+    
+    .message-time-bottom {
+        font-size: 9px;
+    }
+    
+    /* --- Input --- */
+    .message-input-area {
+        gap: 4px;
+        padding: 8px 0 4px 0;
+    }
+    
+    .message-input {
+        font-size: 13px;
+        padding: 8px 12px;
+        min-height: 34px;
+        max-height: 60px;
+    }
+    
+    .send-btn {
+        font-size: 10px;
+        padding: 0 10px;
+        min-height: 34px;
+        min-width: 50px;
+    }
+    
+    /* --- Settings --- */
+    .settings-body {
+        padding: 10px;
+    }
+    
+    .setting-item {
+        padding: 8px;
+        font-size: 12px;
+    }
+    
+    .theme-btn {
+        padding: 4px 8px;
+        font-size: 10px;
+    }
+    
+    .setting-input {
+        font-size: 12px;
+        padding: 6px 10px;
+    }
+    
+    .setting-btn {
+        font-size: 10px;
+        padding: 5px 12px;
+    }
+    
+    /* --- Terminal --- */
+    .terminal-output {
+        font-size: 12px;
+        padding: 8px;
+    }
+    
+    .terminal-input {
+        font-size: 12px;
+        min-height: 30px;
+    }
+    
+    .terminal-send-btn {
+        font-size: 10px;
+        padding: 3px 10px;
+        min-height: 30px;
+    }
+    
+    /* --- Game Button --- */
+    .game-button {
+        width: 60px;
+        height: 60px;
+        font-size: 16px;
+        border-radius: 10px;
+    }
+    
+    /* --- System Dialog --- */
+    .system-dialog {
+        width: 95%;
+        padding: 15px 20px;
+    }
+    
+    .dialog-content {
+        font-size: 13px;
+    }
+    
+    .logout-btn {
+        font-size: 10px;
+        padding: 4px 10px;
+    }
+}
+
 /* ===== MOBILE HEIGHT FIX ===== */
 @media (max-width: 768px) {
     .main-page {
         height: 100dvh;
         min-height: -webkit-fill-available;
+        overflow: hidden;
     }
     
     .top-menu {
-        padding: 8px 12px;
-        height: 50px;
-        min-height: 50px;
+        padding: 6px 12px;
+        height: 48px;
+        min-height: 48px;
     }
     
     .tabs-container {
-        height: calc(100dvh - 50px);
-        min-height: calc(100dvh - 50px);
+        height: calc(100dvh - 48px);
+        min-height: calc(100dvh - 48px);
+        padding: 0;
+    }
+    
+    .tab.active {
+        padding: 6px;
     }
     
     .chat-container {
         height: 100%;
         min-height: 0;
-        padding: 8px;
+        padding: 6px;
+        border-radius: 6px;
+    }
+    
+    .chat-header {
+        padding: 4px 10px;
+        margin-bottom: 6px;
     }
     
     .messages-box {
-        max-height: calc(100dvh - 150px);
-        min-height: calc(100dvh - 180px);
-        padding: 8px;
+        max-height: calc(100dvh - 140px);
+        min-height: calc(100dvh - 160px);
+        padding: 6px;
+        gap: 6px;
     }
     
     .message-input-area {
-        padding: 8px 0;
+        padding: 4px 0;
         flex-shrink: 0;
     }
     
     .message-input {
-        min-height: 36px;
-        max-height: 80px;
-        font-size: 14px;
-        padding: 8px 12px;
+        min-height: 32px;
+        max-height: 60px;
+        font-size: 13px;
+        padding: 6px 10px;
     }
     
     .send-btn {
-        min-height: 36px;
-        min-width: 50px;
+        min-height: 32px;
+        min-width: 44px;
         font-size: 10px;
-        padding: 0 10px;
+        padding: 0 8px;
     }
 }
 
@@ -1326,22 +1511,4 @@ body {
 .logout-btn:hover {
     background: rgba(255, 85, 85, 0.15);
     box-shadow: 0 0 20px rgba(255, 85, 85, 0.3);
-}
-
-/* ===== RESPONSIVE ===== */
-@media (max-width: 480px) {
-    .setting-item {
-        flex-wrap: wrap;
-        gap: 8px;
-    }
-    .setting-input {
-        min-width: 100%;
-        font-size: 13px;
-        padding: 8px 12px;
-    }
-    .setting-btn {
-        font-size: 11px;
-        padding: 6px 14px;
-        width: 100%;
-    }
 }
