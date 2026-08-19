@@ -15,6 +15,7 @@ socket.on('chat-history', (history) => {
 });
 
 socket.on('chat-message', (data) => {
+    console.log('Dev received message:', data);
     if (data.username === 'DEV') {
         const newMessage = {
             sender: 'DEV',
@@ -26,6 +27,7 @@ socket.on('chat-message', (data) => {
         saveMessages();
         displayMessages();
     } else {
+        // پیام از کاربر دیگه
         const newMessage = {
             sender: data.username,
             content: data.message,

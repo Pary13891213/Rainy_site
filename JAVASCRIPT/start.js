@@ -182,13 +182,36 @@ function typeWriter(text, element, speed = 80, intensity = 0, callback = null) {
     type();
 }
 
-const TEST_MODE = false; // false کن وقتی می‌خوای ثبت بشه
+const TEST_MODE = false; // false بذار برای حالت عادی
 
 function startTyping() {
-    if (!TEST_MODE && localStorage.getItem('deviceVerified') === 'true') {
+    // ===== چک کردن وضعیت ورود =====
+    const isVerified = localStorage.getItem('deviceVerified') === 'true';
+    const isDev = localStorage.getItem('devAccess') === 'true';
+    const lastPanel = localStorage.getItem('lastPanel');
+    
+    // اگه TEST_MODE فعال باشه، صفحه Start رو نشون بده (برای تست)
+    if (TEST_MODE) {
+        showStartPage();
+        return;
+    }
+    
+    // اگه قبلاً وارد شده، به صفحه مربوطه برو
+    if (isVerified && lastPanel === 'user') {
         window.location.href = "../HTML/main.html";
         return;
     }
+    
+    if (isDev && lastPanel === 'dev') {
+        window.location.href = "../HTML/dev.html";
+        return;
+    }
+    
+    // اگه هیچکدوم نبود، صفحه Start رو نشون بده
+    showStartPage();
+}
+
+function showStartPage() {
     const startPage = document.querySelector('.start-page');
     const scanlines = document.createElement('div');
     scanlines.className = 'scanlines';

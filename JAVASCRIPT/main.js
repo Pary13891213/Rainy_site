@@ -732,6 +732,8 @@ document.getElementById('logout-btn').addEventListener('click', function() {
     localStorage.removeItem('userPassword');
     localStorage.removeItem('displayName');
     localStorage.removeItem('user_online');
+    localStorage.removeItem('devAccess');
+    localStorage.removeItem('lastPanel');
     
     socket.emit('user-logout', {
         username: localStorage.getItem('userName') || 'User'

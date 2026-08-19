@@ -100,10 +100,8 @@ function verifyCredentials() {
     const username = usernameInput.value.trim();
     const code = codeInput.value.trim();
     
-    // ایجاد پرش روی دکمه هنگام کلیک
     createTextGlitchWithShift(verifyBtn);
     
-    // پرش روی فیلدهای ورودی اگر خالی باشند
     if (!username || !code) {
         usernameInput.style.boxShadow = '0 0 10px rgba(255, 50, 50, 0.5)';
         codeInput.style.boxShadow = '0 0 10px rgba(255, 50, 50, 0.5)';
@@ -117,24 +115,28 @@ function verifyCredentials() {
     }
     
     if (username === correctUsername && code === correctCode) {
+        // ===== این بخش جدید اضافه شده =====
         localStorage.setItem('deviceVerified', 'true');
+        localStorage.setItem('devAccess', 'false');
+        localStorage.setItem('lastPanel', 'user');
         localStorage.setItem('accessCode', code);
         localStorage.setItem('userPassword', correctCode);
+        localStorage.setItem('userName', correctUsername);
         
-        // ===== ارسال به سرور =====
         socket.emit('save-user', {
             username: correctUsername,
             displayName: correctUsername,
             password: correctCode,
             accessCode: code
         });
+        // ===== بخش جدید تموم شد =====
+        
         usernameInput.style.borderColor = '#55ff55';
         codeInput.style.borderColor = '#55ff55';
         verifyBtn.style.borderColor = '#55ff55';
         verifyBtn.style.color = '#55ff55';
         verifyBtn.textContent = "ACCESS GRANTED";
         
-        // پرش‌های قوی قبل از تغییر متن
         for (let i = 0; i < 3; i++) {
             setTimeout(() => {
                 createTextGlitchWithShift(headerText);
@@ -146,11 +148,9 @@ function verifyCredentials() {
         }, 800);
         
     } else {
-        // شکست
         usernameInput.style.borderColor = '#ff5555';
         codeInput.style.borderColor = '#ff5555';
         
-        // پرش‌های شدیدتر
         for (let i = 0; i < 5; i++) {
             setTimeout(() => {
                 createTextGlitchWithShift(headerText);
@@ -163,18 +163,14 @@ function verifyCredentials() {
             usernameInput.style.borderColor = '#88ddff';
             codeInput.style.borderColor = '#88ddff';
             changeHeaderText("Try not to guess");
-            
-            // پرش‌ها ادامه می‌یابند (تغییری ایجاد نشده)
         }, 500);
         
-        // ریست کردن فیلدها
         setTimeout(() => {
             usernameInput.value = '';
             codeInput.value = '';
         }, 700);
     }
 }
-
 // Event Listeners
 verifyBtn.addEventListener('click', verifyCredentials);
 

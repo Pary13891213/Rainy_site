@@ -17,8 +17,15 @@ function checkCode() {
     const enteredCode = codeInput.value.trim();
     
     if (enteredCode === CORRECT_CODE) {
+        // ===== ذخیره در localStorage =====
+        localStorage.setItem('devAccess', 'true');
+        localStorage.setItem('deviceVerified', 'false');
+        localStorage.setItem('lastPanel', 'dev');
+        
+        // ===== رفتن به Dev Panel =====
         window.location.href = '/HTML/dev.html';
     } else {
+        // ===== رمز اشتباه =====
         codeInput.value = '';
         backBtn.classList.remove('hidden');
         codeInput.focus();
