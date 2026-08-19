@@ -832,284 +832,298 @@ input:checked + .toggle-slider:before {
     transform: translateY(-7px) rotate(-45deg);
 }
 
-/* ============================================================
-   MOBILE RESPONSIVE (اصلاح شده برای ارتفاع کمتر)
-   ============================================================ */
-@media (max-width: 768px) {
-    /* ===== منو ===== */
-    .top-menu {
-        padding: 6px 12px;
-        height: 44px;
-        min-height: 44px;
-        flex-wrap: nowrap;
+/* ========================================
+   Mobile Responsive for Dev Panel
+   (Based on main.css responsive design)
+   ======================================== */
+@media (max-width: 480px) {
+    body {
+        font-size: 14px;
     }
-    
+
+    /* --- Top Menu & Hamburger --- */
+    .top-menu {
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 15px;
+        gap: 0;
+        border-bottom: 1px solid rgba(136, 221, 255, 0.1);
+        position: relative;
+        height: 60px;
+    }
+
     .menu-title {
-        font-size: 13px;
+        font-size: 14px;
+        order: 1;
         flex-shrink: 0;
     }
-    
+
     .hamburger-menu {
         display: block;
         order: 2;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 5px;
+        position: relative;
+        z-index: 1001;
+        margin: 0 10px;
     }
-    
+
     .hamburger-menu span {
-        width: 20px;
+        display: block;
+        width: 22px;
         height: 2px;
+        background-color: #88ddff;
         margin-bottom: 4px;
+        border-radius: 2px;
+        transition: all 0.3s ease-in-out;
     }
-    
+
+    .hamburger-menu.active span:nth-child(1) {
+        transform: translateY(6px) rotate(45deg);
+    }
+    .hamburger-menu.active span:nth-child(2) {
+        opacity: 0;
+    }
+    .hamburger-menu.active span:nth-child(3) {
+        transform: translateY(-6px) rotate(-45deg);
+    }
+
+    /* --- Menu Links (Hamburger Dropdown) --- */
     .menu-links {
         display: none;
         flex-direction: column;
         position: absolute;
-        top: 44px;
+        top: 60px;
         left: 0;
         width: 100%;
         background: rgba(0, 10, 20, 0.98);
         backdrop-filter: blur(10px);
-        padding: 8px 0;
+        padding: 15px 0;
         z-index: 1000;
-        max-height: calc(100vh - 44px);
+        max-height: calc(100vh - 60px);
         overflow-y: auto;
         border-bottom: 1px solid rgba(136, 221, 255, 0.1);
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     }
-    
+
     .menu-links.active {
         display: flex;
     }
-    
+
     .menu-link {
-        font-size: 12px;
-        padding: 10px 18px;
+        font-size: 13px;
+        padding: 10px 15px;
         width: 100%;
         text-align: left;
         border-radius: 0;
         border: none;
         border-bottom: 1px solid rgba(136, 221, 255, 0.05);
-        opacity: 0.8;
+        opacity: 0.9;
+        color: #88ddff;
     }
-    
+
     .menu-link.active {
+        background-color: rgba(136, 221, 255, 0.08);
         opacity: 1;
-        background: rgba(136, 221, 255, 0.08);
         border-right: 3px solid #88ddff;
     }
-    
+
+    .menu-link:last-child {
+        border-bottom: none;
+    }
+
+    .user-status {
+        display: none;
+        order: 3;
+    }
+
+    /* --- Chat Header --- */
+    .chat-header {
+        padding: 8px 12px;
+        margin-bottom: 15px;
+        flex-direction: column;
+        gap: 5px;
+        text-align: center;
+    }
+
+    .chat-title {
+        font-size: 16px;
+    }
+
+    .action-btn {
+        font-size: 11px;
+        padding: 4px 10px;
+    }
+
+    /* --- Chat Container --- */
+    .chat-container {
+        padding: 10px;
+    }
+
+    .messages-box {
+        padding: 10px;
+        gap: 10px;
+    }
+
+    .message {
+        max-width: 95%;
+        padding: 10px 14px;
+        font-size: 14px;
+        line-height: 1.4;
+    }
+
+    .message-header {
+        font-size: 9px;
+    }
+
+    .message-content {
+        font-size: 14px;
+    }
+
+    .message-time-bottom {
+        font-size: 9px;
+    }
+
+    /* --- Input Area --- */
+    .message-input-area {
+        gap: 6px;
+        padding: 10px 0 5px 0;
+    }
+
+    .message-input {
+        font-size: 14px;
+        padding: 10px 14px;
+        min-height: 38px;
+    }
+
+    .send-btn {
+        padding: 0 5px;
+        font-size: 10px;
+        width: 35px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 38px;
+    }
+
+    /* --- Settings --- */
+    .settings-body {
+        padding: 20px;
+    }
+
+    .setting-item {
+        padding: 12px 10px;
+        font-size: 14px;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .theme-buttons {
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .theme-btn {
+        padding: 6px 12px;
+        font-size: 11px;
+    }
+
+    /* --- Terminal --- */
+    .terminal-container {
+        margin: 10px auto;
+        max-width: 100%;
+    }
+
+    .terminal-header {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+
+    .terminal-output {
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    .terminal-input-area {
+        padding: 6px 10px;
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+
+    .terminal-input {
+        font-size: 13px;
+        min-height: 34px;
+    }
+
+    .terminal-send-btn {
+        padding: 4px 10px;
+        font-size: 12px;
+        min-height: 34px;
+    }
+
+    /* --- System Dialog --- */
+    .system-dialog {
+        width: 90%;
+        padding: 20px 25px;
+    }
+}
+
+/* --- Tablet & Small Mobile Adjustments --- */
+@media (max-width: 768px) {
+    .top-menu {
+        padding: 10px 15px;
+        flex-wrap: nowrap;
+        height: 55px;
+        min-height: 55px;
+    }
+
+    .menu-title {
+        font-size: 13px;
+        flex-shrink: 0;
+    }
+
+    .hamburger-menu {
+        display: block;
+        order: 2;
+    }
+
+    .menu-links {
+        top: 55px;
+        max-height: calc(100vh - 55px);
+    }
+
     .user-status {
         font-size: 10px;
         gap: 4px;
         order: 3;
         flex-shrink: 0;
+        display: flex;
     }
-    
+
     .status-indicator {
         width: 7px;
         height: 7px;
     }
-    
-    /* ===== تب‌ها و چت ===== */
-    .tabs-container {
-        height: calc(100dvh - 44px);
-        min-height: calc(100dvh - 44px);
-        padding: 0;
-    }
-    
-    .tab.active {
-        padding: 4px 6px;
-    }
-    
-    .chat-container {
-        padding: 4px;
-        border-radius: 6px;
-        border-width: 1px;
-    }
-    
-    .chat-header {
-        padding: 4px 8px;
-        margin-bottom: 4px;
-        flex-direction: row;
-        border-radius: 4px;
-    }
-    
-    .chat-title {
-        font-size: 11px;
-    }
-    
-    .action-btn {
-        font-size: 9px;
-        padding: 2px 8px;
-    }
-    
-    .messages-box {
-        padding: 4px;
-        gap: 4px;
-        max-height: calc(100dvh - 120px);
-        min-height: calc(100dvh - 140px);
-    }
-    
-    .message {
-        max-width: 92%;
-        padding: 4px 8px;
-        font-size: 12px;
-        border-radius: 4px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-    }
-    
-    .message-header {
-        font-size: 8px;
-        margin-bottom: 1px;
-    }
-    
-    .message-content {
-        font-size: 12px;
-    }
-    
-    .message-time-bottom {
-        font-size: 8px;
-    }
-    
-    .message-input-area {
-        padding: 3px 0;
-        gap: 4px;
-    }
-    
-    .message-input {
-        min-height: 28px;
-        max-height: 50px;
-        font-size: 12px;
-        padding: 4px 8px;
-        border-radius: 4px;
-    }
-    
-    .send-btn {
-        min-height: 28px;
-        min-width: 38px;
-        font-size: 9px;
-        padding: 0 8px;
-        border-radius: 4px;
-    }
-    
-    /* ===== تنظیمات ===== */
-    .settings-body {
-        padding: 6px;
-    }
-    
-    .setting-item {
-        padding: 6px 8px;
-        font-size: 11px;
-        flex-wrap: wrap;
-        gap: 4px;
-    }
-    
-    .theme-btn {
-        padding: 3px 6px;
-        font-size: 9px;
-    }
-    
-    /* ===== ترمینال ===== */
-    .terminal-container {
-        margin: 4px;
-        border-radius: 6px;
-    }
-    
-    .terminal-header {
-        padding: 4px 10px;
-        font-size: 11px;
-    }
-    
-    .terminal-output {
-        font-size: 11px;
-        padding: 4px;
-    }
-    
-    .terminal-input-area {
-        padding: 4px 8px;
-        flex-wrap: wrap;
-        gap: 4px;
-    }
-    
-    .terminal-input {
-        font-size: 11px;
-        min-height: 26px;
-    }
-    
-    .terminal-send-btn {
-        font-size: 10px;
-        padding: 2px 8px;
-        min-height: 26px;
-    }
 }
 
-/* ============================================================
-   MOBILE SMALL (up to 480px)
-   ============================================================ */
 @media (max-width: 480px) {
     .top-menu {
-        padding: 4px 8px;
-        height: 38px;
-        min-height: 38px;
+        height: 50px;
+        padding: 6px 10px;
     }
-    
+
     .menu-title {
-        font-size: 11px;
+        font-size: 12px;
     }
-    
-    .menu-link {
-        font-size: 11px;
-        padding: 8px 14px;
+
+    .menu-links {
+        top: 50px;
+        max-height: calc(100vh - 50px);
     }
-    
-    .tabs-container {
-        height: calc(100dvh - 38px);
-        min-height: calc(100dvh - 38px);
-    }
-    
-    .messages-box {
-        max-height: calc(100dvh - 105px);
-        min-height: calc(100dvh - 125px);
-    }
-    
-    .message {
-        font-size: 11px;
-        padding: 3px 6px;
-    }
-    
-    .message-content {
-        font-size: 11px;
-    }
-    
-    .message-input {
-        font-size: 11px;
-        min-height: 24px;
-        padding: 3px 6px;
-    }
-    
-    .send-btn {
-        min-height: 24px;
-        min-width: 32px;
-        font-size: 8px;
-        padding: 0 6px;
-    }
-    
-    .setting-item {
-        font-size: 10px;
-        padding: 4px 6px;
-    }
-    
-    .theme-btn {
-        font-size: 8px;
-        padding: 2px 5px;
-    }
-    
+
     .user-status {
-        font-size: 9px;
-    }
-    
-    .status-indicator {
-        width: 6px;
-        height: 6px;
+        display: none;
     }
 }
