@@ -17,24 +17,11 @@ socket.on('chat-history', (history) => {
 socket.on('chat-message', (data) => {
     console.log('Dev received message:', data);
     
-    const userName = localStorage.getItem('userName') || 'User';
-    
-    // اگه پیام از خود Dev باشه
-    if (data.username === 'DEV') {
+    // ===== فقط پیام‌هایی که از خود Dev نیومدن رو ذخیره کن =====
+    // پیام‌های Dev توسط خودش ذخیره نمیشن و فقط از سرور می‌آن
+    if (data.username !== 'DEV') {
         const newMessage = {
-            sender: 'DEV',
-            content: data.message,
-            time: data.time,
-            type: 'dev'
-        };
-        messages.push(newMessage);
-        saveMessages();
-        displayMessages();
-    } 
-    // اگه پیام از User باشه
-    else {
-        const newMessage = {
-            sender: userName,  // اسم واقعی کاربر رو نشون بده
+            sender: data.username,
             content: data.message,
             time: data.time,
             type: 'other'
@@ -43,6 +30,8 @@ socket.on('chat-message', (data) => {
         saveMessages();
         displayMessages();
     }
+    // پیام‌های DEV از سرور میان ولی نیازی به ذخیره دوباره ندارن
+    // چون توی sendMessage ذخیره شدن
 });
 
 socket.on('user-joined', (data) => {
@@ -243,6 +232,7 @@ function createGlitchEffect() {
     }
 }
 
+// ===== SEND MESSAGE =====
 function sendMessage() {
     console.log('Send button clicked');
     
@@ -259,29 +249,20 @@ function sendMessage() {
         return;
     }
     
-    // ارسال به سرور با نام DEV
+    // ===== فقط به سرور بفرست =====
     socket.emit('chat-message', {
         username: 'DEV',
         message: content
     });
     
-    // نمایش پیام خودم در صفحه
-    const newMessage = {
-        sender: 'DEV',
-        content: content,
-        time: new Date().toLocaleTimeString(),
-        type: 'dev'
-    };
-    
-    messages.push(newMessage);
-    saveMessages();
-    displayMessages();
-    
+    // ===== دیگر اینجا پیام رو به localStorage اضافه نکن! =====
+    // فقط input رو پاک کن
     messageInput.value = '';
     createGlitchEffect();
     
-    console.log('Message sent');
+    console.log('Message sent to server');
 }
+
 function checkNewMessages() {
     loadMessages();
     displayMessages();

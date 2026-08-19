@@ -19,22 +19,12 @@ socket.on('chat-history', (history) => {
 
 socket.on('chat-message', (data) => {
     const userName = localStorage.getItem('userName') || 'User';
-    const isDev = localStorage.getItem('devAccess') === 'true';
     
-    // اگه پیام از خودم باشه (User)
+    // ===== فقط پیام‌هایی که از خود User نیومدن رو ذخیره کن =====
     if (data.username === userName) {
-        const newMessage = {
-            sender: 'You',
-            content: data.message,
-            time: data.time,
-            type: 'user'
-        };
-        messages.push(newMessage);
-        saveMessages();
-        displayMessages();
-    } 
-    // اگه پیام از Dev باشه
-    else if (data.username === 'DEV') {
+        // پیام از خود User - کاری نکن (قبلاً توی sendMessage ذخیره شده)
+        return;
+    } else if (data.username === 'DEV') {
         const newMessage = {
             sender: 'DEV',
             content: data.message,
@@ -44,9 +34,8 @@ socket.on('chat-message', (data) => {
         messages.push(newMessage);
         saveMessages();
         displayMessages();
-    } 
-    // اگه پیام از کاربر دیگه باشه (در اینجا نباید اتفاق بیفته چون چت دو نفره است)
-    else {
+    } else {
+        // پیام از کاربر دیگه (در اینجا نباید اتفاق بیفته چون چت دو نفره است)
         const newMessage = {
             sender: data.username,
             content: data.message,
@@ -256,13 +245,13 @@ function sendMessage() {
     
     const userName = localStorage.getItem('userName') || 'User';
     
-    // ارسال به سرور با اسم واقعی کاربر
+    // ===== فقط به سرور بفرست =====
     socket.emit('chat-message', {
         username: userName,
         message: content
     });
     
-    // نمایش پیام خودم در صفحه
+    // ===== نمایش پیام در صفحه خودش (به صورت محلی) =====
     const newMessage = {
         sender: 'You',
         content: content,
