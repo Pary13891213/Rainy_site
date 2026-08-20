@@ -1232,21 +1232,25 @@ body {
 }
 
 /* ============================================================
-   MOBILE RESPONSIVE - USER PANEL (مشابه پنل Dev)
+   MOBILE RESPONSIVE - USER PANEL (نسخه اصلاح شده)
    ============================================================ */
 
 /* ===== MOBILE (max-width: 768px) ===== */
 @media (max-width: 768px) {
-    body {
-        font-size: 14px;
+    html, body {
+        height: 100%;
         overflow: hidden;
-        height: 100dvh;
+        position: fixed;
+        width: 100%;
     }
     
     .main-page {
-        height: 100dvh;
+        height: 100%;
+        min-height: 100vh;
         min-height: -webkit-fill-available;
         overflow: hidden;
+        display: flex;
+        flex-direction: column;
     }
     
     /* --- Top Menu --- */
@@ -1254,6 +1258,8 @@ body {
         padding: 4px 10px;
         height: 44px;
         min-height: 44px;
+        max-height: 44px;
+        flex-shrink: 0;
         flex-wrap: nowrap;
         border-bottom-width: 1px;
     }
@@ -1297,7 +1303,7 @@ body {
         background: var(--menu-color);
         padding: 8px 0;
         z-index: 1000;
-        max-height: calc(100dvh - 44px);
+        max-height: calc(100vh - 44px);
         overflow-y: auto;
         border-bottom: 1px solid var(--main-color);
     }
@@ -1330,20 +1336,30 @@ body {
     
     /* --- Tabs Container --- */
     .tabs-container {
-        height: calc(100dvh - 44px);
-        min-height: calc(100dvh - 44px);
+        flex: 1;
+        min-height: 0;
+        height: auto;
         padding: 0;
+        position: relative;
     }
     
     .tab.active {
         padding: 4px 6px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
     }
     
     /* --- Chat Container --- */
     .chat-container {
+        flex: 1;
+        min-height: 0;
         padding: 4px;
         border-radius: 6px;
         border-width: 1px;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
     }
     
     /* --- Chat Header --- */
@@ -1353,6 +1369,7 @@ body {
         flex-direction: row;
         border-radius: 4px;
         gap: 4px;
+        flex-shrink: 0;
     }
     
     .chat-title {
@@ -1365,10 +1382,11 @@ body {
     
     /* --- Messages Box --- */
     .messages-box {
+        flex: 1;
+        min-height: 0;
         padding: 4px;
         gap: 4px;
-        max-height: calc(100dvh - 110px);
-        min-height: calc(100dvh - 130px);
+        overflow-y: auto;
     }
     
     .message {
@@ -1377,6 +1395,7 @@ body {
         font-size: 12px;
         border-radius: 4px;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+        flex-shrink: 0;
     }
     
     .message-header {
@@ -1397,6 +1416,8 @@ body {
         padding: 3px 0;
         gap: 4px;
         flex-shrink: 0;
+        display: flex;
+        align-items: center;
     }
     
     .message-input {
@@ -1405,6 +1426,7 @@ body {
         font-size: 12px;
         padding: 4px 8px;
         border-radius: 4px;
+        flex: 1;
     }
     
     .send-btn {
@@ -1413,6 +1435,7 @@ body {
         font-size: 9px;
         padding: 0 8px;
         border-radius: 4px;
+        flex-shrink: 0;
     }
     
     /* --- Settings --- */
@@ -1448,33 +1471,44 @@ body {
     .terminal-container {
         margin: 4px;
         border-radius: 6px;
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
     }
     
     .terminal-header {
         padding: 4px 10px;
         font-size: 11px;
+        flex-shrink: 0;
     }
     
     .terminal-output {
         font-size: 11px;
         padding: 4px;
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
     }
     
     .terminal-input-area {
         padding: 4px 8px;
         flex-wrap: wrap;
         gap: 4px;
+        flex-shrink: 0;
     }
     
     .terminal-input {
         font-size: 11px;
         min-height: 26px;
+        flex: 1;
     }
     
     .terminal-send-btn {
         font-size: 10px;
         padding: 2px 8px;
         min-height: 26px;
+        flex-shrink: 0;
     }
     
     /* --- Game Button --- */
@@ -1500,8 +1534,9 @@ body {
 @media (max-width: 480px) {
     .top-menu {
         padding: 3px 8px;
-        height: 38px;
-        min-height: 38px;
+        height: 36px;
+        min-height: 36px;
+        max-height: 36px;
     }
     
     .menu-title {
@@ -1513,14 +1548,9 @@ body {
         padding: 6px 14px;
     }
     
-    .tabs-container {
-        height: calc(100dvh - 38px);
-        min-height: calc(100dvh - 38px);
-    }
-    
     .messages-box {
-        max-height: calc(100dvh - 100px);
-        min-height: calc(100dvh - 120px);
+        padding: 3px;
+        gap: 3px;
     }
     
     .message {
