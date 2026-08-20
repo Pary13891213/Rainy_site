@@ -1,6 +1,5 @@
 import { DLAT1 , DLAT2 , DLAT3 , DLAT4 , DLAT5 , DLAT6 , DLAT7 , DLAT8 , DLAT9} from "./DLAT.js";
 
-// ===== SOCKET CONNECTION =====
 const socket = io('https://rainy-server.onrender.com', {
     transports: ['websocket', 'polling']
 });

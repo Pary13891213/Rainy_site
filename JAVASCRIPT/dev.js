@@ -1,5 +1,4 @@
-// ===== SOCKET CONNECTION =====
-const socket = io('https://rainy-server.onrender.com/', {
+const socket = io('https://rainy-server.onrender.com', {
     transports: ['websocket', 'polling']
 });
 

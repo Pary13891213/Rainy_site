@@ -67,9 +67,11 @@ async function findOrCreateUser(data) {
 
 // ===== CORS =====
 const allowedOrigins = [
+    'https://baroon.surge.sh',
     'https://baroon.netlify.app',
     'http://localhost:3000',
-    'http://127.0.0.1:5500'
+    'http://127.0.0.1:5500',
+    'https://rainy-server.onrender.com'
 ];
 
 app.use(cors({
@@ -98,7 +100,9 @@ const io = require('socket.io')(http, {
         },
         methods: ['GET', 'POST'],
         credentials: true
-    }
+    },
+    transports: ['websocket', 'polling'],
+    allowEIO3: true
 });
 
 const path = require('path');
@@ -237,6 +241,17 @@ io.on('connection', async (socket) => {
             username: data.username,
             users: Object.values(users)
         });
+    });
+
+    // ===== CLEAR CHAT HISTORY =====
+    socket.on('clear-chat', async () => {
+        try {
+            await Message.deleteMany({});
+            console.log('🗑️ All messages deleted from database');
+            io.emit('chat-cleared');
+        } catch (err) {
+            console.error('Error clearing chat:', err);
+        }
     });
 
     socket.on('chat-message', async (data) => {
