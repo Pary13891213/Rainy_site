@@ -1,4 +1,4 @@
-const socket = io(https://baroon-server.onrender.com, {
+const socket = io('https://baroon-server.onrender.com', {
     transports: ['websocket', 'polling']
 });
 
