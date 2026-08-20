@@ -18,30 +18,31 @@ socket.on('chat-history', (history) => {
 socket.on('chat-message', (data) => {
     const userName = localStorage.getItem('userName') || 'User';
     
-    // اگه پیام از خود کاربر باشه → نادیده بگیر (قبلاً توی sendMessage اضافه شده)
     if (data.username === userName) {
         return;
     }
     
-    // اگه پیام از Dev باشه
     if (data.username === 'DEV') {
         const newMessage = {
             sender: 'DEV',
-            content: data.message,
+            content: data.message || '',
             time: data.time,
-            type: 'dev'
+            type: 'dev',
+            isImage: data.isImage || false,
+            imagePath: data.imagePath || ''
         };
         messages.push(newMessage);
         displayMessages();
         return;
     }
     
-    // پیام از دیگران (اگه باشه)
     const newMessage = {
         sender: data.username,
-        content: data.message,
+        content: data.message || '',
         time: data.time,
-        type: 'other'
+        type: 'other',
+        isImage: data.isImage || false,
+        imagePath: data.imagePath || ''
     };
     messages.push(newMessage);
     displayMessages();
@@ -71,6 +72,8 @@ let messages = [];
 const messagesBox = document.getElementById('user-messages-box');
 const messageInput = document.getElementById('user-message-input');
 const sendBtn = document.getElementById('user-send-btn');
+const uploadBtn = document.getElementById('user-upload-btn');
+const fileInput = document.getElementById('user-file-input');
 const menuLinks = document.querySelectorAll('.menu-link');
 const tabs = document.querySelectorAll('.tab');
 const profileName = document.getElementById('profile-name');
@@ -160,6 +163,7 @@ function createDialogGlitch() {
 
 function displayMessages() {
     if (!messagesBox) return;
+    if (messages.length === lastMessageCount) return;
     
     messagesBox.innerHTML = '';
     
@@ -168,32 +172,34 @@ function displayMessages() {
         
         if (msg.type === 'user') {
             messageDiv.className = 'message mine';
-            messageDiv.innerHTML = `
-                <div class="message-header">
-                    <span class="message-sender">You</span>
-                </div>
-                <div class="message-content">${msg.content}</div>
-                <div class="message-time-bottom">${msg.time}</div>
-            `;
+            msg.sender = 'You';
         } else if (msg.type === 'dev') {
             messageDiv.className = 'message other';
-            messageDiv.innerHTML = `
-                <div class="message-header">
-                    <span class="message-sender">DEV</span>
-                </div>
-                <div class="message-content">${msg.content}</div>
-                <div class="message-time-bottom">${msg.time}</div>
-            `;
+            msg.sender = 'DEV';
         } else if (msg.type === 'system') {
             messageDiv.className = 'message system';
-            messageDiv.innerHTML = `
-                <div class="message-content">${msg.content}</div>
-            `;
         } else {
             messageDiv.className = 'message other';
+            msg.sender = msg.sender || 'Unknown';
+        }
+        
+        if (msg.isImage) {
             messageDiv.innerHTML = `
                 <div class="message-header">
-                    <span class="message-sender">${msg.sender || 'Unknown'}</span>
+                    <span class="message-sender">${msg.sender}</span>
+                </div>
+                <div class="message-content">
+                    <img src="${msg.imagePath || msg.content}" 
+                         alt="Image" 
+                         class="chat-image" 
+                         onclick="openImageLightbox(this.src)">
+                </div>
+                <div class="message-time-bottom">${msg.time}</div>
+            `;
+        } else {
+            messageDiv.innerHTML = `
+                <div class="message-header">
+                    <span class="message-sender">${msg.sender}</span>
                 </div>
                 <div class="message-content">${msg.content}</div>
                 <div class="message-time-bottom">${msg.time}</div>
@@ -203,6 +209,7 @@ function displayMessages() {
         messagesBox.appendChild(messageDiv);
     });
     
+    lastMessageCount = messages.length;
     messagesBox.scrollTop = messagesBox.scrollHeight;
 }
 
@@ -218,6 +225,120 @@ function addSystemMessage(content) {
     displayMessages();
 }
 
+// ============================================================
+// UPLOAD IMAGE
+// ============================================================
+uploadBtn.addEventListener('click', () => {
+    fileInput.click();
+});
+
+fileInput.addEventListener('change', async function(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    if (file.size > 5 * 1024 * 1024) {
+        addSystemMessage('⚠️ Image size must be less than 5MB');
+        fileInput.value = '';
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    try {
+        const response = await fetch('/upload-image', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            const userName = localStorage.getItem('userName') || 'User';
+            
+            socket.emit('chat-message', {
+                username: userName,
+                message: '',
+                isImage: true,
+                imagePath: result.imagePath
+            });
+            
+            const newMessage = {
+                sender: 'You',
+                content: result.imagePath,
+                time: new Date().toLocaleTimeString(),
+                type: 'user',
+                isImage: true,
+                imagePath: result.imagePath
+            };
+            
+            messages.push(newMessage);
+            displayMessages();
+        }
+    } catch (err) {
+        console.error('Upload error:', err);
+        addSystemMessage('❌ Failed to upload image');
+    }
+    
+    fileInput.value = '';
+});
+
+// ============================================================
+// LIGHTBOX
+// ============================================================
+function openImageLightbox(src) {
+    const oldLightbox = document.getElementById('lightbox-overlay');
+    if (oldLightbox) oldLightbox.remove();
+    
+    const overlay = document.createElement('div');
+    overlay.id = 'lightbox-overlay';
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        z-index: 10000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        animation: lightboxIn 0.3s ease-out;
+    `;
+    
+    const img = document.createElement('img');
+    img.src = src;
+    img.style.cssText = `
+        max-width: 90%;
+        max-height: 90%;
+        object-fit: contain;
+        border-radius: 8px;
+        box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+    `;
+    
+    overlay.appendChild(img);
+    document.body.appendChild(overlay);
+    
+    overlay.addEventListener('click', () => {
+        overlay.style.animation = 'lightboxOut 0.2s ease-in';
+        setTimeout(() => overlay.remove(), 200);
+    });
+}
+
+// Lightbox Styles
+const lightboxStyle = document.createElement('style');
+lightboxStyle.textContent = `
+    @keyframes lightboxIn {
+        from { opacity: 0; transform: scale(0.9); }
+        to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes lightboxOut {
+        from { opacity: 1; transform: scale(1); }
+        to { opacity: 0; transform: scale(0.9); }
+    }
+`;
+document.head.appendChild(lightboxStyle);
 // ===== SEND MESSAGE =====
 function sendMessage() {
     const content = messageInput.value.trim();
@@ -456,7 +577,7 @@ function unlockHack(){
             console.log("unvalid commend")
         } else {
             sendMessage(sms);
-            addSystemMessageO("tabs...and Hack tab...\nOkay. key please::")
+            addSystemMessage("tabs...and Hack tab...\nOkay. key please::")
         }
     } else if (sms == '/key::"1389yrap13"') {
         if(islocked) {

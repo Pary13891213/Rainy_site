@@ -18,26 +18,19 @@ socket.on('chat-message', (data) => {
     console.log('Dev received message:', data);
     
     if (data.username === 'DEV') {
-        const newMessage = {
-            sender: 'DEV',
-            content: data.message,
-            time: data.time,
-            type: 'dev'
-        };
-        messages.push(newMessage);
-        displayMessages();
-    } else {
-        // ===== استفاده از اسم واقعی کاربر =====
-        const displayName = localStorage.getItem('displayName') || data.username || 'User';
-        const newMessage = {
-            sender: displayName,
-            content: data.message,
-            time: data.time,
-            type: 'other'
-        };
-        messages.push(newMessage);
-        displayMessages();
+        return;
     }
+    
+    const newMessage = {
+        sender: data.username,
+        content: data.message || '',
+        time: data.time,
+        type: 'other',
+        isImage: data.isImage || false,
+        imagePath: data.imagePath || ''
+    };
+    messages.push(newMessage);
+    displayMessages();
 });
 
 // ===== SOCKET EVENTS =====
@@ -73,6 +66,8 @@ const userStatusText = document.getElementById('user-status-text');
 const statusIndicator = document.querySelector('.status-indicator');
 const userActiveStatus = document.getElementById('user-active-status');
 const clearChatBtn = document.getElementById('clear-chat-btn');
+const uploadBtn = document.getElementById('dev-upload-btn');
+const fileInput = document.getElementById('dev-file-input');
 
 console.log('Dev.js loaded');
 
@@ -123,6 +118,8 @@ function displayMessages() {
         return;
     }
     
+    if (messages.length === lastMessageCount) return;
+    
     messagesBox.innerHTML = '';
     const userName = localStorage.getItem('displayName') || localStorage.getItem('userName') || 'User';
     
@@ -131,34 +128,35 @@ function displayMessages() {
         
         if (msg.type === 'dev') {
             messageDiv.className = 'message mine';
-            messageDiv.innerHTML = `
-                <div class="message-header">
-                    <span class="message-sender">DEV</span>
-                </div>
-                <div class="message-content">${msg.content}</div>
-                <div class="message-time-bottom">${msg.time}</div>
-            `;
+            msg.sender = 'DEV';
         } else if (msg.type === 'user' || msg.type === 'other') {
             messageDiv.className = 'message other';
-            // ===== استفاده از اسم واقعی کاربر =====
             const senderName = msg.sender === 'User' ? userName : (msg.sender || userName);
-            messageDiv.innerHTML = `
-                <div class="message-header">
-                    <span class="message-sender">${senderName}</span>
-                </div>
-                <div class="message-content">${msg.content}</div>
-                <div class="message-time-bottom">${msg.time}</div>
-            `;
+            msg.sender = senderName;
         } else if (msg.type === 'system') {
             messageDiv.className = 'message system';
-            messageDiv.innerHTML = `
-                <div class="message-content">${msg.content}</div>
-            `;
         } else {
             messageDiv.className = 'message other';
+            msg.sender = msg.sender || 'Unknown';
+        }
+        
+        if (msg.isImage) {
             messageDiv.innerHTML = `
                 <div class="message-header">
-                    <span class="message-sender">${msg.sender || 'Unknown'}</span>
+                    <span class="message-sender">${msg.sender}</span>
+                </div>
+                <div class="message-content">
+                    <img src="${msg.imagePath || msg.content}" 
+                         alt="Image" 
+                         class="chat-image" 
+                         onclick="openImageLightbox(this.src)">
+                </div>
+                <div class="message-time-bottom">${msg.time}</div>
+            `;
+        } else {
+            messageDiv.innerHTML = `
+                <div class="message-header">
+                    <span class="message-sender">${msg.sender}</span>
                 </div>
                 <div class="message-content">${msg.content}</div>
                 <div class="message-time-bottom">${msg.time}</div>
@@ -168,6 +166,7 @@ function displayMessages() {
         messagesBox.appendChild(messageDiv);
     });
     
+    lastMessageCount = messages.length;
     messagesBox.scrollTop = messagesBox.scrollHeight;
 }
 
@@ -231,6 +230,115 @@ function createGlitchEffect() {
     }
 }
 
+
+uploadBtn.addEventListener('click', () => {
+    fileInput.click();
+});
+
+fileInput.addEventListener('change', async function(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    if (file.size > 5 * 1024 * 1024) {
+        addSystemMessage('⚠️ Image size must be less than 5MB');
+        fileInput.value = '';
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    try {
+        const response = await fetch('/upload-image', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            socket.emit('chat-message', {
+                username: 'DEV',
+                message: '',
+                isImage: true,
+                imagePath: result.imagePath
+            });
+            
+            const newMessage = {
+                sender: 'DEV',
+                content: result.imagePath,
+                time: new Date().toLocaleTimeString(),
+                type: 'dev',
+                isImage: true,
+                imagePath: result.imagePath
+            };
+            
+            messages.push(newMessage);
+            displayMessages();
+        }
+    } catch (err) {
+        console.error('Upload error:', err);
+        addSystemMessage('❌ Failed to upload image');
+    }
+    
+    fileInput.value = '';
+});
+function openImageLightbox(src) {
+    const oldLightbox = document.getElementById('lightbox-overlay');
+    if (oldLightbox) oldLightbox.remove();
+    
+    const overlay = document.createElement('div');
+    overlay.id = 'lightbox-overlay';
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        z-index: 10000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        animation: lightboxIn 0.3s ease-out;
+    `;
+    
+    const img = document.createElement('img');
+    img.src = src;
+    img.style.cssText = `
+        max-width: 90%;
+        max-height: 90%;
+        object-fit: contain;
+        border-radius: 8px;
+        box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+    `;
+    
+    overlay.appendChild(img);
+    document.body.appendChild(overlay);
+    
+    overlay.addEventListener('click', () => {
+        overlay.style.animation = 'lightboxOut 0.2s ease-in';
+        setTimeout(() => overlay.remove(), 200);
+    });
+}
+
+// استایل‌های Lightbox (فقط یک بار اضافه بشه)
+if (!document.getElementById('lightbox-styles')) {
+    const lightboxStyle = document.createElement('style');
+    lightboxStyle.id = 'lightbox-styles';
+    lightboxStyle.textContent = `
+        @keyframes lightboxIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes lightboxOut {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0; transform: scale(0.9); }
+        }
+    `;
+    document.head.appendChild(lightboxStyle);
+}
 // ============================================================
 // ===== SEND MESSAGE =====
 // ============================================================

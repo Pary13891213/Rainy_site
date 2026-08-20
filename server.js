@@ -3,7 +3,42 @@ const app = express();
 const http = require('http').createServer(app);
 const cors = require('cors');
 const mongoose = require('mongoose');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 require('dotenv').config();
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        const uploadPath = path.join(__dirname, 'uploads');
+        if (!fs.existsSync(uploadPath)) {
+            fs.mkdirSync(uploadPath, { recursive: true });
+        }
+        cb(null, uploadPath);
+    },
+    filename: function (req, file, cb) {
+        const uniqueName = Date.now() + '_' + Math.random().toString(36).substring(7);
+        const ext = path.extname(file.originalname);
+        cb(null, uniqueName + ext);
+    }
+});
+
+const fileFilter = (req, file, cb) => {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (allowedTypes.includes(file.mimetype)) {
+        cb(null, true);
+    } else {
+        cb(new Error('Only images are allowed'), false);
+    }
+};
+
+const upload = multer({
+    storage: storage,
+    limits: {
+        fileSize: 5 * 1024 * 1024
+    },
+    fileFilter: fileFilter
+});
 
 // ===== MONGODB CONNECTION =====
 const MONGODB_URI = process.env.MONGODB_URI;
@@ -21,7 +56,9 @@ const messageSchema = new mongoose.Schema({
     username: String,
     message: String,
     time: String,
-    timestamp: { type: Date, default: Date.now }
+    timestamp: { type: Date, default: Date.now },
+    isImage: { type: Boolean, default: false },
+    imagePath: { type: String, default: '' }
 });
 
 const Message = mongoose.model('Message', messageSchema);
@@ -112,6 +149,7 @@ app.use(express.static(__dirname));
 app.use('/CSS', express.static(path.join(__dirname, 'CSS')));
 app.use('/HTML', express.static(path.join(__dirname, 'HTML')));
 app.use('/JAVASCRIPT', express.static(path.join(__dirname, 'JAVASCRIPT')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
@@ -131,6 +169,22 @@ app.get('/:page', (req, res) => {
     });
 });
 
+app.post('/upload-image', upload.single('image'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'No file uploaded' });
+        }
+        const imagePath = '/uploads/' + req.file.filename;
+        res.json({ 
+            success: true, 
+            imagePath: imagePath 
+        });
+    } catch (err) {
+        console.error('Upload error:', err);
+        res.status(500).json({ error: 'Upload failed' });
+    }
+});
+
 const users = {};
 
 // ===== GET CHAT HISTORY =====
@@ -148,8 +202,10 @@ async function saveMessage(data) {
     try {
         const newMessage = new Message({
             username: data.username,
-            message: data.message,
-            time: data.time
+            message: data.message || '',
+            time: data.time,
+            isImage: data.isImage || false,
+            imagePath: data.imagePath || ''
         });
         await newMessage.save();
         return newMessage;
@@ -279,18 +335,22 @@ io.on('connection', async (socket) => {
     socket.on('chat-message', async (data) => {
         const messageData = {
             username: data.username,
-            message: data.message,
-            time: new Date().toLocaleTimeString('en-US', { timeZone: 'Asia/Tehran' })
+            message: data.message || '',
+            time: new Date().toLocaleTimeString('en-US', { timeZone: 'Asia/Tehran' }),
+            isImage: data.isImage || false,
+            imagePath: data.imagePath || ''
         };
         
         const savedMessage = await saveMessage(messageData);
         
         if (savedMessage) {
-            console.log('💬 ' + data.username + ': ' + data.message);
+            console.log('💬 ' + data.username + ': ' + (data.isImage ? '[Image]' : data.message));
             io.emit('chat-message', {
                 username: savedMessage.username,
                 message: savedMessage.message,
-                time: savedMessage.time
+                time: savedMessage.time,
+                isImage: savedMessage.isImage,
+                imagePath: savedMessage.imagePath
             });
         }
     });
