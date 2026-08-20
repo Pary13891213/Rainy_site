@@ -1231,134 +1231,250 @@ body {
     }
 }
 
-/* ===== MOBILE SMALL (up to 480px) ===== */
-@media (max-width: 480px) {
+/* ============================================================
+   MOBILE RESPONSIVE - USER PANEL (مشابه پنل Dev)
+   ============================================================ */
+
+/* ===== MOBILE (max-width: 768px) ===== */
+@media (max-width: 768px) {
     body {
-        font-size: 13px;
+        font-size: 14px;
+        overflow: hidden;
+        height: 100dvh;
     }
     
+    .main-page {
+        height: 100dvh;
+        min-height: -webkit-fill-available;
+        overflow: hidden;
+    }
+    
+    /* --- Top Menu --- */
     .top-menu {
-        padding: 6px 10px;
-        height: 48px;
-        min-height: 48px;
+        padding: 4px 10px;
+        height: 44px;
+        min-height: 44px;
+        flex-wrap: nowrap;
+        border-bottom-width: 1px;
     }
     
     .menu-title {
         font-size: 12px;
+        flex-shrink: 0;
+    }
+    
+    .hamburger-menu {
+        display: block;
+        order: 2;
+        padding: 3px;
+        margin: 0 5px;
+    }
+    
+    .hamburger-menu span {
+        width: 18px;
+        height: 2px;
+        margin-bottom: 3px;
+        background-color: var(--main-color);
+    }
+    
+    .hamburger-menu.active span:nth-child(1) {
+        transform: translateY(5px) rotate(45deg);
+    }
+    .hamburger-menu.active span:nth-child(2) {
+        opacity: 0;
+    }
+    .hamburger-menu.active span:nth-child(3) {
+        transform: translateY(-5px) rotate(-45deg);
     }
     
     .menu-links {
-        top: 48px;
-        max-height: calc(100vh - 48px);
-        padding: 10px 0;
+        display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 44px;
+        left: 0;
+        width: 100%;
+        background: var(--menu-color);
+        padding: 8px 0;
+        z-index: 1000;
+        max-height: calc(100dvh - 44px);
+        overflow-y: auto;
+        border-bottom: 1px solid var(--main-color);
+    }
+    
+    .menu-links.active {
+        display: flex;
     }
     
     .menu-link {
         font-size: 12px;
         padding: 8px 16px;
+        width: 100%;
+        text-align: left;
+        border-radius: 0;
+        border: none;
+        border-bottom: 1px solid var(--shadow-2);
+        opacity: 0.8;
     }
     
-    .hamburger-menu span {
-        width: 20px;
-        height: 2px;
-        margin-bottom: 4px;
+    .menu-link.active {
+        background: var(--shadow-3);
+        border-right: 2px solid var(--main-color);
+        opacity: 1;
     }
     
-    /* --- Chat --- */
-    .chat-title {
-        font-size: 13px;
+    .user-status {
+        display: none;
+        order: 3;
     }
     
+    /* --- Tabs Container --- */
+    .tabs-container {
+        height: calc(100dvh - 44px);
+        min-height: calc(100dvh - 44px);
+        padding: 0;
+    }
+    
+    .tab.active {
+        padding: 4px 6px;
+    }
+    
+    /* --- Chat Container --- */
     .chat-container {
-        padding: 8px;
+        padding: 4px;
         border-radius: 6px;
+        border-width: 1px;
     }
     
+    /* --- Chat Header --- */
+    .chat-header {
+        padding: 4px 8px;
+        margin-bottom: 4px;
+        flex-direction: row;
+        border-radius: 4px;
+        gap: 4px;
+    }
+    
+    .chat-title {
+        font-size: 11px;
+    }
+    
+    .chat-info {
+        font-size: 9px;
+    }
+    
+    /* --- Messages Box --- */
     .messages-box {
-        padding: 8px;
-        gap: 6px;
-        max-height: calc(100vh - 170px);
+        padding: 4px;
+        gap: 4px;
+        max-height: calc(100dvh - 110px);
+        min-height: calc(100dvh - 130px);
     }
     
     .message {
-        max-width: 95%;
-        padding: 8px 12px;
-        font-size: 13px;
+        max-width: 92%;
+        padding: 4px 8px;
+        font-size: 12px;
         border-radius: 4px;
-    }
-    
-    .message-content {
-        font-size: 13px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
     }
     
     .message-header {
-        font-size: 9px;
+        font-size: 8px;
+        margin-bottom: 1px;
+    }
+    
+    .message-content {
+        font-size: 12px;
     }
     
     .message-time-bottom {
-        font-size: 9px;
+        font-size: 8px;
     }
     
-    /* --- Input --- */
+    /* --- Input Area --- */
     .message-input-area {
+        padding: 3px 0;
         gap: 4px;
-        padding: 8px 0 4px 0;
+        flex-shrink: 0;
     }
     
     .message-input {
-        font-size: 13px;
-        padding: 8px 12px;
-        min-height: 34px;
-        max-height: 60px;
+        min-height: 28px;
+        max-height: 50px;
+        font-size: 12px;
+        padding: 4px 8px;
+        border-radius: 4px;
     }
     
     .send-btn {
-        font-size: 10px;
-        padding: 0 10px;
-        min-height: 34px;
-        min-width: 50px;
+        min-height: 28px;
+        min-width: 38px;
+        font-size: 9px;
+        padding: 0 8px;
+        border-radius: 4px;
     }
     
     /* --- Settings --- */
     .settings-body {
-        padding: 10px;
+        padding: 6px;
     }
     
     .setting-item {
-        padding: 8px;
-        font-size: 12px;
+        padding: 6px 8px;
+        font-size: 11px;
+        flex-wrap: wrap;
+        gap: 4px;
     }
     
     .theme-btn {
-        padding: 4px 8px;
-        font-size: 10px;
+        padding: 3px 6px;
+        font-size: 9px;
     }
     
     .setting-input {
-        font-size: 12px;
-        padding: 6px 10px;
+        font-size: 11px;
+        padding: 4px 8px;
+        min-width: 100%;
     }
     
     .setting-btn {
         font-size: 10px;
-        padding: 5px 12px;
+        padding: 4px 10px;
+        width: 100%;
     }
     
     /* --- Terminal --- */
+    .terminal-container {
+        margin: 4px;
+        border-radius: 6px;
+    }
+    
+    .terminal-header {
+        padding: 4px 10px;
+        font-size: 11px;
+    }
+    
     .terminal-output {
-        font-size: 12px;
-        padding: 8px;
+        font-size: 11px;
+        padding: 4px;
+    }
+    
+    .terminal-input-area {
+        padding: 4px 8px;
+        flex-wrap: wrap;
+        gap: 4px;
     }
     
     .terminal-input {
-        font-size: 12px;
-        min-height: 30px;
+        font-size: 11px;
+        min-height: 26px;
     }
     
     .terminal-send-btn {
         font-size: 10px;
-        padding: 3px 10px;
-        min-height: 30px;
+        padding: 2px 8px;
+        min-height: 26px;
     }
     
     /* --- Game Button --- */
@@ -1371,144 +1487,71 @@ body {
     
     /* --- System Dialog --- */
     .system-dialog {
-        width: 95%;
+        width: 90%;
         padding: 15px 20px;
     }
     
     .dialog-content {
         font-size: 13px;
     }
-    
-    .logout-btn {
-        font-size: 10px;
-        padding: 4px 10px;
-    }
 }
 
-/* ===== MOBILE HEIGHT FIX ===== */
-@media (max-width: 768px) {
-    .main-page {
-        height: 100dvh;
-        min-height: -webkit-fill-available;
-        overflow: hidden;
+/* ===== MOBILE SMALL (up to 480px) ===== */
+@media (max-width: 480px) {
+    .top-menu {
+        padding: 3px 8px;
+        height: 38px;
+        min-height: 38px;
     }
     
-    .top-menu {
-        padding: 6px 12px;
-        height: 48px;
-        min-height: 48px;
+    .menu-title {
+        font-size: 10px;
+    }
+    
+    .menu-link {
+        font-size: 11px;
+        padding: 6px 14px;
     }
     
     .tabs-container {
-        height: calc(100dvh - 48px);
-        min-height: calc(100dvh - 48px);
-        padding: 0;
-    }
-    
-    .tab.active {
-        padding: 6px;
-    }
-    
-    .chat-container {
-        height: 100%;
-        min-height: 0;
-        padding: 6px;
-        border-radius: 6px;
-    }
-    
-    .chat-header {
-        padding: 4px 10px;
-        margin-bottom: 6px;
+        height: calc(100dvh - 38px);
+        min-height: calc(100dvh - 38px);
     }
     
     .messages-box {
-        max-height: calc(100dvh - 140px);
-        min-height: calc(100dvh - 160px);
-        padding: 6px;
-        gap: 6px;
+        max-height: calc(100dvh - 100px);
+        min-height: calc(100dvh - 120px);
     }
     
-    .message-input-area {
-        padding: 4px 0;
-        flex-shrink: 0;
+    .message {
+        font-size: 11px;
+        padding: 3px 6px;
+    }
+    
+    .message-content {
+        font-size: 11px;
     }
     
     .message-input {
-        min-height: 32px;
-        max-height: 60px;
-        font-size: 13px;
-        padding: 6px 10px;
+        font-size: 11px;
+        min-height: 24px;
+        padding: 3px 6px;
     }
     
     .send-btn {
-        min-height: 32px;
-        min-width: 44px;
-        font-size: 10px;
-        padding: 0 8px;
+        min-height: 24px;
+        min-width: 32px;
+        font-size: 8px;
+        padding: 0 6px;
     }
-}
-
-/* ===== SETTINGS - NEW STYLES ===== */
-.setting-divider {
-    border-top: 1px solid var(--shadow-4);
-    margin: 15px 0;
-}
-
-.setting-input {
-    background: var(--bg-color);
-    border: 1px solid var(--shadow-4);
-    color: var(--main-color);
-    font-family: 'Courier New', Courier, 'Vazir', monospace;
-    font-size: 14px;
-    padding: 6px 12px;
-    border-radius: 4px;
-    outline: none;
-    flex: 1;
-    min-width: 100px;
-    transition: all 0.3s ease;
-}
-
-.setting-input:focus {
-    border-color: var(--main-color);
-    box-shadow: 0 0 10px var(--shadow-4);
-}
-
-.setting-btn {
-    background: transparent;
-    border: 1px solid var(--main-color);
-    color: var(--main-color);
-    font-family: 'Courier New', Courier, 'Vazir', monospace;
-    font-size: 12px;
-    padding: 6px 16px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    white-space: nowrap;
-}
-
-.setting-btn:hover {
-    background: var(--shadow-3);
-    box-shadow: 0 0 15px var(--shadow-4);
-}
-
-.setting-btn:active {
-    transform: scale(0.95);
-}
-
-.logout-item {
-    border-top: 2px solid var(--red-shadow);
-    margin-top: 10px;
-    padding-top: 15px;
-}
-
-.logout-btn {
-    border-color: #ff5555;
-    color: #ff5555;
-}
-
-.logout-btn:hover {
-    background: rgba(255, 85, 85, 0.15);
-    box-shadow: 0 0 20px rgba(255, 85, 85, 0.3);
+    
+    .setting-item {
+        font-size: 10px;
+        padding: 4px 6px;
+    }
+    
+    .theme-btn {
+        font-size: 8px;
+        padding: 2px 5px;
+    }
 }
