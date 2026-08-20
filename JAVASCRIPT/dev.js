@@ -13,26 +13,40 @@ socket.on('chat-history', (history) => {
     displayMessages();
 });
 
+// ===== دریافت پیام =====
 socket.on('chat-message', (data) => {
     console.log('Dev received message:', data);
     
-    // اگه پیام از خود Dev باشه → نادیده بگیر (قبلاً توی sendMessage اضافه شده)
     if (data.username === 'DEV') {
-        return;
+        const newMessage = {
+            sender: 'DEV',
+            content: data.message,
+            time: data.time,
+            type: 'dev'
+        };
+        messages.push(newMessage);
+        displayMessages();
+    } else {
+        // ===== استفاده از اسم واقعی کاربر =====
+        const displayName = localStorage.getItem('displayName') || data.username || 'User';
+        const newMessage = {
+            sender: displayName,
+            content: data.message,
+            time: data.time,
+            type: 'other'
+        };
+        messages.push(newMessage);
+        displayMessages();
     }
-    
-    // پیام از User
-    const newMessage = {
-        sender: data.username,
-        content: data.message,
-        time: data.time,
-        type: 'other'
-    };
-    messages.push(newMessage);
-    displayMessages();
 });
 
+// ===== SOCKET EVENTS =====
 socket.on('user-joined', (data) => {
+    // ذخیره اسم کاربر در localStorage
+    if (data.username && data.username !== 'DEV') {
+        localStorage.setItem('userName', data.username);
+        localStorage.setItem('displayName', data.username);
+    }
     addSystemMessage(data.username + ' joined the chat');
 });
 
@@ -110,7 +124,7 @@ function displayMessages() {
     }
     
     messagesBox.innerHTML = '';
-    const userName = localStorage.getItem('userName') || 'User';
+    const userName = localStorage.getItem('displayName') || localStorage.getItem('userName') || 'User';
     
     messages.forEach(msg => {
         const messageDiv = document.createElement('div');
@@ -126,9 +140,11 @@ function displayMessages() {
             `;
         } else if (msg.type === 'user' || msg.type === 'other') {
             messageDiv.className = 'message other';
+            // ===== استفاده از اسم واقعی کاربر =====
+            const senderName = msg.sender === 'User' ? userName : (msg.sender || userName);
             messageDiv.innerHTML = `
                 <div class="message-header">
-                    <span class="message-sender">${userName}</span>
+                    <span class="message-sender">${senderName}</span>
                 </div>
                 <div class="message-content">${msg.content}</div>
                 <div class="message-time-bottom">${msg.time}</div>
@@ -284,28 +300,18 @@ function init() {
         console.error('sendBtn not found!');
     }
     
+    // ===== MESSAGE INPUT =====
     messageInput.addEventListener('keydown', (e) => {
-        // ===== تشخیص گوشی =====
-        const isMobile = window.innerWidth < 768;
-        
-        // ===== در گوشی: اینتر رو نادیده بگیر (فقط دکمه Send) =====
-        if (isMobile && e.key === 'Enter') {
-            e.preventDefault();
+        // در گوشی، اینتر فقط خط جدید میده (نه ارسال)
+        if (e.key === 'Enter') {
+            // هیچ کاری نکن - فقط خط جدید
+            // (textarea خودش خط جدید میسازه)
             return;
         }
-        
-        // ===== در لپ‌تاپ: =====
-        if (e.key === 'Enter') {
-            // Shift+Enter → خط جدید (همیشه مجاز)
-            if (e.shiftKey) {
-                return;
-            }
-            
-            // فقط Enter (بدون Shift) → ارسال پیام
-            e.preventDefault();
-            sendMessage();
-        }
     });
+
+    // دکمه Send فقط ارسال کنه
+    sendBtn.addEventListener('click', sendMessage);
     
     if (clearChatBtn) {
         clearChatBtn.addEventListener('click', clearChat);

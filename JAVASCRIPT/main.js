@@ -594,12 +594,13 @@ function unlockHack(){
 // ===== SAVE USER TO SERVER =====
 function saveUserToServer() {
     const userName = localStorage.getItem('userName') || 'User';
+    const displayName = localStorage.getItem('displayName') || userName;
     const accessCode = localStorage.getItem('accessCode') || '';
     const password = localStorage.getItem('userPassword') || '';
     
     socket.emit('save-user', {
         username: userName,
-        displayName: userName,
+        displayName: displayName,
         password: password,
         accessCode: accessCode
     });
@@ -623,28 +624,18 @@ function init() {
     
     sendBtn.addEventListener('click', sendMessage);
     
+    // ===== MESSAGE INPUT =====
     messageInput.addEventListener('keydown', (e) => {
-        // ===== تشخیص گوشی =====
-        const isMobile = window.innerWidth < 768;
-        
-        // ===== در گوشی: اینتر رو نادیده بگیر (فقط دکمه Send) =====
-        if (isMobile && e.key === 'Enter') {
-            e.preventDefault();
+        // در گوشی، اینتر فقط خط جدید میده (نه ارسال)
+        if (e.key === 'Enter') {
+            // هیچ کاری نکن - فقط خط جدید
+            // (textarea خودش خط جدید میسازه)
             return;
         }
-        
-        // ===== در لپ‌تاپ: =====
-        if (e.key === 'Enter') {
-            // Shift+Enter → خط جدید (همیشه مجاز)
-            if (e.shiftKey) {
-                return;
-            }
-            
-            // فقط Enter (بدون Shift) → ارسال پیام
-            e.preventDefault();
-            sendMessage();
-        }
     });
+
+    // دکمه Send فقط ارسال کنه
+    sendBtn.addEventListener('click', sendMessage);
     
     window.addEventListener('beforeunload', () => {
         localStorage.setItem('user_online', 'false');

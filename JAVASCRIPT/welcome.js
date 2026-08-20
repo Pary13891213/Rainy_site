@@ -8,7 +8,7 @@ return `"${username}"... That's a nice name. She has good taste in people. I hop
 };
 
 const welcomeElement = document.getElementById('welcome-text');
-const nameInputContainer = document.getElementById('name-input-container');
+const nameInputContainer = آdocument.getElementById('name-input-container');
 const nameInput = document.getElementById('name-input');
 const greetingElement = document.getElementById('greeting-text');
 const typingContainer = document.querySelector('.typing-text');
@@ -270,25 +270,23 @@ function handleNameSubmit() {
     const userName = nameInput.value.trim();
     
     if (!userName) {
-        // پرش خطا
+        // خطا
         for (let i = 0; i < 3; i++) {
             setTimeout(() => {
                 createHorizontalGlitch(nameInputContainer, 5);
                 createHorizontalGlitch(welcomeElement, 4);
             }, i * 120);
         }
-        
         nameInput.style.borderColor = '#ff5555';
-        nameInput.style.textShadow = '0 0 3px #ff5555';
-        
         setTimeout(() => {
             nameInput.style.borderColor = 'rgba(136, 221, 255, 0.5)';
-            nameInput.style.textShadow = '0 0 2px #aaefff, 0 0 4px #99eeff';
         }, 1000);
         return;
     }
     
+    // ===== ذخیره در localStorage =====
     localStorage.setItem('userName', userName);
+    localStorage.setItem('displayName', userName);
     
     // ===== ارسال به سرور =====
     socket.emit('save-user', {

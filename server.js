@@ -174,19 +174,41 @@ io.on('connection', async (socket) => {
         });
     });
 
-    // ===== SAVE USER TO DATABASE =====
+// ===== SAVE USER =====
     socket.on('save-user', async (data) => {
-        const user = await findOrCreateUser({
-            username: data.username,
-            displayName: data.displayName || data.username,
-            password: data.password || '',
-            accessCode: data.accessCode || ''
-        });
-        
-        if (user) {
-            socket.emit('user-saved', { success: true, user: user });
-        } else {
-            socket.emit('user-saved', { success: false });
+        try {
+            // پیدا کردن کاربر یا ساختن جدید
+            let user = await User.findOne({ username: data.username });
+            
+            if (!user) {
+                // ساختن کاربر جدید
+                user = new User({
+                    username: data.username,
+                    displayName: data.displayName || data.username,
+                    password: data.password || '',
+                    accessCode: data.accessCode || '',
+                    lastLogin: new Date()
+                });
+                await user.save();
+                console.log('✅ New user created:', user.username);
+            } else {
+                // به‌روزرسانی کاربر موجود
+                user.displayName = data.displayName || data.username;
+                user.lastLogin = new Date();
+                await user.save();
+                console.log('✅ User updated:', user.username);
+            }
+            
+            socket.emit('user-saved', { 
+                success: true, 
+                user: {
+                    username: user.username,
+                    displayName: user.displayName
+                }
+            });
+        } catch (err) {
+            console.error('Error saving user:', err);
+            socket.emit('user-saved', { success: false, error: err.message });
         }
     });
 
