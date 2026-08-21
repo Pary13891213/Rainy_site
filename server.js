@@ -11,12 +11,25 @@ require('dotenv').config();
 
 // ===== MONGODB CONNECTION =====
 const MONGODB_URI = process.env.MONGODB_URI;
-const conn = mongoose.createConnection(MONGODB_URI);
+
+const mongooseOptions = {
+    serverSelectionTimeoutMS: 30000,
+    socketTimeoutMS: 45000,
+    family: 4,
+};
+
+mongoose.connect(MONGODB_URI, mongooseOptions)
+.then(() => {
+    console.log('✅ Connected to MongoDB');
+})
+.catch(err => {
+    console.error('❌ MongoDB connection error:', err);
+});
 
 // ===== GRIDFS =====
 let gfs;
-conn.once('open', () => {
-    gfs = new mongoose.mongo.GridFSBucket(conn.db, {
+mongoose.connection.once('open', () => {
+    gfs = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {
         bucketName: 'uploads'
     });
     console.log('✅ GridFS is ready');
@@ -24,7 +37,7 @@ conn.once('open', () => {
 
 // ===== MULTER STORAGE (GridFS) =====
 const storage = new GridFsStorage({
-    db: conn,
+    db: mongoose.connection,  // ← تغییر
     file: (req, file) => {
         return new Promise((resolve, reject) => {
             crypto.randomBytes(16, (err, buf) => {
@@ -168,13 +181,21 @@ app.post('/upload-image', upload.single('image'), async (req, res) => {
     }
 });
 
-// ===== GET IMAGE =====
 app.get('/image/:filename', async (req, res) => {
     try {
-        const file = await conn.db.collection('uploads.files').findOne({ filename: req.params.filename });
+        // اگه gfs آماده نیست
+        if (!gfs) {
+            return res.status(503).send('GridFS not ready');
+        }
+        
+        const file = await mongoose.connection.db.collection('uploads.files').findOne({ 
+            filename: req.params.filename 
+        });
+        
         if (!file) {
             return res.status(404).send('File not found');
         }
+        
         const readStream = gfs.openDownloadStream(file._id);
         readStream.pipe(res);
     } catch (err) {
