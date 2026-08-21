@@ -373,6 +373,7 @@ body {
 }
 
 .message-content {
+    white-space: pre-wrap;
     font-size: 15px;
     line-height: 1.5;
 }
@@ -1309,6 +1310,7 @@ body {
     }
 
     .message-content {
+        white-space: pre-wrap;
         font-size: 14px;
     }
 
@@ -1458,6 +1460,7 @@ body {
     }
 
     .message-content {
+        white-space: pre-wrap;
         font-size: 13px;
     }
 
