@@ -31,7 +31,7 @@ socket.on('chat-message', (data) => {
         time: data.time,
         type: data.username === 'DEV' ? 'dev' : 'other',
         isImage: data.isImage || false,
-        imagePath: data.imagePath || ''  // ← این مهمه
+        imagePath: data.imagePath || ''
     };
     
     messages.push(newMessage);
@@ -273,18 +273,6 @@ fileInput.addEventListener('change', async function(event) {
                 imagePath: result.imagePath
             });
             
-            // نمایش فوری
-            const newMessage = {
-                sender: senderName,
-                content: result.imagePath,
-                time: new Date().toLocaleTimeString(),
-                type: userName === 'User' ? 'user' : 'other',
-                isImage: true,
-                imagePath: result.imagePath
-            };
-            
-            messages.push(newMessage);
-            displayMessages();
         }
     } catch (err) {
         console.error('Upload error:', err);
@@ -357,23 +345,13 @@ function sendMessage() {
     
     const userName = localStorage.getItem('userName') || 'User';
     
-    // ۱. به سرور بفرست
+    // فقط به سرور بفرست (خودت به لیست اضافه نکن)
     socket.emit('chat-message', {
         username: userName,
         message: content
     });
     
-    // ۲. برای نمایش فوری، به لیست پیام‌ها اضافه کن
-    const newMessage = {
-        sender: 'You',
-        content: content,
-        time: new Date().toLocaleTimeString(),
-        type: 'user'
-    };
-    
-    messages.push(newMessage);
-    displayMessages();
-    
+    // ورودی رو پاک کن
     messageInput.value = '';
     
     if (profileName) {

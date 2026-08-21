@@ -20,7 +20,7 @@ socket.on('chat-message', (data) => {
     console.log('Dev received message:', data);
     
     if (data.username === 'DEV') {
-        return;
+        return;  // ← این خط مهمه! پیام‌های DEV رو نادیده بگیر
     }
     
     const newMessage = {
@@ -29,7 +29,7 @@ socket.on('chat-message', (data) => {
         time: data.time,
         type: 'other',
         isImage: data.isImage || false,
-        imagePath: data.imagePath || ''  // ← این مهمه
+        imagePath: data.imagePath || ''
     };
     
     messages.push(newMessage);
@@ -378,22 +378,11 @@ function sendMessage() {
         return;
     }
     
-    // ۱. به سرور بفرست
+    // فقط به سرور بفرست (خودت به لیست اضافه نکن)
     socket.emit('chat-message', {
         username: 'DEV',
         message: content
     });
-    
-    // ۲. برای نمایش فوری، به لیست پیام‌ها اضافه کن
-    const newMessage = {
-        sender: 'DEV',
-        content: content,
-        time: new Date().toLocaleTimeString(),
-        type: 'dev'
-    };
-    
-    messages.push(newMessage);
-    displayMessages();
     
     messageInput.value = '';
     createGlitchEffect();
