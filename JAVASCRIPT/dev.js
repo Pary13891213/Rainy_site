@@ -147,7 +147,7 @@ function displayMessages() {
                     <span class="message-sender">${msg.sender}</span>
                 </div>
                 <div class="message-content">
-                    <img src="${msg.imagePath || msg.content}" 
+                    <img src="https://baroon-server.onrender.com${msg.imagePath || msg.content}" 
                          alt="Image" 
                          class="chat-image" 
                          onclick="openImageLightbox(this.src)">
