@@ -142,7 +142,6 @@ const io = require('socket.io')(http, {
     allowEIO3: true
 });
 
-const path = require('path');
 const PORT = process.env.PORT || 3000;
 
 app.use(express.static(__dirname));
