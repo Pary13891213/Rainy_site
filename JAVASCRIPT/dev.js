@@ -142,15 +142,20 @@ function displayMessages() {
         }
         
         if (msg.isImage) {
+            // ساخت آدرس کامل تصویر
+            const imageUrl = msg.imagePath && msg.imagePath.startsWith('http') 
+                ? msg.imagePath 
+                : `https://baroon-server.onrender.com${msg.imagePath || msg.content}`;
+            
             messageDiv.innerHTML = `
                 <div class="message-header">
                     <span class="message-sender">${msg.sender}</span>
                 </div>
                 <div class="message-content">
-                    <img src="https://baroon-server.onrender.com${msg.imagePath || msg.content}" 
-                         alt="Image" 
-                         class="chat-image" 
-                         onclick="openImageLightbox(this.src)">
+                    <img src="${imageUrl}" 
+                        alt="Image" 
+                        class="chat-image" 
+                        onclick="openImageLightbox(this.src)">
                 </div>
                 <div class="message-time-bottom">${msg.time}</div>
             `;

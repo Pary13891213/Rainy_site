@@ -191,9 +191,9 @@ function displayMessages() {
                 </div>
                 <div class="message-content">
                     <img src="https://baroon-server.onrender.com${msg.imagePath || msg.content}" 
-                         alt="Image" 
-                         class="chat-image" 
-                         onclick="openImageLightbox(this.src)">
+                        alt="Image" 
+                        class="chat-image" 
+                        onclick="openImageLightbox(this.src)">
                 </div>
                 <div class="message-time-bottom">${msg.time}</div>
             `;
