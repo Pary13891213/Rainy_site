@@ -27,7 +27,7 @@ socket.on('chat-message', (data) => {
         time: data.time,
         type: 'other',
         isImage: data.isImage || false,
-        imagePath: data.imagePath || ''
+        imagePath: data.imagePath || ''  // ← این رو چک کن
     };
     messages.push(newMessage);
     displayMessages();
@@ -142,10 +142,18 @@ function displayMessages() {
         }
         
         if (msg.isImage) {
-            // ساخت آدرس کامل تصویر
-            const imageUrl = msg.imagePath && msg.imagePath.startsWith('http') 
-                ? msg.imagePath 
-                : `https://baroon-server.onrender.com${msg.imagePath || msg.content}`;
+            // اگه imagePath وجود نداره یا خالیه، از content استفاده کن
+            let imageUrl = msg.imagePath || msg.content || '';
+            
+            // اگه آدرس با / شروع شد، آدرس کامل رو بساز
+            if (imageUrl && !imageUrl.startsWith('http')) {
+                imageUrl = 'https://baroon-server.onrender.com' + imageUrl;
+            }
+            
+            // اگه بازم خالی بود، یه placeholder نشون بده
+            if (!imageUrl) {
+                imageUrl = 'https://via.placeholder.com/200x200?text=No+Image';
+            }
             
             messageDiv.innerHTML = `
                 <div class="message-header">
@@ -263,18 +271,22 @@ fileInput.addEventListener('change', async function(event) {
         const result = await response.json();
         
         if (result.success) {
+            const userName = localStorage.getItem('userName') || 'User';
+            
+            // ارسال به سرور با imagePath
             socket.emit('chat-message', {
-                username: 'DEV',
+                username: userName,
                 message: '',
                 isImage: true,
-                imagePath: result.imagePath
+                imagePath: result.imagePath  // ← این رو چک کن
             });
             
+            // اضافه کردن به لیست پیام‌ها
             const newMessage = {
-                sender: 'DEV',
+                sender: userName === 'User' ? 'You' : userName,
                 content: result.imagePath,
                 time: new Date().toLocaleTimeString(),
-                type: 'dev',
+                type: 'user',
                 isImage: true,
                 imagePath: result.imagePath
             };

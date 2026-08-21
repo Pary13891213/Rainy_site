@@ -337,19 +337,19 @@ io.on('connection', async (socket) => {
             message: data.message || '',
             time: new Date().toLocaleTimeString('en-US', { timeZone: 'Asia/Tehran' }),
             isImage: data.isImage || false,
-            imagePath: data.imagePath || ''
+            imagePath: data.imagePath || ''  // ← این رو چک کن
         };
         
         const savedMessage = await saveMessage(messageData);
         
         if (savedMessage) {
-            console.log('💬 ' + data.username + ': ' + (data.isImage ? '[Image]' : data.message));
+            console.log('💬 ' + data.username + ': ' + (data.isImage ? '[Image] ' + savedMessage.imagePath : data.message));
             io.emit('chat-message', {
                 username: savedMessage.username,
                 message: savedMessage.message,
                 time: savedMessage.time,
                 isImage: savedMessage.isImage,
-                imagePath: savedMessage.imagePath
+                imagePath: savedMessage.imagePath  // ← مطمئن شو اینجا هست
             });
         }
     });

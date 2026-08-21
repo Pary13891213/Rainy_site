@@ -18,21 +18,8 @@ socket.on('chat-history', (history) => {
 socket.on('chat-message', (data) => {
     const userName = localStorage.getItem('userName') || 'User';
     
+    // اگه پیام از خودم باشه، نادیده بگیر (چون قبلاً اضافه کردیم)
     if (data.username === userName) {
-        return;
-    }
-    
-    if (data.username === 'DEV') {
-        const newMessage = {
-            sender: 'DEV',
-            content: data.message || '',
-            time: data.time,
-            type: 'dev',
-            isImage: data.isImage || false,
-            imagePath: data.imagePath || ''
-        };
-        messages.push(newMessage);
-        displayMessages();
         return;
     }
     
@@ -40,10 +27,11 @@ socket.on('chat-message', (data) => {
         sender: data.username,
         content: data.message || '',
         time: data.time,
-        type: 'other',
+        type: data.username === 'DEV' ? 'dev' : 'other',
         isImage: data.isImage || false,
-        imagePath: data.imagePath || ''
+        imagePath: data.imagePath || ''  // ← این رو چک کن
     };
+    
     messages.push(newMessage);
     displayMessages();
 });
@@ -185,12 +173,25 @@ function displayMessages() {
         }
         
         if (msg.isImage) {
+            // اگه imagePath وجود نداره یا خالیه، از content استفاده کن
+            let imageUrl = msg.imagePath || msg.content || '';
+            
+            // اگه آدرس با / شروع شد، آدرس کامل رو بساز
+            if (imageUrl && !imageUrl.startsWith('http')) {
+                imageUrl = 'https://baroon-server.onrender.com' + imageUrl;
+            }
+            
+            // اگه بازم خالی بود، یه placeholder نشون بده
+            if (!imageUrl) {
+                imageUrl = 'https://via.placeholder.com/200x200?text=No+Image';
+            }
+            
             messageDiv.innerHTML = `
                 <div class="message-header">
                     <span class="message-sender">${msg.sender}</span>
                 </div>
                 <div class="message-content">
-                    <img src="https://baroon-server.onrender.com${msg.imagePath || msg.content}" 
+                    <img src="${imageUrl}" 
                         alt="Image" 
                         class="chat-image" 
                         onclick="openImageLightbox(this.src)">
@@ -257,15 +258,17 @@ fileInput.addEventListener('change', async function(event) {
         if (result.success) {
             const userName = localStorage.getItem('userName') || 'User';
             
+            // ارسال به سرور با imagePath
             socket.emit('chat-message', {
                 username: userName,
                 message: '',
                 isImage: true,
-                imagePath: result.imagePath
+                imagePath: result.imagePath  // ← این رو چک کن
             });
             
+            // اضافه کردن به لیست پیام‌ها
             const newMessage = {
-                sender: 'You',
+                sender: userName === 'User' ? 'You' : userName,
                 content: result.imagePath,
                 time: new Date().toLocaleTimeString(),
                 type: 'user',
