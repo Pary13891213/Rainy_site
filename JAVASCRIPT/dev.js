@@ -56,6 +56,7 @@ socket.on('user-typing', (username) => {
 // ============================================================
 let messages = [];
 let userOnline = false;
+let lastMessageCount = 0;
 
 const messagesBox = document.getElementById('dev-messages-box');
 const messageInput = document.getElementById('dev-message-input');
@@ -249,7 +250,7 @@ fileInput.addEventListener('change', async function(event) {
     formData.append('image', file);
     
     try {
-        const response = await fetch('/upload-image', {
+        const response = await fetch('https://baroon-server.onrender.com/upload-image', {
             method: 'POST',
             body: formData
         });

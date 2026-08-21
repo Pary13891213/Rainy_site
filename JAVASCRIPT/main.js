@@ -68,6 +68,7 @@ if (localStorage.getItem('hack-unlocked') === 'true') {
 }
 
 let messages = [];
+let lastMessageCount = 0;
 
 const messagesBox = document.getElementById('user-messages-box');
 const messageInput = document.getElementById('user-message-input');
@@ -246,7 +247,7 @@ fileInput.addEventListener('change', async function(event) {
     formData.append('image', file);
     
     try {
-        const response = await fetch('/upload-image', {
+        const response = await fetch('https://baroon-server.onrender.com/upload-image', {
             method: 'POST',
             body: formData
         });
