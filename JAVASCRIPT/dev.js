@@ -9,32 +9,21 @@ socket.on('chat-history', (history) => {
         time: msg.time,
         type: msg.username === 'DEV' ? 'dev' : 'other',
         isImage: msg.isImage || false,
-        imageData: msg.imageData || '',    // ← Base64
-        imagePath: msg.imagePath || ''
+        imagePath: msg.imagePath || ''  // ← فقط imagePath
     }));
     displayMessages();
 });
 
 // ===== دریافت پیام =====
-socket.on('chat-message', (data) => {
-    const userName = localStorage.getItem('userName') || 'User';
-    
-    // اگه پیام از خودم باشه، نادیده بگیر
-    if (data.username === userName) {
-        return;
-    }
-    
-    const newMessage = {
-        sender: data.username === 'DEV' ? 'DEV' : data.username,
-        content: data.message || '',
-        time: data.time,
-        type: data.username === 'DEV' ? 'dev' : 'other',
-        isImage: data.isImage || false,
-        imageData: data.imageData || '',    // ← Base64
-        imagePath: data.imagePath || ''
-    };
-    
-    messages.push(newMessage);
+socket.on('chat-history', (history) => {
+    messages = history.map(msg => ({
+        sender: msg.username === 'DEV' ? 'DEV' : msg.username,
+        content: msg.message || '',
+        time: msg.time,
+        type: msg.username === 'DEV' ? 'dev' : 'other',
+        isImage: msg.isImage || false,
+        imagePath: msg.imagePath || ''  // ← فقط imagePath
+    }));
     displayMessages();
 });
 
@@ -145,7 +134,7 @@ function displayMessages() {
         // ===== نمایش پیام =====
         if (msg.isImage) {
             // ساخت آدرس کامل تصویر
-            let imageUrl = msg.imageData || msg.imagePath || msg.content || '';
+            let imageUrl = msg.imagePath || msg.content || '';
             
             // اگه آدرس با / شروع شد، آدرس کامل رو بساز
             if (imageUrl && !imageUrl.startsWith('http')) {
@@ -278,19 +267,12 @@ fileInput.addEventListener('change', async function(event) {
         if (result.success) {
             const userName = localStorage.getItem('userName') || 'User';
             
-            // فقط به سرور بفرست (خودت به لیست اضافه نکن)
             socket.emit('chat-message', {
                 username: userName,
                 message: '',
                 isImage: true,
-                imageData: result.imagePath,   // ← Base64
-                imagePath: result.imagePath
+                imagePath: result.imagePath  // ← فقط imagePath
             });
-            
-            // ⛔️ این سه خط رو حذف کن ⛔️
-            // const newMessage = { ... };
-            // messages.push(newMessage);
-            // displayMessages();
         }
     } catch (err) {
         console.error('Upload error:', err);

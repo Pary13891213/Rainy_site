@@ -5,51 +5,51 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
+const crypto = require('crypto');
+const { GridFsStorage } = require('multer-gridfs-storage');
 require('dotenv').config();
-
-// ===== MULTER CONFIGURATION (ذخیره موقت در حافظه) =====
-const storage = multer.memoryStorage();  // ← تغییر به memoryStorage
-
-const fileFilter = (req, file, cb) => {
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-    if (allowedTypes.includes(file.mimetype)) {
-        cb(null, true);
-    } else {
-        cb(new Error('Only images are allowed'), false);
-    }
-};
-
-const upload = multer({
-    storage: storage,
-    limits: {
-        fileSize: 5 * 1024 * 1024  // 5MB
-    },
-    fileFilter: fileFilter
-});
 
 // ===== MONGODB CONNECTION =====
 const MONGODB_URI = process.env.MONGODB_URI;
+const conn = mongoose.createConnection(MONGODB_URI);
 
-mongoose.connect(MONGODB_URI)
-.then(() => {
-    console.log('✅ Connected to MongoDB');
-})
-.catch(err => {
-    console.error('❌ MongoDB connection error:', err);
+// ===== GRIDFS =====
+let gfs;
+conn.once('open', () => {
+    gfs = new mongoose.mongo.GridFSBucket(conn.db, {
+        bucketName: 'uploads'
+    });
+    console.log('✅ GridFS is ready');
 });
 
-// ===== MESSAGE SCHEMA (با پشتیبانی از Base64) =====
+// ===== MULTER STORAGE (GridFS) =====
+const storage = new GridFsStorage({
+    db: conn,
+    file: (req, file) => {
+        return new Promise((resolve, reject) => {
+            crypto.randomBytes(16, (err, buf) => {
+                if (err) return reject(err);
+                const filename = buf.toString('hex') + path.extname(file.originalname);
+                resolve({ filename, bucketName: 'uploads' });
+            });
+        });
+    }
+});
+
+const upload = multer({
+    storage,
+    limits: { fileSize: 5 * 1024 * 1024 }
+});
+
+// ===== MESSAGE SCHEMA =====
 const messageSchema = new mongoose.Schema({
     username: String,
     message: String,
     time: String,
     timestamp: { type: Date, default: Date.now },
     isImage: { type: Boolean, default: false },
-    imageData: { type: String, default: '' },    // ← Base64 تصویر
-    imagePath: { type: String, default: '' }      // ← برای سازگاری
+    imagePath: { type: String, default: '' }
 });
-
 const Message = mongoose.model('Message', messageSchema);
 
 // ===== USER SCHEMA =====
@@ -62,7 +62,6 @@ const userSchema = new mongoose.Schema({
     lastLogin: Date,
     isActive: { type: Boolean, default: true }
 });
-
 const User = mongoose.model('User', userSchema);
 
 // ===== FIND OR CREATE USER =====
@@ -99,9 +98,8 @@ const allowedOrigins = [
     'http://127.0.0.1:5500',
     'https://baroon-server.onrender.com'
 ];
-
 app.use(cors({
-    origin: function (origin, callback) {
+    origin: (origin, callback) => {
         if (!origin) return callback(null, true);
         if (allowedOrigins.indexOf(origin) !== -1) {
             callback(null, true);
@@ -116,7 +114,7 @@ app.use(cors({
 // ===== SOCKET.IO =====
 const io = require('socket.io')(http, {
     cors: {
-        origin: function (origin, callback) {
+        origin: (origin, callback) => {
             if (!origin) return callback(null, true);
             if (allowedOrigins.indexOf(origin) !== -1) {
                 callback(null, true);
@@ -138,7 +136,6 @@ app.use(express.static(__dirname));
 app.use('/CSS', express.static(path.join(__dirname, 'CSS')));
 app.use('/HTML', express.static(path.join(__dirname, 'HTML')));
 app.use('/JAVASCRIPT', express.static(path.join(__dirname, 'JAVASCRIPT')));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // ===== ROUTES =====
 app.get('/', (req, res) => {
@@ -153,31 +150,36 @@ app.get('/:page', (req, res) => {
     }
     const htmlPath = path.join(__dirname, 'HTML', `${page}.html`);
     res.sendFile(htmlPath, (err) => {
-        if (err) {
-            res.status(404).send('Page not found');
-        }
+        if (err) res.status(404).send('Page not found');
     });
 });
 
-// ===== UPLOAD IMAGE (با ذخیره Base64) =====
+// ===== UPLOAD IMAGE =====
 app.post('/upload-image', upload.single('image'), async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).json({ error: 'No file uploaded' });
         }
-        
-        // تبدیل به Base64
-        const base64Image = req.file.buffer.toString('base64');
-        const mimeType = req.file.mimetype;
-        const dataUrl = `data:${mimeType};base64,${base64Image}`;
-        
-        res.json({ 
-            success: true, 
-            imagePath: dataUrl 
-        });
+        const imagePath = `/image/${req.file.filename}`;
+        res.json({ success: true, imagePath });
     } catch (err) {
         console.error('Upload error:', err);
         res.status(500).json({ error: 'Upload failed' });
+    }
+});
+
+// ===== GET IMAGE =====
+app.get('/image/:filename', async (req, res) => {
+    try {
+        const file = await conn.db.collection('uploads.files').findOne({ filename: req.params.filename });
+        if (!file) {
+            return res.status(404).send('File not found');
+        }
+        const readStream = gfs.openDownloadStream(file._id);
+        readStream.pipe(res);
+    } catch (err) {
+        console.error('Download error:', err);
+        res.status(500).send('Error downloading file');
     }
 });
 
@@ -201,7 +203,6 @@ async function saveMessage(data) {
             message: data.message || '',
             time: data.time,
             isImage: data.isImage || false,
-            imageData: data.imageData || '',
             imagePath: data.imagePath || ''
         });
         await newMessage.save();
@@ -222,17 +223,12 @@ io.on('connection', async (socket) => {
     socket.on('user-join', (username) => {
         users[socket.id] = username;
         console.log('👤 ' + username + ' joined');
-        io.emit('user-joined', {
-            username: username,
-            users: Object.values(users)
-        });
+        io.emit('user-joined', { username, users: Object.values(users) });
     });
 
-    // ===== SAVE USER =====
     socket.on('save-user', async (data) => {
         try {
             let user = await User.findOne({ username: data.username });
-            
             if (!user) {
                 user = new User({
                     username: data.username,
@@ -249,9 +245,8 @@ io.on('connection', async (socket) => {
                 await user.save();
                 console.log('✅ User updated:', user.username);
             }
-            
-            socket.emit('user-saved', { 
-                success: true, 
+            socket.emit('user-saved', {
+                success: true,
                 user: {
                     username: user.username,
                     displayName: user.displayName
@@ -263,7 +258,6 @@ io.on('connection', async (socket) => {
         }
     });
 
-    // ===== UPDATE USERNAME =====
     socket.on('update-username', async (data) => {
         try {
             const user = await User.findOne({ username: data.oldUsername });
@@ -282,7 +276,6 @@ io.on('connection', async (socket) => {
         }
     });
 
-    // ===== UPDATE ACCESS CODE =====
     socket.on('update-code', async (data) => {
         try {
             const user = await User.findOne({ username: data.username });
@@ -301,7 +294,6 @@ io.on('connection', async (socket) => {
         }
     });
 
-    // ===== LOGOUT =====
     socket.on('user-logout', (data) => {
         console.log('👤 User logged out:', data.username);
         for (let [id, username] of Object.entries(users)) {
@@ -310,13 +302,9 @@ io.on('connection', async (socket) => {
                 break;
             }
         }
-        io.emit('user-left', {
-            username: data.username,
-            users: Object.values(users)
-        });
+        io.emit('user-left', { username: data.username, users: Object.values(users) });
     });
 
-    // ===== CLEAR CHAT =====
     socket.on('clear-chat', async () => {
         try {
             await Message.deleteMany({});
@@ -327,19 +315,17 @@ io.on('connection', async (socket) => {
         }
     });
 
-    // ===== CHAT MESSAGE =====
     socket.on('chat-message', async (data) => {
         const messageData = {
             username: data.username,
             message: data.message || '',
             time: new Date().toLocaleTimeString('en-US', { timeZone: 'Asia/Tehran' }),
             isImage: data.isImage || false,
-            imageData: data.imageData || '',
             imagePath: data.imagePath || ''
         };
-        
+
         const savedMessage = await saveMessage(messageData);
-        
+
         if (savedMessage) {
             console.log('💬 ' + data.username + ': ' + (data.isImage ? '[Image]' : data.message));
             io.emit('chat-message', {
@@ -347,17 +333,13 @@ io.on('connection', async (socket) => {
                 message: savedMessage.message,
                 time: savedMessage.time,
                 isImage: savedMessage.isImage,
-                imageData: savedMessage.imageData,
                 imagePath: savedMessage.imagePath
             });
         }
     });
 
-    // ===== PRIVATE MESSAGE =====
     socket.on('private-message', (data) => {
-        const targetSocketId = Object.keys(users).find(
-            id => users[id] === data.to
-        );
+        const targetSocketId = Object.keys(users).find(id => users[id] === data.to);
         if (targetSocketId) {
             io.to(targetSocketId).emit('private-message', {
                 from: data.from,
@@ -367,21 +349,16 @@ io.on('connection', async (socket) => {
         }
     });
 
-    // ===== TYPING =====
     socket.on('typing', (username) => {
         socket.broadcast.emit('user-typing', username);
     });
 
-    // ===== DISCONNECT =====
     socket.on('disconnect', () => {
         const username = users[socket.id];
         if (username) {
             console.log('🔴 ' + username + ' disconnected');
             delete users[socket.id];
-            io.emit('user-left', {
-                username: username,
-                users: Object.values(users)
-            });
+            io.emit('user-left', { username, users: Object.values(users) });
         }
     });
 });

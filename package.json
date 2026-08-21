@@ -12,6 +12,7 @@
     "express": "^4.18.2",
     "mongoose": "^9.9.2",
     "multer": "^2.2.0",
+    "multer-gridfs-storage": "^6.1.0",
     "socket.io": "^4.7.2"
   }
 }
