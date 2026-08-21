@@ -265,14 +265,14 @@ fileInput.addEventListener('change', async function(event) {
         const result = await response.json();
         
         if (result.success) {
-            const userName = localStorage.getItem('userName') || 'User';
-            
+
             socket.emit('chat-message', {
-                username: userName,
+                username: 'DEV',  
                 message: '',
                 isImage: true,
-                imagePath: result.imagePath  // ← فقط imagePath
+                imagePath: result.imagePath
             });
+            // ===== ===== =====
         }
     } catch (err) {
         console.error('Upload error:', err);
