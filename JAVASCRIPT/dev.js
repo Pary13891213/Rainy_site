@@ -6,9 +6,11 @@ const socket = io('https://baroon-server.onrender.com', {
 socket.on('chat-history', (history) => {
     messages = history.map(msg => ({
         sender: msg.username === 'DEV' ? 'DEV' : msg.username,
-        content: msg.message,
+        content: msg.message || '',
         time: msg.time,
-        type: msg.username === 'DEV' ? 'dev' : 'other'
+        type: msg.username === 'DEV' ? 'dev' : 'other',
+        isImage: msg.isImage || false,
+        imagePath: msg.imagePath || ''  // ← این مهمه
     }));
     displayMessages();
 });
@@ -27,8 +29,9 @@ socket.on('chat-message', (data) => {
         time: data.time,
         type: 'other',
         isImage: data.isImage || false,
-        imagePath: data.imagePath || ''  // ← این رو چک کن
+        imagePath: data.imagePath || ''  // ← این مهمه
     };
+    
     messages.push(newMessage);
     displayMessages();
 });
@@ -114,26 +117,21 @@ function checkUserStatus() {
 // ===== DISPLAY MESSAGES =====
 // ============================================================
 function displayMessages() {
-    if (!messagesBox) {
-        console.error('messagesBox not found!');
-        return;
-    }
-    
+    if (!messagesBox) return;
     if (messages.length === lastMessageCount) return;
     
     messagesBox.innerHTML = '';
-    const userName = localStorage.getItem('displayName') || localStorage.getItem('userName') || 'User';
     
     messages.forEach(msg => {
         const messageDiv = document.createElement('div');
         
-        if (msg.type === 'dev') {
+        // تعیین نوع پیام
+        if (msg.type === 'user') {
             messageDiv.className = 'message mine';
-            msg.sender = 'DEV';
-        } else if (msg.type === 'user' || msg.type === 'other') {
+            msg.sender = 'You';
+        } else if (msg.type === 'dev') {
             messageDiv.className = 'message other';
-            const senderName = msg.sender === 'User' ? userName : (msg.sender || userName);
-            msg.sender = senderName;
+            msg.sender = 'DEV';
         } else if (msg.type === 'system') {
             messageDiv.className = 'message system';
         } else {
@@ -141,8 +139,9 @@ function displayMessages() {
             msg.sender = msg.sender || 'Unknown';
         }
         
+        // ===== نمایش پیام =====
         if (msg.isImage) {
-            // اگه imagePath وجود نداره یا خالیه، از content استفاده کن
+            // ساخت آدرس کامل تصویر
             let imageUrl = msg.imagePath || msg.content || '';
             
             // اگه آدرس با / شروع شد، آدرس کامل رو بساز
@@ -150,7 +149,7 @@ function displayMessages() {
                 imageUrl = 'https://baroon-server.onrender.com' + imageUrl;
             }
             
-            // اگه بازم خالی بود، یه placeholder نشون بده
+            // اگه آدرس خالی بود، placeholder بذار
             if (!imageUrl) {
                 imageUrl = 'https://via.placeholder.com/200x200?text=No+Image';
             }
@@ -161,13 +160,15 @@ function displayMessages() {
                 </div>
                 <div class="message-content">
                     <img src="${imageUrl}" 
-                        alt="Image" 
-                        class="chat-image" 
-                        onclick="openImageLightbox(this.src)">
+                         alt="Image" 
+                         class="chat-image" 
+                         onclick="openImageLightbox(this.src)"
+                         onerror="this.onerror=null; this.src='https://via.placeholder.com/200x200?text=Error';">
                 </div>
                 <div class="message-time-bottom">${msg.time}</div>
             `;
         } else {
+            // پیام متنی
             messageDiv.innerHTML = `
                 <div class="message-header">
                     <span class="message-sender">${msg.sender}</span>
@@ -183,7 +184,6 @@ function displayMessages() {
     lastMessageCount = messages.length;
     messagesBox.scrollTop = messagesBox.scrollHeight;
 }
-
 // ============================================================
 // ===== SYSTEM MESSAGES =====
 // ============================================================
@@ -272,21 +272,22 @@ fileInput.addEventListener('change', async function(event) {
         
         if (result.success) {
             const userName = localStorage.getItem('userName') || 'User';
+            const senderName = userName === 'User' ? 'You' : userName;
             
-            // ارسال به سرور با imagePath
+            // ارسال به سرور
             socket.emit('chat-message', {
                 username: userName,
                 message: '',
                 isImage: true,
-                imagePath: result.imagePath  // ← این رو چک کن
+                imagePath: result.imagePath
             });
             
-            // اضافه کردن به لیست پیام‌ها
+            // نمایش فوری
             const newMessage = {
-                sender: userName === 'User' ? 'You' : userName,
+                sender: senderName,
                 content: result.imagePath,
                 time: new Date().toLocaleTimeString(),
-                type: 'user',
+                type: userName === 'User' ? 'user' : 'other',
                 isImage: true,
                 imagePath: result.imagePath
             };
@@ -301,6 +302,7 @@ fileInput.addEventListener('change', async function(event) {
     
     fileInput.value = '';
 });
+
 function openImageLightbox(src) {
     const oldLightbox = document.getElementById('lightbox-overlay');
     if (oldLightbox) oldLightbox.remove();

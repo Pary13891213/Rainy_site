@@ -8,9 +8,11 @@ const socket = io('https://baroon-server.onrender.com', {
 socket.on('chat-history', (history) => {
     messages = history.map(msg => ({
         sender: msg.username === 'DEV' ? 'DEV' : msg.username,
-        content: msg.message,
+        content: msg.message || '',
         time: msg.time,
-        type: msg.username === 'DEV' ? 'dev' : 'other'
+        type: msg.username === 'DEV' ? 'dev' : 'other',
+        isImage: msg.isImage || false,
+        imagePath: msg.imagePath || ''  // ← این مهمه
     }));
     displayMessages();
 });
@@ -24,12 +26,12 @@ socket.on('chat-message', (data) => {
     }
     
     const newMessage = {
-        sender: data.username,
+        sender: data.username === 'DEV' ? 'DEV' : data.username,
         content: data.message || '',
         time: data.time,
         type: data.username === 'DEV' ? 'dev' : 'other',
         isImage: data.isImage || false,
-        imagePath: data.imagePath || ''  // ← این رو چک کن
+        imagePath: data.imagePath || ''  // ← این مهمه
     };
     
     messages.push(newMessage);
@@ -159,6 +161,7 @@ function displayMessages() {
     messages.forEach(msg => {
         const messageDiv = document.createElement('div');
         
+        // تعیین نوع پیام
         if (msg.type === 'user') {
             messageDiv.className = 'message mine';
             msg.sender = 'You';
@@ -172,8 +175,9 @@ function displayMessages() {
             msg.sender = msg.sender || 'Unknown';
         }
         
+        // ===== نمایش پیام =====
         if (msg.isImage) {
-            // اگه imagePath وجود نداره یا خالیه، از content استفاده کن
+            // ساخت آدرس کامل تصویر
             let imageUrl = msg.imagePath || msg.content || '';
             
             // اگه آدرس با / شروع شد، آدرس کامل رو بساز
@@ -181,7 +185,7 @@ function displayMessages() {
                 imageUrl = 'https://baroon-server.onrender.com' + imageUrl;
             }
             
-            // اگه بازم خالی بود، یه placeholder نشون بده
+            // اگه آدرس خالی بود، placeholder بذار
             if (!imageUrl) {
                 imageUrl = 'https://via.placeholder.com/200x200?text=No+Image';
             }
@@ -192,13 +196,15 @@ function displayMessages() {
                 </div>
                 <div class="message-content">
                     <img src="${imageUrl}" 
-                        alt="Image" 
-                        class="chat-image" 
-                        onclick="openImageLightbox(this.src)">
+                         alt="Image" 
+                         class="chat-image" 
+                         onclick="openImageLightbox(this.src)"
+                         onerror="this.onerror=null; this.src='https://via.placeholder.com/200x200?text=Error';">
                 </div>
                 <div class="message-time-bottom">${msg.time}</div>
             `;
         } else {
+            // پیام متنی
             messageDiv.innerHTML = `
                 <div class="message-header">
                     <span class="message-sender">${msg.sender}</span>
@@ -257,21 +263,22 @@ fileInput.addEventListener('change', async function(event) {
         
         if (result.success) {
             const userName = localStorage.getItem('userName') || 'User';
+            const senderName = userName === 'User' ? 'You' : userName;
             
-            // ارسال به سرور با imagePath
+            // ارسال به سرور
             socket.emit('chat-message', {
                 username: userName,
                 message: '',
                 isImage: true,
-                imagePath: result.imagePath  // ← این رو چک کن
+                imagePath: result.imagePath
             });
             
-            // اضافه کردن به لیست پیام‌ها
+            // نمایش فوری
             const newMessage = {
-                sender: userName === 'User' ? 'You' : userName,
+                sender: senderName,
                 content: result.imagePath,
                 time: new Date().toLocaleTimeString(),
-                type: 'user',
+                type: userName === 'User' ? 'user' : 'other',
                 isImage: true,
                 imagePath: result.imagePath
             };
