@@ -128,8 +128,9 @@ function displayMessages() {
         const messageDiv = document.createElement('div');
         
         // تعیین نوع پیام
+        // تعیین نوع پیام
         if (msg.type === 'dev') {
-            messageDiv.className = 'message mine';  // ← این رو به 'mine' تغییر بده
+            messageDiv.className = 'message mine';  // ← این رو 'mine' بذار
             msg.sender = 'DEV';
         } else if (msg.type === 'user' || msg.type === 'other') {
             messageDiv.className = 'message other';
@@ -144,7 +145,7 @@ function displayMessages() {
         // ===== نمایش پیام =====
         if (msg.isImage) {
             // ساخت آدرس کامل تصویر
-            let imageUrl = msg.imagePath || msg.content || '';
+            let imageUrl = msg.imageData || msg.imagePath || msg.content || '';
             
             // اگه آدرس با / شروع شد، آدرس کامل رو بساز
             if (imageUrl && !imageUrl.startsWith('http')) {
@@ -152,8 +153,10 @@ function displayMessages() {
             }
             
             // اگه آدرس خالی بود، placeholder بذار
+            // جایگزین placeholder با یه دیتا URI ساده
             if (!imageUrl) {
-                imageUrl = 'https://via.placeholder.com/200x200?text=No+Image';
+                // یه جایگزین ساده با SVG
+                imageUrl = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect width='200' height='200' fill='%23333'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%23666' font-family='monospace' font-size='14'%3ENo Image%3C/text%3E%3C/svg%3E";
             }
             
             messageDiv.innerHTML = `

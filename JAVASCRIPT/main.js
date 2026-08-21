@@ -180,7 +180,7 @@ function displayMessages() {
         // ===== نمایش پیام =====
         if (msg.isImage) {
             // ساخت آدرس کامل تصویر
-            let imageUrl = msg.imagePath || msg.content || '';
+            let imageUrl = msg.imageData || msg.imagePath || msg.content || '';
             
             // اگه آدرس با / شروع شد، آدرس کامل رو بساز
             if (imageUrl && !imageUrl.startsWith('http')) {

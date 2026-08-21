@@ -173,7 +173,7 @@ app.post('/upload-image', upload.single('image'), async (req, res) => {
         
         res.json({ 
             success: true, 
-            imagePath: dataUrl  // ← Base64 برگردون
+            imagePath: dataUrl 
         });
     } catch (err) {
         console.error('Upload error:', err);
