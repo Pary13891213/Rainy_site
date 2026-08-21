@@ -14,16 +14,22 @@ socket.on('chat-history', (history) => {
     displayMessages();
 });
 
-// ===== دریافت پیام =====
-socket.on('chat-history', (history) => {
-    messages = history.map(msg => ({
-        sender: msg.username === 'DEV' ? 'DEV' : msg.username,
-        content: msg.message || '',
-        time: msg.time,
-        type: msg.username === 'DEV' ? 'dev' : 'other',
-        isImage: msg.isImage || false,
-        imagePath: msg.imagePath || ''  // ← فقط imagePath
-    }));
+socket.on('chat-message', (data) => {
+    // اگه پیام از DEV هست، نادیده بگیر (چون قبلاً توی sendMessage اضافه شده)
+    if (data.username === 'DEV') {
+        return;
+    }
+    
+    const newMessage = {
+        sender: data.username === 'DEV' ? 'DEV' : data.username,
+        content: data.message || '',
+        time: data.time,
+        type: data.username === 'DEV' ? 'dev' : 'other',
+        isImage: data.isImage || false,
+        imagePath: data.imagePath || ''
+    };
+    
+    messages.push(newMessage);
     displayMessages();
 });
 
