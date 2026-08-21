@@ -8,20 +8,8 @@ const path = require('path');
 const fs = require('fs');
 require('dotenv').config();
 
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        const uploadPath = path.join(__dirname, 'uploads');
-        if (!fs.existsSync(uploadPath)) {
-            fs.mkdirSync(uploadPath, { recursive: true });
-        }
-        cb(null, uploadPath);
-    },
-    filename: function (req, file, cb) {
-        const uniqueName = Date.now() + '_' + Math.random().toString(36).substring(7);
-        const ext = path.extname(file.originalname);
-        cb(null, uniqueName + ext);
-    }
-});
+// ===== MULTER CONFIGURATION (ذخیره موقت در حافظه) =====
+const storage = multer.memoryStorage();  // ← تغییر به memoryStorage
 
 const fileFilter = (req, file, cb) => {
     const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
@@ -35,7 +23,7 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
     storage: storage,
     limits: {
-        fileSize: 5 * 1024 * 1024
+        fileSize: 5 * 1024 * 1024  // 5MB
     },
     fileFilter: fileFilter
 });
@@ -51,14 +39,15 @@ mongoose.connect(MONGODB_URI)
     console.error('❌ MongoDB connection error:', err);
 });
 
-// ===== MESSAGE SCHEMA =====
+// ===== MESSAGE SCHEMA (با پشتیبانی از Base64) =====
 const messageSchema = new mongoose.Schema({
     username: String,
     message: String,
     time: String,
     timestamp: { type: Date, default: Date.now },
     isImage: { type: Boolean, default: false },
-    imagePath: { type: String, default: '' }
+    imageData: { type: String, default: '' },    // ← Base64 تصویر
+    imagePath: { type: String, default: '' }      // ← برای سازگاری
 });
 
 const Message = mongoose.model('Message', messageSchema);
@@ -144,12 +133,14 @@ const io = require('socket.io')(http, {
 
 const PORT = process.env.PORT || 3000;
 
+// ===== STATIC FILES =====
 app.use(express.static(__dirname));
 app.use('/CSS', express.static(path.join(__dirname, 'CSS')));
 app.use('/HTML', express.static(path.join(__dirname, 'HTML')));
 app.use('/JAVASCRIPT', express.static(path.join(__dirname, 'JAVASCRIPT')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// ===== ROUTES =====
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
@@ -168,15 +159,21 @@ app.get('/:page', (req, res) => {
     });
 });
 
+// ===== UPLOAD IMAGE (با ذخیره Base64) =====
 app.post('/upload-image', upload.single('image'), async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).json({ error: 'No file uploaded' });
         }
-        const imagePath = '/uploads/' + req.file.filename;
+        
+        // تبدیل به Base64
+        const base64Image = req.file.buffer.toString('base64');
+        const mimeType = req.file.mimetype;
+        const dataUrl = `data:${mimeType};base64,${base64Image}`;
+        
         res.json({ 
             success: true, 
-            imagePath: imagePath 
+            imagePath: dataUrl  // ← Base64 برگردون
         });
     } catch (err) {
         console.error('Upload error:', err);
@@ -204,6 +201,7 @@ async function saveMessage(data) {
             message: data.message || '',
             time: data.time,
             isImage: data.isImage || false,
+            imageData: data.imageData || '',
             imagePath: data.imagePath || ''
         });
         await newMessage.save();
@@ -214,6 +212,7 @@ async function saveMessage(data) {
     }
 }
 
+// ===== SOCKET EVENTS =====
 io.on('connection', async (socket) => {
     console.log('🟢 New user connected:', socket.id);
 
@@ -229,14 +228,12 @@ io.on('connection', async (socket) => {
         });
     });
 
-// ===== SAVE USER =====
+    // ===== SAVE USER =====
     socket.on('save-user', async (data) => {
         try {
-            // پیدا کردن کاربر یا ساختن جدید
             let user = await User.findOne({ username: data.username });
             
             if (!user) {
-                // ساختن کاربر جدید
                 user = new User({
                     username: data.username,
                     displayName: data.displayName || data.username,
@@ -247,7 +244,6 @@ io.on('connection', async (socket) => {
                 await user.save();
                 console.log('✅ New user created:', user.username);
             } else {
-                // به‌روزرسانی کاربر موجود
                 user.displayName = data.displayName || data.username;
                 user.lastLogin = new Date();
                 await user.save();
@@ -320,7 +316,7 @@ io.on('connection', async (socket) => {
         });
     });
 
-    // ===== CLEAR CHAT HISTORY =====
+    // ===== CLEAR CHAT =====
     socket.on('clear-chat', async () => {
         try {
             await Message.deleteMany({});
@@ -331,29 +327,33 @@ io.on('connection', async (socket) => {
         }
     });
 
+    // ===== CHAT MESSAGE =====
     socket.on('chat-message', async (data) => {
         const messageData = {
             username: data.username,
             message: data.message || '',
             time: new Date().toLocaleTimeString('en-US', { timeZone: 'Asia/Tehran' }),
             isImage: data.isImage || false,
-            imagePath: data.imagePath || ''  // ← این رو چک کن
+            imageData: data.imageData || '',
+            imagePath: data.imagePath || ''
         };
         
         const savedMessage = await saveMessage(messageData);
         
         if (savedMessage) {
-            console.log('💬 ' + data.username + ': ' + (data.isImage ? '[Image] ' + savedMessage.imagePath : data.message));
+            console.log('💬 ' + data.username + ': ' + (data.isImage ? '[Image]' : data.message));
             io.emit('chat-message', {
                 username: savedMessage.username,
                 message: savedMessage.message,
                 time: savedMessage.time,
                 isImage: savedMessage.isImage,
-                imagePath: savedMessage.imagePath  // ← مطمئن شو اینجا هست
+                imageData: savedMessage.imageData,
+                imagePath: savedMessage.imagePath
             });
         }
     });
 
+    // ===== PRIVATE MESSAGE =====
     socket.on('private-message', (data) => {
         const targetSocketId = Object.keys(users).find(
             id => users[id] === data.to
@@ -367,10 +367,12 @@ io.on('connection', async (socket) => {
         }
     });
 
+    // ===== TYPING =====
     socket.on('typing', (username) => {
         socket.broadcast.emit('user-typing', username);
     });
 
+    // ===== DISCONNECT =====
     socket.on('disconnect', () => {
         const username = users[socket.id];
         if (username) {

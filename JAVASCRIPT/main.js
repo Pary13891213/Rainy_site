@@ -12,7 +12,8 @@ socket.on('chat-history', (history) => {
         time: msg.time,
         type: msg.username === 'DEV' ? 'dev' : 'other',
         isImage: msg.isImage || false,
-        imagePath: msg.imagePath || ''  // ← این مهمه
+        imageData: msg.imageData || '',    // ← Base64
+        imagePath: msg.imagePath || ''
     }));
     displayMessages();
 });
@@ -20,7 +21,7 @@ socket.on('chat-history', (history) => {
 socket.on('chat-message', (data) => {
     const userName = localStorage.getItem('userName') || 'User';
     
-    // اگه پیام از خودم باشه، نادیده بگیر (چون قبلاً اضافه کردیم)
+    // اگه پیام از خودم باشه، نادیده بگیر
     if (data.username === userName) {
         return;
     }
@@ -31,6 +32,7 @@ socket.on('chat-message', (data) => {
         time: data.time,
         type: data.username === 'DEV' ? 'dev' : 'other',
         isImage: data.isImage || false,
+        imageData: data.imageData || '',    // ← Base64
         imagePath: data.imagePath || ''
     };
     
@@ -263,16 +265,20 @@ fileInput.addEventListener('change', async function(event) {
         
         if (result.success) {
             const userName = localStorage.getItem('userName') || 'User';
-            const senderName = userName === 'User' ? 'You' : userName;
             
-            // ارسال به سرور
+            // فقط به سرور بفرست (خودت به لیست اضافه نکن)
             socket.emit('chat-message', {
                 username: userName,
                 message: '',
                 isImage: true,
+                imageData: result.imagePath,   // ← Base64
                 imagePath: result.imagePath
             });
             
+            // ⛔️ این سه خط رو حذف کن ⛔️
+            // const newMessage = { ... };
+            // messages.push(newMessage);
+            // displayMessages();
         }
     } catch (err) {
         console.error('Upload error:', err);
@@ -281,7 +287,6 @@ fileInput.addEventListener('change', async function(event) {
     
     fileInput.value = '';
 });
-
 // ============================================================
 // LIGHTBOX
 // ============================================================
@@ -345,13 +350,11 @@ function sendMessage() {
     
     const userName = localStorage.getItem('userName') || 'User';
     
-    // فقط به سرور بفرست (خودت به لیست اضافه نکن)
     socket.emit('chat-message', {
         username: userName,
         message: content
     });
     
-    // ورودی رو پاک کن
     messageInput.value = '';
     
     if (profileName) {

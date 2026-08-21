@@ -2,7 +2,6 @@ const socket = io('https://baroon-server.onrender.com', {
     transports: ['websocket', 'polling']
 });
 
-// ===== SOCKET EVENTS =====
 socket.on('chat-history', (history) => {
     messages = history.map(msg => ({
         sender: msg.username === 'DEV' ? 'DEV' : msg.username,
@@ -10,25 +9,28 @@ socket.on('chat-history', (history) => {
         time: msg.time,
         type: msg.username === 'DEV' ? 'dev' : 'other',
         isImage: msg.isImage || false,
-        imagePath: msg.imagePath || ''  // ← این مهمه
+        imageData: msg.imageData || '',    // ← Base64
+        imagePath: msg.imagePath || ''
     }));
     displayMessages();
 });
 
 // ===== دریافت پیام =====
 socket.on('chat-message', (data) => {
-    console.log('Dev received message:', data);
+    const userName = localStorage.getItem('userName') || 'User';
     
-    if (data.username === 'DEV') {
-        return;  // ← این خط مهمه! پیام‌های DEV رو نادیده بگیر
+    // اگه پیام از خودم باشه، نادیده بگیر
+    if (data.username === userName) {
+        return;
     }
     
     const newMessage = {
-        sender: data.username,
+        sender: data.username === 'DEV' ? 'DEV' : data.username,
         content: data.message || '',
         time: data.time,
-        type: 'other',
+        type: data.username === 'DEV' ? 'dev' : 'other',
         isImage: data.isImage || false,
+        imageData: data.imageData || '',    // ← Base64
         imagePath: data.imagePath || ''
     };
     
@@ -126,12 +128,12 @@ function displayMessages() {
         const messageDiv = document.createElement('div');
         
         // تعیین نوع پیام
-        if (msg.type === 'user') {
-            messageDiv.className = 'message mine';
-            msg.sender = 'You';
-        } else if (msg.type === 'dev') {
-            messageDiv.className = 'message other';
+        if (msg.type === 'dev') {
+            messageDiv.className = 'message mine';  // ← این رو به 'mine' تغییر بده
             msg.sender = 'DEV';
+        } else if (msg.type === 'user' || msg.type === 'other') {
+            messageDiv.className = 'message other';
+            msg.sender = msg.sender || 'Unknown';
         } else if (msg.type === 'system') {
             messageDiv.className = 'message system';
         } else {
@@ -272,28 +274,20 @@ fileInput.addEventListener('change', async function(event) {
         
         if (result.success) {
             const userName = localStorage.getItem('userName') || 'User';
-            const senderName = userName === 'User' ? 'You' : userName;
             
-            // ارسال به سرور
+            // فقط به سرور بفرست (خودت به لیست اضافه نکن)
             socket.emit('chat-message', {
                 username: userName,
                 message: '',
                 isImage: true,
+                imageData: result.imagePath,   // ← Base64
                 imagePath: result.imagePath
             });
             
-            // نمایش فوری
-            const newMessage = {
-                sender: senderName,
-                content: result.imagePath,
-                time: new Date().toLocaleTimeString(),
-                type: userName === 'User' ? 'user' : 'other',
-                isImage: true,
-                imagePath: result.imagePath
-            };
-            
-            messages.push(newMessage);
-            displayMessages();
+            // ⛔️ این سه خط رو حذف کن ⛔️
+            // const newMessage = { ... };
+            // messages.push(newMessage);
+            // displayMessages();
         }
     } catch (err) {
         console.error('Upload error:', err);
@@ -363,22 +357,9 @@ if (!document.getElementById('lightbox-styles')) {
 // ===== SEND MESSAGE =====
 // ============================================================
 function sendMessage() {
-    console.log('Send button clicked');
-    
-    if (!messageInput) {
-        console.error('messageInput not found!');
-        return;
-    }
-    
     const content = messageInput.value.trim();
-    console.log('Message content:', content);
+    if (!content) return;
     
-    if (!content) {
-        console.log('Empty message');
-        return;
-    }
-    
-    // فقط به سرور بفرست (خودت به لیست اضافه نکن)
     socket.emit('chat-message', {
         username: 'DEV',
         message: content
@@ -386,8 +367,6 @@ function sendMessage() {
     
     messageInput.value = '';
     createGlitchEffect();
-    
-    console.log('Message sent');
 }
 
 // ============================================================
