@@ -6,51 +6,62 @@ const fullText = "Welcome Back Developer\nAnd\nWelcome Back Baroon!";
 const mainElement = document.getElementById("text-main");
 let glitchInterval = null;
 
-// ===== GLITCH (سیاه و سفید، طبیعی) =====
-function createGlitchNatural() {
+// ===== GLITCH REAL (چند مستطیل + جابجایی متن) =====
+function createGlitchReal() {
     const typingText = document.querySelector('.typing-text');
     const rect = typingText.getBoundingClientRect();
     
-    if (Math.random() < 0.6) return;
+    // ۱ تا ۳ مستطیل همزمان
+    const count = Math.floor(Math.random() * 3) + 1;
     
-    const rectangle = document.createElement('div');
-    rectangle.className = 'glitch-rectangle';
+    for (let i = 0; i < count; i++) {
+        const rectangle = document.createElement('div');
+        rectangle.className = 'glitch-rectangle';
+        
+        const width = 30 + Math.random() * 80;
+        const height = 1.5 + Math.random() * 3;
+        const posX = Math.random() * (rect.width - width);
+        const posY = Math.random() * (rect.height - height);
+        
+        rectangle.style.width = `${width}px`;
+        rectangle.style.height = `${height}px`;
+        rectangle.style.left = `${posX}px`;
+        rectangle.style.top = `${posY}px`;
+        rectangle.style.background = Math.random() < 0.4 
+            ? 'rgba(255, 255, 255, 0.7)' 
+            : 'rgba(0, 0, 0, 0.8)';
+        
+        // هر مستطیل با تأخیر کمی ظاهر میشه
+        setTimeout(() => {
+            typingText.appendChild(rectangle);
+        }, i * 30);
+        
+        setTimeout(() => {
+            rectangle.remove();
+        }, 250 + i * 30);
+    }
     
-    const width = 20 + Math.random() * 50;
-    const height = 1.5 + Math.random() * 2;
-    const posX = Math.random() * (rect.width - width);
-    const posY = Math.random() * (rect.height - height);
-    
-    rectangle.style.width = `${width}px`;
-    rectangle.style.height = `${height}px`;
-    rectangle.style.left = `${posX}px`;
-    rectangle.style.top = `${posY}px`;
-    rectangle.style.background = Math.random() < 0.3 
-        ? 'rgba(255, 255, 255, 0.6)' 
-        : 'rgba(0, 0, 0, 0.7)';
-    
-    typingText.appendChild(rectangle);
-    setTimeout(() => rectangle.remove(), 180);
+    // جابجایی متن همزمان با مستطیل‌ها
+    shiftTextReal(mainElement);
 }
 
-function shiftTextNatural(element) {
+function shiftTextReal(element) {
     if (!element || !element.textContent || element.textContent.length === 0) return;
-    if (Math.random() < 0.5) return;
     
-    const shiftAmount = 1 + Math.random() * 3;
+    const shiftAmount = 2 + Math.random() * 5;
     const direction = Math.random() > 0.5 ? 1 : -1;
     const originalTransform = element.style.transform || '';
     
-    element.style.transition = 'transform 0.06s ease-out';
+    element.style.transition = 'transform 0.08s ease-out';
     element.style.transform = `${originalTransform} translateX(${shiftAmount * direction}px)`;
     
     setTimeout(() => {
         element.style.transform = originalTransform;
-    }, 100);
+    }, 150);
 }
 
-// ===== TYPEWRITER (با گلیچ ۱۸٪) =====
-function typeWriterWithClickable(text, element, clickableWord, speed = 110, callback = null) {
+// ===== TYPEWRITER =====
+function typeWriterWithClickable(text, element, clickableWord, speed = 100, callback = null) {
     let i = 0;
     element.innerHTML = '';
     let wordTyped = false;
@@ -75,9 +86,9 @@ function typeWriterWithClickable(text, element, clickableWord, speed = 110, call
         element.innerHTML += currentChar;
         i++;
         
-        if (Math.random() < 0.18) {
-            createGlitchNatural();
-            shiftTextNatural(element);
+        // Glitch REAL هنگام تایپ (۳۵٪)
+        if (Math.random() < 0.35) {
+            createGlitchReal();
         }
         
         let currentSpeed = speed;
@@ -102,9 +113,8 @@ function typeWriterWithClickable(text, element, clickableWord, speed = 110, call
                 afterText;
             element.innerHTML = fullHtml;
             
-            if (Math.random() < 0.18) {
-                createGlitchNatural();
-                shiftTextNatural(element);
+            if (Math.random() < 0.35) {
+                createGlitchReal();
             }
             
             setTimeout(() => {
@@ -126,16 +136,15 @@ function setupClickableWord() {
         clickable.addEventListener('click', function(e) {
             e.stopPropagation();
             
-            for (let i = 0; i < 4; i++) {
+            for (let i = 0; i < 6; i++) {
                 setTimeout(() => {
-                    createGlitchNatural();
-                    shiftTextNatural(mainElement);
+                    createGlitchReal();
                 }, i * 80);
             }
             
             setTimeout(() => {
                 window.location.href = "../HTML/access.html";
-            }, 400);
+            }, 500);
         });
     }
 }
@@ -157,16 +166,16 @@ function startPage() {
     }
     
     setTimeout(() => {
-        typeWriterWithClickable(fullText, mainElement, 'Baroon!', 110, () => {
+        typeWriterWithClickable(fullText, mainElement, 'Baroon!', 100, () => {
             setTimeout(() => {
                 setupClickableWord();
                 
+                // Glitch REAL بعد از تایپ (هر ۰.۸ ثانیه، ۴۵٪)
                 glitchInterval = setInterval(() => {
-                    if (Math.random() < 0.25) {
-                        createGlitchNatural();
-                        shiftTextNatural(mainElement);
+                    if (Math.random() < 0.45) {
+                        createGlitchReal();
                     }
-                }, 1500);
+                }, 800);
             }, 500);
         });
     }, 800);
