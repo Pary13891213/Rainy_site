@@ -20,13 +20,11 @@ function buildGlitchStructure(text) {
             let wordHtml = '';
             
             chars.forEach((char, charIndex) => {
-                // تشخیص کلمه Baroon برای ایتالیک و کلیک
                 const isBaroon = (word === 'Baroon!' || word === 'Baroon');
                 const charClass = isBaroon ? 'glitch-char baroon-char' : 'glitch-char';
                 wordHtml += `<span class="${charClass}" data-line="${lineIndex}" data-word="${wordIndex}" data-char="${charIndex}">${char}</span>`;
             });
             
-            // تشخیص کلمه Baroon برای کلیک
             const isBaroonWord = (word === 'Baroon!' || word === 'Baroon');
             const wordClass = isBaroonWord ? 'glitch-word baroon-word' : 'glitch-word';
             
@@ -43,47 +41,47 @@ function buildGlitchStructure(text) {
     return html;
 }
 
-// ===== GLITCH: حرکت مستقل حروف، کلمات، خطوط =====
+// ===== GLITCH: حرکت ناگهانی (بدون transition نرم) =====
 function applyGlitchMovement() {
-    // ۱. حرکت خطوط (بزرگ‌ترین)
+    // ۱. حرکت خطوط (ناگهانی)
     document.querySelectorAll('.glitch-line').forEach(line => {
         if (Math.random() < 0.15) {
-            const shiftX = (Math.random() - 0.5) * 10;
-            const shiftY = (Math.random() - 0.5) * 4;
-            const duration = 100 + Math.random() * 150;
-            line.style.transition = `transform ${duration}ms ease-out`;
+            const shiftX = (Math.random() - 0.5) * 12;
+            const shiftY = (Math.random() - 0.5) * 5;
+            line.style.transition = 'none';
             line.style.transform = `translate(${shiftX}px, ${shiftY}px)`;
             setTimeout(() => {
+                line.style.transition = 'none';
                 line.style.transform = '';
-            }, duration + 50);
+            }, 150 + Math.random() * 100);
         }
     });
     
-    // ۲. حرکت کلمات (متوسط)
+    // ۲. حرکت کلمات (ناگهانی)
     document.querySelectorAll('.glitch-word').forEach(word => {
         if (Math.random() < 0.20) {
-            const shiftX = (Math.random() - 0.5) * 6;
+            const shiftX = (Math.random() - 0.5) * 7;
             const shiftY = (Math.random() - 0.5) * 3;
-            const duration = 80 + Math.random() * 120;
-            word.style.transition = `transform ${duration}ms ease-out`;
+            word.style.transition = 'none';
             word.style.transform = `translate(${shiftX}px, ${shiftY}px)`;
             setTimeout(() => {
+                word.style.transition = 'none';
                 word.style.transform = '';
-            }, duration + 40);
+            }, 120 + Math.random() * 80);
         }
     });
     
-    // ۳. حرکت حروف (کوچک‌ترین)
+    // ۳. حرکت حروف (ناگهانی)
     document.querySelectorAll('.glitch-char').forEach(char => {
         if (Math.random() < 0.25) {
-            const shiftX = (Math.random() - 0.5) * 4;
-            const shiftY = (Math.random() - 0.5) * 2.5;
-            const duration = 60 + Math.random() * 100;
-            char.style.transition = `transform ${duration}ms ease-out`;
+            const shiftX = (Math.random() - 0.5) * 5;
+            const shiftY = (Math.random() - 0.5) * 3;
+            char.style.transition = 'none';
             char.style.transform = `translate(${shiftX}px, ${shiftY}px)`;
             setTimeout(() => {
+                char.style.transition = 'none';
                 char.style.transform = '';
-            }, duration + 30);
+            }, 100 + Math.random() * 60);
         }
     });
 }
@@ -109,15 +107,15 @@ function createGlitchRectangles() {
         rectangle.style.left = `${posX}px`;
         rectangle.style.top = `${posY}px`;
         rectangle.style.background = Math.random() < 0.4 
-            ? 'rgba(255, 255, 255, 0.6)' 
-            : 'rgba(0, 0, 0, 0.7)';
+            ? 'rgba(255, 255, 255, 0.7)' 
+            : 'rgba(0, 0, 0, 0.8)';
         
         typingText.appendChild(rectangle);
-        setTimeout(() => rectangle.remove(), 200 + i * 30);
+        setTimeout(() => rectangle.remove(), 150 + i * 20);
     }
 }
 
-// ===== GLITCH FULL (مستطیل + حرکت) =====
+// ===== GLITCH FULL (ناگهانی) =====
 function applyFullGlitch() {
     createGlitchRectangles();
     applyGlitchMovement();
@@ -130,11 +128,8 @@ function typeWriter(text, element, speed = 100, callback = null) {
     
     function type() {
         if (i >= text.length) {
-            // بعد از تایپ کامل، ساختار گلیچ‌دار رو بازسازی کن
             element.innerHTML = buildGlitchStructure(text);
-            // تنظیم کلیک برای Baroon
             setupBaroonClick();
-            // تنظیم دابل کلیک برای Developer
             setupDeveloperDblClick();
             if (callback) callback();
             return;
@@ -168,59 +163,37 @@ function setupBaroonClick() {
         el.style.cursor = 'pointer';
         el.style.fontStyle = 'italic';
         
-        // هاور: زیرخط
         el.addEventListener('mouseenter', () => {
             el.style.textDecoration = 'underline';
-            el.style.textDecorationColor = 'rgba(255,255,255,0.3)';
+            el.style.textDecorationColor = 'rgba(255,255,255,0.4)';
+            el.style.textUnderlineOffset = '3px';
         });
         el.addEventListener('mouseleave', () => {
             el.style.textDecoration = 'none';
         });
         
-        // کلیک
         el.addEventListener('click', function(e) {
             e.stopPropagation();
-            
             for (let i = 0; i < 6; i++) {
-                setTimeout(() => {
-                    applyFullGlitch();
-                }, i * 80);
+                setTimeout(() => applyFullGlitch(), i * 80);
             }
-            
             setTimeout(() => {
                 window.location.href = "../HTML/access.html";
             }, 500);
         });
-        
-        // حروف داخل کلمه Baroon هم کلیک‌پذیر باشن
-        el.querySelectorAll('.baroon-char').forEach(char => {
-            char.style.cursor = 'pointer';
-        });
     });
 }
 
-// ===== SETUP: دابل کلیک روی Developer =====
+// ===== SETUP: دابل کلیک روی Developer (بدون نشانه) =====
 function setupDeveloperDblClick() {
-    const textContent = mainElement.textContent || '';
-    const devIndex = textContent.indexOf('Developer');
-    if (devIndex === -1) return;
-    
-    // پیدا کردن کلمه Developer در DOM
-    const allWords = document.querySelectorAll('.glitch-word');
-    allWords.forEach(word => {
+    document.querySelectorAll('.glitch-word').forEach(word => {
         if (word.textContent.trim() === 'Developer') {
-            word.style.cursor = 'pointer';
-            
-            // دابل کلیک
+            word.style.cursor = 'default';
             word.addEventListener('dblclick', function(e) {
                 e.stopPropagation();
-                
                 for (let i = 0; i < 6; i++) {
-                    setTimeout(() => {
-                        applyFullGlitch();
-                    }, i * 80);
+                    setTimeout(() => applyFullGlitch(), i * 80);
                 }
-                
                 setTimeout(() => {
                     window.location.href = "../HTML/dev-enter.html";
                 }, 500);
@@ -245,27 +218,20 @@ function startPage() {
         return;
     }
     
-    // ساختار اولیه
     mainElement.innerHTML = buildGlitchStructure(fullText);
     
     setTimeout(() => {
-        // تایپ مجدد با افکت
         typeWriter(fullText, mainElement, 100, () => {
             setTimeout(() => {
-                // Glitch بعد از تایپ (۳۰٪)
+                // Glitch بعد از تایپ (هر ۰.۶ ثانیه، ۴۰٪)
                 glitchInterval = setInterval(() => {
-                    if (Math.random() < 0.30) {
+                    if (Math.random() < 0.40) {
                         applyFullGlitch();
                     }
-                }, 1000);
+                }, 600);
             }, 500);
         });
     }, 500);
 }
-
-// ===== DEV PANEL ACCESS (دابل کلیک روی Developer) =====
-document.addEventListener('DOMContentLoaded', function() {
-    // اینجا دیگه نیازی نیست چون توی setupDeveloperDblClick هندل میشه
-});
 
 document.addEventListener('DOMContentLoaded', startPage);
