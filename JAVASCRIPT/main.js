@@ -20,19 +20,20 @@ socket.on('chat-history', (history) => {
 socket.on('chat-message', (data) => {
     const userName = localStorage.getItem('userName') || 'User';
     
+    // اگه پیام از خودمه، فرستنده رو به 'You' تغییر بده
     let sender = data.username;
     let type = data.username === 'DEV' ? 'dev' : 'other';
     
     if (data.username === userName) {
         sender = 'You';
-        type = 'user';
+        type = 'user';  // ← این مهمه!
     }
     
     const newMessage = {
         sender: sender,
         content: data.message || '',
         time: data.time,
-        type: type,
+        type: type,  // ← اینجا 'user' ست میشه
         isImage: data.isImage || false,
         imagePath: data.imagePath || ''
     };
