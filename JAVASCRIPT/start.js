@@ -6,12 +6,80 @@ const fullText = "Welcome Back Developer\nAnd\nWelcome Back Baroon!";
 const mainElement = document.getElementById("text-main");
 let glitchInterval = null;
 
-// ===== GLITCH REAL (چند مستطیل + جابجایی متن) =====
-function createGlitchReal() {
+// ===== ساخت ساختار خط/کلمه/حرف =====
+function buildGlitchStructure(text) {
+    const lines = text.split('\n');
+    let html = '';
+    
+    lines.forEach((line, lineIndex) => {
+        const words = line.split(' ');
+        let lineHtml = '';
+        
+        words.forEach((word, wordIndex) => {
+            const chars = word.split('');
+            let wordHtml = '';
+            
+            chars.forEach((char, charIndex) => {
+                wordHtml += `<span class="glitch-char" data-line="${lineIndex}" data-word="${wordIndex}" data-char="${charIndex}">${char}</span>`;
+            });
+            
+            if (wordIndex < words.length - 1) {
+                wordHtml += `<span class="glitch-char" data-line="${lineIndex}" data-word="${wordIndex}" data-char="space"> </span>`;
+            }
+            
+            lineHtml += `<span class="glitch-word" data-line="${lineIndex}" data-word="${wordIndex}">${wordHtml}</span>`;
+        });
+        
+        html += `<span class="glitch-line" data-line="${lineIndex}">${lineHtml}</span>`;
+    });
+    
+    return html;
+}
+
+// ===== GLITCH: حرکت مستقل حروف، کلمات، خطوط =====
+function applyGlitchMovement() {
+    // ۱. حرکت خطوط (بزرگ‌ترین)
+    document.querySelectorAll('.glitch-line').forEach(line => {
+        if (Math.random() < 0.15) {
+            const shiftX = (Math.random() - 0.5) * 8;
+            const shiftY = (Math.random() - 0.5) * 3;
+            line.style.transform = `translate(${shiftX}px, ${shiftY}px)`;
+            setTimeout(() => {
+                line.style.transform = '';
+            }, 150 + Math.random() * 100);
+        }
+    });
+    
+    // ۲. حرکت کلمات (متوسط)
+    document.querySelectorAll('.glitch-word').forEach(word => {
+        if (Math.random() < 0.20) {
+            const shiftX = (Math.random() - 0.5) * 5;
+            const shiftY = (Math.random() - 0.5) * 2;
+            word.style.transform = `translate(${shiftX}px, ${shiftY}px)`;
+            setTimeout(() => {
+                word.style.transform = '';
+            }, 120 + Math.random() * 80);
+        }
+    });
+    
+    // ۳. حرکت حروف (کوچک‌ترین)
+    document.querySelectorAll('.glitch-char').forEach(char => {
+        if (Math.random() < 0.25) {
+            const shiftX = (Math.random() - 0.5) * 3;
+            const shiftY = (Math.random() - 0.5) * 2;
+            char.style.transform = `translate(${shiftX}px, ${shiftY}px)`;
+            setTimeout(() => {
+                char.style.transform = '';
+            }, 100 + Math.random() * 60);
+        }
+    });
+}
+
+// ===== GLITCH: مستطیل‌های سفید/مشکی =====
+function createGlitchRectangles() {
     const typingText = document.querySelector('.typing-text');
     const rect = typingText.getBoundingClientRect();
     
-    // ۱ تا ۳ مستطیل همزمان
     const count = Math.floor(Math.random() * 3) + 1;
     
     for (let i = 0; i < count; i++) {
@@ -28,10 +96,9 @@ function createGlitchReal() {
         rectangle.style.left = `${posX}px`;
         rectangle.style.top = `${posY}px`;
         rectangle.style.background = Math.random() < 0.4 
-            ? 'rgba(255, 255, 255, 0.7)' 
-            : 'rgba(0, 0, 0, 0.8)';
+            ? 'rgba(255, 255, 255, 0.6)' 
+            : 'rgba(0, 0, 0, 0.7)';
         
-        // هر مستطیل با تأخیر کمی ظاهر میشه
         setTimeout(() => {
             typingText.appendChild(rectangle);
         }, i * 30);
@@ -40,24 +107,12 @@ function createGlitchReal() {
             rectangle.remove();
         }, 250 + i * 30);
     }
-    
-    // جابجایی متن همزمان با مستطیل‌ها
-    shiftTextReal(mainElement);
 }
 
-function shiftTextReal(element) {
-    if (!element || !element.textContent || element.textContent.length === 0) return;
-    
-    const shiftAmount = 2 + Math.random() * 5;
-    const direction = Math.random() > 0.5 ? 1 : -1;
-    const originalTransform = element.style.transform || '';
-    
-    element.style.transition = 'transform 0.08s ease-out';
-    element.style.transform = `${originalTransform} translateX(${shiftAmount * direction}px)`;
-    
-    setTimeout(() => {
-        element.style.transform = originalTransform;
-    }, 150);
+// ===== GLITCH FULL =====
+function applyFullGlitch() {
+    createGlitchRectangles();
+    applyGlitchMovement();
 }
 
 // ===== TYPEWRITER =====
@@ -66,29 +121,24 @@ function typeWriterWithClickable(text, element, clickableWord, speed = 100, call
     element.innerHTML = '';
     let wordTyped = false;
     element.style.opacity = '1';
+    let fullTextTyped = '';
     
     function type() {
         if (i >= text.length) {
+            // بعد از تایپ کامل، ساختار گلیچ‌دار رو بازسازی کن
+            element.innerHTML = buildGlitchStructure(text);
             if (callback) callback();
             return;
         }
         
-        const remaining = text.slice(i);
-        const wordIndex = remaining.indexOf(clickableWord);
-        
-        if (wordIndex === 0 && !wordTyped) {
-            wordTyped = true;
-            typeClickableWord(0);
-            return;
-        }
-        
-        const currentChar = text.charAt(i);
-        element.innerHTML += currentChar;
+        fullTextTyped += text.charAt(i);
+        // نمایش متن ساده هنگام تایپ
+        element.innerHTML = fullTextTyped;
         i++;
         
-        // Glitch REAL هنگام تایپ (۳۵٪)
-        if (Math.random() < 0.35) {
-            createGlitchReal();
+        // Glitch هنگام تایپ (۳۰٪)
+        if (Math.random() < 0.30) {
+            applyFullGlitch();
         }
         
         let currentSpeed = speed;
@@ -101,44 +151,19 @@ function typeWriterWithClickable(text, element, clickableWord, speed = 100, call
         setTimeout(type, currentSpeed * variation);
     }
     
-    function typeClickableWord(index) {
-        const word = clickableWord;
-        if (index < word.length) {
-            const typedWord = word.slice(0, index + 1);
-            const beforeText = text.slice(0, i);
-            const afterText = text.slice(i + word.length);
-            
-            const fullHtml = beforeText + 
-                `<span class="clickable" id="clickable-word">${typedWord}</span>` + 
-                afterText;
-            element.innerHTML = fullHtml;
-            
-            if (Math.random() < 0.35) {
-                createGlitchReal();
-            }
-            
-            setTimeout(() => {
-                typeClickableWord(index + 1);
-            }, speed * 0.8);
-        } else {
-            i += word.length;
-            setTimeout(type, speed);
-        }
-    }
-    
     type();
 }
 
-// ===== CLICK HANDLER =====
+// ===== CLICKABLE WORD SETUP =====
 function setupClickableWord() {
-    const clickable = document.getElementById('clickable-word');
+    const clickable = document.querySelector('#text-main .clickable');
     if (clickable) {
         clickable.addEventListener('click', function(e) {
             e.stopPropagation();
             
             for (let i = 0; i < 6; i++) {
                 setTimeout(() => {
-                    createGlitchReal();
+                    applyFullGlitch();
                 }, i * 80);
             }
             
@@ -165,20 +190,36 @@ function startPage() {
         return;
     }
     
+    // ساختار اولیه
+    mainElement.innerHTML = buildGlitchStructure(fullText);
+    
     setTimeout(() => {
+        // تایپ مجدد با افکت
         typeWriterWithClickable(fullText, mainElement, 'Baroon!', 100, () => {
             setTimeout(() => {
-                setupClickableWord();
+                // بعد از تایپ، کلمه کلیک‌پذیر رو تنظیم کن
+                const clickableSpan = document.querySelector('#text-main .clickable');
+                if (clickableSpan) {
+                    clickableSpan.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        for (let i = 0; i < 6; i++) {
+                            setTimeout(() => applyFullGlitch(), i * 80);
+                        }
+                        setTimeout(() => {
+                            window.location.href = "../HTML/access.html";
+                        }, 500);
+                    });
+                }
                 
-                // Glitch REAL بعد از تایپ (هر ۰.۸ ثانیه، ۴۵٪)
+                // Glitch بعد از تایپ (۳۰٪)
                 glitchInterval = setInterval(() => {
-                    if (Math.random() < 0.45) {
-                        createGlitchReal();
+                    if (Math.random() < 0.30) {
+                        applyFullGlitch();
                     }
-                }, 800);
+                }, 1000);
             }, 500);
         });
-    }, 800);
+    }, 500);
 }
 
 // ===== DEV PANEL ACCESS =====

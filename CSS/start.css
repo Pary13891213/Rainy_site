@@ -43,6 +43,28 @@ body {
 
 #text-main {
     white-space: pre-wrap;
+    position: relative;
+}
+
+/* ===== هر خط ===== */
+.glitch-line {
+    display: block;
+    transition: transform 0.08s ease-out;
+    position: relative;
+}
+
+/* ===== هر کلمه ===== */
+.glitch-word {
+    display: inline-block;
+    transition: transform 0.06s ease-out;
+    position: relative;
+}
+
+/* ===== هر حرف ===== */
+.glitch-char {
+    display: inline-block;
+    transition: transform 0.05s ease-out;
+    position: relative;
 }
 
 #text-main .clickable {
@@ -69,28 +91,23 @@ body {
     width: 100%;
 }
 
-#text-main .clickable:hover {
-    text-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
-}
-
-/* ===== GLITCH REAL ===== */
+/* ===== GLITCH RECTANGLE ===== */
 .glitch-rectangle {
     position: absolute;
     pointer-events: none;
     z-index: 3;
-    animation: glitch-real 0.2s forwards;
+    animation: glitch-rect 0.2s forwards;
     opacity: 0;
 }
 
-@keyframes glitch-real {
-    0% { opacity: 0; transform: translateX(-5px) scaleX(1.02); }
-    10% { opacity: 0.9; transform: translateX(5px) scaleX(0.98); }
-    25% { opacity: 0.9; transform: translateX(-3px) scaleX(1.01); }
-    40% { opacity: 0.8; transform: translateX(3px) scaleX(0.99); }
+@keyframes glitch-rect {
+    0% { opacity: 0; transform: translateX(-4px) scaleX(1.02); }
+    15% { opacity: 0.8; transform: translateX(4px) scaleX(0.98); }
+    30% { opacity: 0.8; transform: translateX(-2px) scaleX(1.01); }
     100% { opacity: 0; transform: translateX(0) scaleX(1); }
 }
 
-/* ===== SCANLINES (خطی ساده) ===== */
+/* ===== SCANLINES ===== */
 .scanlines {
     position: fixed;
     top: 0;
