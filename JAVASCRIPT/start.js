@@ -2,68 +2,46 @@ const socket = io('https://baroon-server.onrender.com', {
     transports: ['websocket', 'polling']
 });
 
-// ===== TEXT با حروف اول کپیتال =====
 const fullText = "Welcome Back Developer\nAnd\nWelcome Back Baroon!";
-
 const mainElement = document.getElementById("text-main");
-
 let glitchInterval = null;
 
-// ===== GLITCH REAL FUNCTIONS =====
-function createGlitchReal() {
+// ===== GLITCH (سیاه و سفید، طبیعی) =====
+function createGlitchNatural() {
     const typingText = document.querySelector('.typing-text');
     const rect = typingText.getBoundingClientRect();
     
-    // مستطیل اصلی
-    const rectCount = Math.floor(Math.random() * 2) + 1;
-    for (let i = 0; i < rectCount; i++) {
-        const rectangle = document.createElement('div');
-        rectangle.className = 'glitch-rectangle';
-        
-        const width = 30 + Math.random() * 80;
-        const height = 1.5 + Math.random() * 2.5;
-        const posX = Math.random() * (rect.width - width);
-        const posY = Math.random() * (rect.height - height);
-        
-        rectangle.style.width = `${width}px`;
-        rectangle.style.height = `${height}px`;
-        rectangle.style.left = `${posX}px`;
-        rectangle.style.top = `${posY}px`;
-        rectangle.style.background = Math.random() < 0.3 
-            ? 'rgba(255, 255, 255, 0.7)' 
-            : 'rgba(0, 0, 0, 0.8)';
-        
-        typingText.appendChild(rectangle);
-        setTimeout(() => rectangle.remove(), 200);
-    }
+    if (Math.random() < 0.6) return;
     
-    // RGB اثر (گاهی)
-    if (Math.random() < 0.3) {
-        const rgb = document.createElement('div');
-        rgb.className = 'glitch-rgb';
-        rgb.style.width = `${80 + Math.random() * 120}px`;
-        rgb.style.height = `${2 + Math.random() * 3}px`;
-        rgb.style.left = `${Math.random() * (rect.width - 80)}px`;
-        rgb.style.top = `${Math.random() * (rect.height - 10)}px`;
-        
-        const colors = ['rgba(255,0,0,0.4)', 'rgba(0,255,0,0.4)', 'rgba(0,0,255,0.4)'];
-        rgb.style.background = colors[Math.floor(Math.random() * colors.length)];
-        rgb.style.boxShadow = '0 0 10px currentColor';
-        
-        typingText.appendChild(rgb);
-        setTimeout(() => rgb.remove(), 200);
-    }
+    const rectangle = document.createElement('div');
+    rectangle.className = 'glitch-rectangle';
+    
+    const width = 20 + Math.random() * 50;
+    const height = 1.5 + Math.random() * 2;
+    const posX = Math.random() * (rect.width - width);
+    const posY = Math.random() * (rect.height - height);
+    
+    rectangle.style.width = `${width}px`;
+    rectangle.style.height = `${height}px`;
+    rectangle.style.left = `${posX}px`;
+    rectangle.style.top = `${posY}px`;
+    rectangle.style.background = Math.random() < 0.3 
+        ? 'rgba(255, 255, 255, 0.6)' 
+        : 'rgba(0, 0, 0, 0.7)';
+    
+    typingText.appendChild(rectangle);
+    setTimeout(() => rectangle.remove(), 180);
 }
 
-function shiftTextReal(element) {
+function shiftTextNatural(element) {
     if (!element || !element.textContent || element.textContent.length === 0) return;
-    if (Math.random() < 0.4) return;
+    if (Math.random() < 0.5) return;
     
-    const shiftAmount = 2 + Math.random() * 4;
+    const shiftAmount = 1 + Math.random() * 3;
     const direction = Math.random() > 0.5 ? 1 : -1;
     const originalTransform = element.style.transform || '';
     
-    element.style.transition = 'transform 0.05s ease-out';
+    element.style.transition = 'transform 0.06s ease-out';
     element.style.transform = `${originalTransform} translateX(${shiftAmount * direction}px)`;
     
     setTimeout(() => {
@@ -71,8 +49,8 @@ function shiftTextReal(element) {
     }, 100);
 }
 
-// ===== TYPEWRITER =====
-function typeWriterWithClickable(text, element, clickableWord, speed = 100, callback = null) {
+// ===== TYPEWRITER (با گلیچ ۱۸٪) =====
+function typeWriterWithClickable(text, element, clickableWord, speed = 110, callback = null) {
     let i = 0;
     element.innerHTML = '';
     let wordTyped = false;
@@ -97,10 +75,9 @@ function typeWriterWithClickable(text, element, clickableWord, speed = 100, call
         element.innerHTML += currentChar;
         i++;
         
-        // Glitch real during typing (12% chance)
-        if (Math.random() < 0.12) {
-            createGlitchReal();
-            shiftTextReal(element);
+        if (Math.random() < 0.18) {
+            createGlitchNatural();
+            shiftTextNatural(element);
         }
         
         let currentSpeed = speed;
@@ -125,9 +102,9 @@ function typeWriterWithClickable(text, element, clickableWord, speed = 100, call
                 afterText;
             element.innerHTML = fullHtml;
             
-            if (Math.random() < 0.12) {
-                createGlitchReal();
-                shiftTextReal(element);
+            if (Math.random() < 0.18) {
+                createGlitchNatural();
+                shiftTextNatural(element);
             }
             
             setTimeout(() => {
@@ -149,10 +126,10 @@ function setupClickableWord() {
         clickable.addEventListener('click', function(e) {
             e.stopPropagation();
             
-            for (let i = 0; i < 5; i++) {
+            for (let i = 0; i < 4; i++) {
                 setTimeout(() => {
-                    createGlitchReal();
-                    shiftTextReal(mainElement);
+                    createGlitchNatural();
+                    shiftTextNatural(mainElement);
                 }, i * 80);
             }
             
@@ -180,17 +157,16 @@ function startPage() {
     }
     
     setTimeout(() => {
-        typeWriterWithClickable(fullText, mainElement, 'Baroon!', 100, () => {
+        typeWriterWithClickable(fullText, mainElement, 'Baroon!', 110, () => {
             setTimeout(() => {
                 setupClickableWord();
                 
-                // Glitch real after typing (every 1.2s, 35% chance)
                 glitchInterval = setInterval(() => {
-                    if (Math.random() < 0.35) {
-                        createGlitchReal();
-                        shiftTextReal(mainElement);
+                    if (Math.random() < 0.25) {
+                        createGlitchNatural();
+                        shiftTextNatural(mainElement);
                     }
-                }, 1200);
+                }, 1500);
             }, 500);
         });
     }, 800);
