@@ -8,7 +8,7 @@ return `"${username}"... That's a nice name. She has good taste in people. I hop
 };
 
 const welcomeElement = document.getElementById('welcome-text');
-const nameInputContainer = آdocument.getElementById('name-input-container');
+const nameInputContainer = document.getElementById('name-input-container');
 const nameInput = document.getElementById('name-input');
 const greetingElement = document.getElementById('greeting-text');
 const typingContainer = document.querySelector('.typing-text');
