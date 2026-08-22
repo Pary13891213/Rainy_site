@@ -15,10 +15,22 @@ socket.on('chat-history', (history) => {
 });
 
 socket.on('chat-message', (data) => {
+    // اگه پیام از DEV هست، به لیست اضافه کن (چون توی sendMessage اضافه نشده)
     if (data.username === 'DEV') {
+        const newMessage = {
+            sender: 'DEV',
+            content: data.message || '',
+            time: data.time,
+            type: 'dev',
+            isImage: data.isImage || false,
+            imagePath: data.imagePath || ''
+        };
+        messages.push(newMessage);
+        displayMessages();
         return;
     }
     
+    // پیام از کاربر عادی
     const newMessage = {
         sender: data.username,
         content: data.message || '',
@@ -270,14 +282,13 @@ fileInput.addEventListener('change', async function(event) {
         const result = await response.json();
         
         if (result.success) {
-
+            // فقط به سرور بفرست (خودت به لیست اضافه نکن)
             socket.emit('chat-message', {
-                username: 'DEV',  
+                username: 'DEV',
                 message: '',
                 isImage: true,
                 imagePath: result.imagePath
             });
-            // ===== ===== =====
         }
     } catch (err) {
         console.error('Upload error:', err);

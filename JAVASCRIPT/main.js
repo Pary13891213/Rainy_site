@@ -6,14 +6,27 @@ const socket = io('https://baroon-server.onrender.com', {
 
 // ===== SOCKET EVENTS =====
 socket.on('chat-history', (history) => {
-    messages = history.map(msg => ({
-        sender: msg.username === 'DEV' ? 'DEV' : msg.username,
-        content: msg.message || '',
-        time: msg.time,
-        type: msg.username === 'DEV' ? 'dev' : 'other',
-        isImage: msg.isImage || false,
-        imagePath: msg.imagePath || ''  // ← فقط imagePath
-    }));
+    const userName = localStorage.getItem('userName') || 'User';
+    
+    messages = history.map(msg => {
+        let sender = msg.username;
+        let type = msg.username === 'DEV' ? 'dev' : 'other';
+        
+        // اگه پیام از خود کاربره، نوع رو 'user' بذار
+        if (msg.username === userName) {
+            sender = 'You';
+            type = 'user';
+        }
+        
+        return {
+            sender: sender,
+            content: msg.message || '',
+            time: msg.time,
+            type: type,
+            isImage: msg.isImage || false,
+            imagePath: msg.imagePath || ''
+        };
+    });
     displayMessages();
 });
 
