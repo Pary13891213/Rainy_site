@@ -14,7 +14,7 @@ let glitchTimeouts = [];
 
 
 // =====================================================
-// UTILITY
+// RANDOM
 // =====================================================
 
 function random(min, max) {
@@ -66,16 +66,6 @@ function buildGlitchStructure(text) {
             });
 
 
-            const isBaroonWord =
-                word === 'Baroon!' ||
-                word === 'Baroon';
-
-            const wordClass =
-                isBaroonWord
-                    ? 'glitch-word baroon-word'
-                    : 'glitch-word';
-
-
             if (wordIndex < words.length - 1) {
 
                 wordHtml += `
@@ -87,6 +77,16 @@ function buildGlitchStructure(text) {
                     > </span>
                 `;
             }
+
+
+            const isBaroonWord =
+                word === 'Baroon!' ||
+                word === 'Baroon';
+
+            const wordClass =
+                isBaroonWord
+                    ? 'glitch-word baroon-word'
+                    : 'glitch-word';
 
 
             lineHtml += `
@@ -107,60 +107,201 @@ function buildGlitchStructure(text) {
         `;
     });
 
+
     return html;
 }
 
 
 // =====================================================
-// CLEAR GLITCH
+// GET VISIBLE TEXT AREA
 // =====================================================
 
-function clearGlitch() {
+function getTextRect() {
 
-    glitchTimeouts.forEach(timeout => {
-        clearTimeout(timeout);
-    });
+    const rect =
+        mainElement.getBoundingClientRect();
 
-    glitchTimeouts = [];
-
-
-    document
-        .querySelectorAll(
-            '.glitch-line, .glitch-word, .glitch-char'
-        )
-        .forEach(element => {
-
-            element.style.transform = '';
-            element.style.opacity = '';
-        });
-
-
-    if (mainElement) {
-
-        mainElement.classList.remove(
-            'glitch-active'
-        );
-
-        mainElement.style.transform = '';
-        mainElement.style.opacity = '';
-        mainElement.style.filter = '';
-    }
-
-
-    document
-        .querySelectorAll('.glitch-bar')
-        .forEach(bar => bar.remove());
+    return rect;
 }
 
 
 // =====================================================
-// CREATE GLITCH BARS
+// CHARACTER GLITCH
 // =====================================================
 
-function createGlitchBars(intensity = 1) {
+function glitchCharacters() {
+
+    const chars =
+        Array.from(
+            document.querySelectorAll(
+                '.glitch-char'
+            )
+        );
+
+    if (!chars.length) return;
+
+
+    // فقط 1 تا 3 حرف
+    const count =
+        Math.floor(random(1, 4));
+
+
+    for (let i = 0; i < count; i++) {
+
+        const char =
+            chars[
+                Math.floor(
+                    Math.random() *
+                    chars.length
+                )
+            ];
+
+
+        const x1 =
+            random(-5, 5);
+
+        const y1 =
+            random(-2, 2);
+
+        const x2 =
+            random(-3, 6);
+
+        const y2 =
+            random(-1, 1);
+
+        const x3 =
+            random(-4, 4);
+
+
+        char.style.setProperty(
+            '--char-x1',
+            `${x1}px`
+        );
+
+        char.style.setProperty(
+            '--char-y1',
+            `${y1}px`
+        );
+
+        char.style.setProperty(
+            '--char-x2',
+            `${x2}px`
+        );
+
+        char.style.setProperty(
+            '--char-y2',
+            `${y2}px`
+        );
+
+        char.style.setProperty(
+            '--char-x3',
+            `${x3}px`
+        );
+
+
+        char.classList.remove(
+            'glitch-char-active'
+        );
+
+        void char.offsetWidth;
+
+        char.classList.add(
+            'glitch-char-active'
+        );
+
+
+        const timeout =
+            setTimeout(() => {
+
+                char.classList.remove(
+                    'glitch-char-active'
+                );
+
+            }, 130);
+
+        glitchTimeouts.push(timeout);
+    }
+}
+
+
+// =====================================================
+// WORD GLITCH
+// =====================================================
+
+function glitchWords() {
+
+    const words =
+        Array.from(
+            document.querySelectorAll(
+                '.glitch-word'
+            )
+        );
+
+    if (!words.length) return;
+
+
+    if (Math.random() > 0.55) return;
+
+
+    const word =
+        words[
+            Math.floor(
+                Math.random() *
+                words.length
+            )
+        ];
+
+
+    word.style.setProperty(
+        '--word-x1',
+        `${random(-7, 7)}px`
+    );
+
+    word.style.setProperty(
+        '--word-x2',
+        `${random(-5, 8)}px`
+    );
+
+    word.style.setProperty(
+        '--word-x3',
+        `${random(-4, 4)}px`
+    );
+
+
+    word.classList.remove(
+        'glitch-word-active'
+    );
+
+    void word.offsetWidth;
+
+    word.classList.add(
+        'glitch-word-active'
+    );
+
+
+    const timeout =
+        setTimeout(() => {
+
+            word.classList.remove(
+                'glitch-word-active'
+            );
+
+        }, 150);
+
+    glitchTimeouts.push(timeout);
+}
+
+
+// =====================================================
+// GLITCH RECTANGLES
+// =====================================================
+
+function createGlitchRectangles() {
 
     const container =
-        document.querySelector('.typing-text');
+        document.querySelector(
+            '.typing-text'
+        );
 
     if (!container) return;
 
@@ -169,36 +310,46 @@ function createGlitchBars(intensity = 1) {
         container.getBoundingClientRect();
 
 
+    // متوسط: 3 تا 6 قطعه
     const count =
         Math.floor(
-            random(1, 3 + intensity)
+            random(3, 7)
         );
 
 
     for (let i = 0; i < count; i++) {
 
-        const bar =
+        const rectangle =
             document.createElement('div');
 
-        bar.className =
-            'glitch-bar';
+
+        rectangle.className =
+            'glitch-rectangle';
 
 
+        // اندازه
         const width =
             random(
-                25,
-                Math.min(180, rect.width * 0.4)
+                18,
+                Math.min(
+                    150,
+                    rect.width * 0.45
+                )
             );
 
 
         const height =
-            random(1, 2.5);
+            random(1, 4);
 
 
+        // موقعیت
         const left =
             random(
                 0,
-                Math.max(0, rect.width - width)
+                Math.max(
+                    0,
+                    rect.width - width
+                )
             );
 
 
@@ -209,36 +360,79 @@ function createGlitchBars(intensity = 1) {
             );
 
 
-        bar.style.width =
+        rectangle.style.width =
             `${width}px`;
 
-        bar.style.height =
+        rectangle.style.height =
             `${height}px`;
 
-        bar.style.left =
+        rectangle.style.left =
             `${left}px`;
 
-        bar.style.top =
+        rectangle.style.top =
             `${top}px`;
 
 
-        // فقط سیاه و سفید
-        bar.style.background =
-            Math.random() < 0.5
-                ? '#ffffff'
-                : '#000000';
+        // سیاه یا سفید
+        if (Math.random() < 0.55) {
+
+            rectangle.classList.remove(
+                'black'
+            );
+
+        } else {
+
+            rectangle.classList.add(
+                'black'
+            );
+        }
 
 
-        container.appendChild(bar);
+        // حرکت
+        rectangle.style.setProperty(
+            '--x1',
+            `${random(-15, 15)}px`
+        );
+
+        rectangle.style.setProperty(
+            '--x2',
+            `${random(-25, 25)}px`
+        );
+
+        rectangle.style.setProperty(
+            '--x3',
+            `${random(-12, 12)}px`
+        );
+
+        rectangle.style.setProperty(
+            '--x4',
+            `${random(-5, 5)}px`
+        );
+
+
+        rectangle.style.setProperty(
+            '--opacity',
+            `${random(0.45, 0.9)}`
+        );
+
+
+        rectangle.style.setProperty(
+            '--duration',
+            `${random(80, 160)}ms`
+        );
+
+
+        container.appendChild(
+            rectangle
+        );
 
 
         const timeout =
             setTimeout(() => {
 
-                bar.remove();
+                rectangle.remove();
 
-            }, random(100, 180));
-
+            }, 180);
 
         glitchTimeouts.push(timeout);
     }
@@ -246,10 +440,232 @@ function createGlitchBars(intensity = 1) {
 
 
 // =====================================================
-// APPLY GLITCH
+// TEXT FRAGMENT
 // =====================================================
 
-function applyFullGlitch(intensity = 1) {
+function createTextFragment() {
+
+    const lines =
+        Array.from(
+            document.querySelectorAll(
+                '.glitch-line'
+            )
+        );
+
+    if (!lines.length) return;
+
+
+    // حدود 35% مواقع
+    if (Math.random() > 0.35) return;
+
+
+    const source =
+        lines[
+            Math.floor(
+                Math.random() *
+                lines.length
+            )
+        ];
+
+
+    const rect =
+        source.getBoundingClientRect();
+
+
+    const container =
+        document.querySelector(
+            '.typing-text'
+        );
+
+
+    const containerRect =
+        container.getBoundingClientRect();
+
+
+    const fragment =
+        document.createElement('div');
+
+
+    fragment.className =
+        'glitch-fragment';
+
+
+    fragment.textContent =
+        source.textContent;
+
+
+    // قسمت تصادفی از خط
+    const sliceHeight =
+        random(
+            3,
+            Math.max(
+                5,
+                rect.height * 0.3
+            )
+        );
+
+
+    const sliceTop =
+        random(
+            0,
+            Math.max(
+                0,
+                rect.height - sliceHeight
+            )
+        );
+
+
+    fragment.style.height =
+        `${sliceHeight}px`;
+
+
+    fragment.style.left =
+        `${rect.left - containerRect.left}px`;
+
+
+    fragment.style.top =
+        `${rect.top - containerRect.top + sliceTop}px`;
+
+
+    fragment.style.clipPath =
+        `inset(${sliceTop}px 0 ${
+            Math.max(
+                0,
+                rect.height -
+                sliceTop -
+                sliceHeight
+            )
+        }px 0)`;
+
+
+    fragment.style.setProperty(
+        '--x1',
+        `${random(-15, 15)}px`
+    );
+
+    fragment.style.setProperty(
+        '--x2',
+        `${random(-30, 30)}px`
+    );
+
+    fragment.style.setProperty(
+        '--x3',
+        `${random(-10, 10)}px`
+    );
+
+    fragment.style.setProperty(
+        '--duration',
+        `${random(80, 150)}ms`
+    );
+
+
+    container.appendChild(
+        fragment
+    );
+
+
+    const timeout =
+        setTimeout(() => {
+
+            fragment.remove();
+
+        }, 170);
+
+    glitchTimeouts.push(timeout);
+}
+
+
+// =====================================================
+// FLICKER
+// =====================================================
+
+function glitchFlicker() {
+
+    if (Math.random() > 0.3) return;
+
+
+    mainElement.classList.remove(
+        'glitch-flicker'
+    );
+
+    void mainElement.offsetWidth;
+
+    mainElement.classList.add(
+        'glitch-flicker'
+    );
+
+
+    const timeout =
+        setTimeout(() => {
+
+            mainElement.classList.remove(
+                'glitch-flicker'
+            );
+
+        }, 130);
+
+    glitchTimeouts.push(timeout);
+}
+
+
+// =====================================================
+// CLEAR GLITCH
+// =====================================================
+
+function clearGlitch() {
+
+    glitchTimeouts.forEach(
+        timeout => clearTimeout(timeout)
+    );
+
+    glitchTimeouts = [];
+
+
+    document
+        .querySelectorAll(
+            '.glitch-char-active'
+        )
+        .forEach(element => {
+
+            element.classList.remove(
+                'glitch-char-active'
+            );
+        });
+
+
+    document
+        .querySelectorAll(
+            '.glitch-word-active'
+        )
+        .forEach(element => {
+
+            element.classList.remove(
+                'glitch-word-active'
+            );
+        });
+
+
+    document
+        .querySelectorAll(
+            '.glitch-rectangle, .glitch-fragment'
+        )
+        .forEach(element => {
+
+            element.remove();
+        });
+
+
+    mainElement.classList.remove(
+        'glitch-flicker'
+    );
+}
+
+
+// =====================================================
+// FULL GLITCH
+// =====================================================
+
+function applyFullGlitch() {
 
     if (glitchRunning) return;
 
@@ -257,100 +673,35 @@ function applyFullGlitch(intensity = 1) {
 
     glitchRunning = true;
 
+
+    // مهم:
+    // clearGlitch اینجا structure متن را دست نمی‌زند.
     clearGlitch();
 
 
-    // -------------------------------------------------
-    // Main text
-    // -------------------------------------------------
-
-    mainElement.classList.add(
-        'glitch-active'
-    );
+    // 1. چند حرف
+    glitchCharacters();
 
 
-    // -------------------------------------------------
-    // Lines
-    // -------------------------------------------------
-
-    document
-        .querySelectorAll('.glitch-line')
-        .forEach(line => {
-
-            if (
-                Math.random() <
-                0.25 * intensity
-            ) {
-
-                const x =
-                    random(-5, 5) * intensity;
-
-                const y =
-                    random(-1, 1) * intensity;
-
-                line.style.transform =
-                    `translate(${x}px, ${y}px)`;
-            }
-        });
+    // 2. گاهی یک کلمه
+    glitchWords();
 
 
-    // -------------------------------------------------
-    // Words
-    // -------------------------------------------------
-
-    document
-        .querySelectorAll('.glitch-word')
-        .forEach(word => {
-
-            if (
-                Math.random() <
-                0.12 * intensity
-            ) {
-
-                const x =
-                    random(-4, 4) * intensity;
-
-                word.style.transform =
-                    `translateX(${x}px)`;
-            }
-        });
+    // 3. مستطیل‌ها
+    createGlitchRectangles();
 
 
-    // -------------------------------------------------
-    // Characters
-    // -------------------------------------------------
-
-    document
-        .querySelectorAll('.glitch-char')
-        .forEach(char => {
-
-            if (
-                Math.random() <
-                0.08 * intensity
-            ) {
-
-                const x =
-                    random(-3, 3) * intensity;
-
-                char.style.transform =
-                    `translateX(${x}px)`;
-            }
-        });
+    // 4. گاهی تکه‌ای از خط
+    createTextFragment();
 
 
-    // -------------------------------------------------
-    // Horizontal bars
-    // -------------------------------------------------
-
-    createGlitchBars(intensity);
+    // 5. گاهی flicker
+    glitchFlicker();
 
 
-    // -------------------------------------------------
-    // Cleanup
-    // -------------------------------------------------
-
+    // مدت glitch
     const duration =
-        random(100, 180);
+        random(100, 190);
 
 
     const timeout =
@@ -387,11 +738,14 @@ function typeWriter(
 
         if (i >= text.length) {
 
+            // فقط بعد از اتمام کامل تایپ
             element.innerHTML =
                 buildGlitchStructure(text);
 
+
             setupBaroonClick();
             setupDeveloperDblClick();
+
 
             if (callback) {
                 callback();
@@ -404,20 +758,26 @@ function typeWriter(
         fullTextTyped +=
             text.charAt(i);
 
-        element.innerHTML =
+        element.textContent =
             fullTextTyped;
 
         i++;
 
 
-        // Glitch بسیار محدود هنگام تایپ
-        if (Math.random() < 0.08) {
+        // -----------------------------------------
+        // GLITCH DURING TYPING
+        // -----------------------------------------
 
-            applyFullGlitch(0.6);
+        // در هنگام تایپ، glitch سبک‌تر
+        if (Math.random() < 0.16) {
+
+            createTypingGlitch();
         }
 
 
-        let currentSpeed = speed;
+        let currentSpeed =
+            speed;
+
 
         const char =
             text.charAt(i - 1);
@@ -441,7 +801,8 @@ function typeWriter(
 
 
         const variation =
-            0.9 + Math.random() * 0.2;
+            0.9 +
+            Math.random() * 0.2;
 
 
         setTimeout(
@@ -452,6 +813,124 @@ function typeWriter(
 
 
     type();
+}
+
+
+// =====================================================
+// GLITCH DURING TYPING
+// =====================================================
+
+function createTypingGlitch() {
+
+    const container =
+        document.querySelector(
+            '.typing-text'
+        );
+
+    if (!container) return;
+
+
+    const rect =
+        container.getBoundingClientRect();
+
+
+    // فقط 1 تا 3 مستطیل
+    const count =
+        Math.floor(random(1, 4));
+
+
+    for (let i = 0; i < count; i++) {
+
+        const rectangle =
+            document.createElement('div');
+
+
+        rectangle.className =
+            'glitch-rectangle';
+
+
+        const width =
+            random(15, 100);
+
+
+        const height =
+            random(1, 3);
+
+
+        rectangle.style.width =
+            `${width}px`;
+
+        rectangle.style.height =
+            `${height}px`;
+
+
+        rectangle.style.left =
+            `${random(
+                0,
+                Math.max(
+                    0,
+                    rect.width - width
+                )
+            )}px`;
+
+
+        rectangle.style.top =
+            `${random(
+                0,
+                rect.height
+            )}px`;
+
+
+        if (Math.random() < 0.5) {
+
+            rectangle.classList.add(
+                'black'
+            );
+        }
+
+
+        rectangle.style.setProperty(
+            '--x1',
+            `${random(-8, 8)}px`
+        );
+
+        rectangle.style.setProperty(
+            '--x2',
+            `${random(-14, 14)}px`
+        );
+
+        rectangle.style.setProperty(
+            '--x3',
+            `${random(-6, 6)}px`
+        );
+
+        rectangle.style.setProperty(
+            '--x4',
+            `0px`
+        );
+
+        rectangle.style.setProperty(
+            '--opacity',
+            `${random(0.4, 0.75)}`
+        );
+
+        rectangle.style.setProperty(
+            '--duration',
+            `${random(60, 120)}ms`
+        );
+
+
+        container.appendChild(
+            rectangle
+        );
+
+
+        setTimeout(() => {
+
+            rectangle.remove();
+
+        }, 130);
+    }
 }
 
 
@@ -497,19 +976,19 @@ function setupBaroonClick() {
 
             element.addEventListener(
                 'click',
-                function (event) {
+                function(event) {
 
                     event.stopPropagation();
 
 
-                    // Glitch شدیدتر هنگام ورود
+                    // چند glitch پشت سر هم
                     for (let i = 0; i < 6; i++) {
 
                         setTimeout(() => {
 
-                            applyFullGlitch(1.8);
+                            applyFullGlitch();
 
-                        }, i * 75);
+                        }, i * 70);
                     }
 
 
@@ -546,19 +1025,18 @@ function setupDeveloperDblClick() {
 
                 word.addEventListener(
                     'dblclick',
-                    function (event) {
+                    function(event) {
 
                         event.stopPropagation();
 
 
-                        // Glitch شدیدتر هنگام ورود
                         for (let i = 0; i < 6; i++) {
 
                             setTimeout(() => {
 
-                                applyFullGlitch(1.8);
+                                applyFullGlitch();
 
-                            }, i * 75);
+                            }, i * 70);
                         }
 
 
@@ -599,7 +1077,7 @@ function startPage() {
         );
 
 
-    // Already logged in as user
+    // User already verified
     if (
         isVerified &&
         lastPanel === 'user'
@@ -612,7 +1090,7 @@ function startPage() {
     }
 
 
-    // Already logged in as developer
+    // Developer already verified
     if (
         isDev &&
         lastPanel === 'dev'
@@ -625,12 +1103,10 @@ function startPage() {
     }
 
 
-    // Initial structure
-    mainElement.innerHTML =
-        buildGlitchStructure(fullText);
+    // Start empty
+    mainElement.innerHTML = '';
 
 
-    // Start typewriter
     setTimeout(() => {
 
         typeWriter(
@@ -639,26 +1115,27 @@ function startPage() {
             100,
             () => {
 
-                setTimeout(() => {
+                // ---------------------------------
+                // TYPING FINISHED
+                // ---------------------------------
 
-                    // -------------------------------------------------
-                    // Ambient glitch
-                    // -------------------------------------------------
+                setTimeout(() => {
 
                     glitchInterval =
                         setInterval(() => {
 
+                            // glitch معمولی
                             if (
                                 Math.random() <
-                                0.28
+                                0.38
                             ) {
 
-                                applyFullGlitch(1);
+                                applyFullGlitch();
                             }
 
-                        }, 900);
+                        }, 700);
 
-                }, 500);
+                }, 300);
             }
         );
 
