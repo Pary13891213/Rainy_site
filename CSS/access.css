@@ -68,6 +68,7 @@ body {
     gap: 6px;
 }
 
+/* ===== متن‌های همرنگ Start ===== */
 .input-label {
     color: rgba(255, 255, 255, 0.4);
     font-size: 11px;
@@ -76,11 +77,11 @@ body {
     font-weight: 300;
 }
 
-/* ===== کادرهای مشکی با لبه گرد (مثل dev-enter) ===== */
+/* ===== کادرها ===== */
 .code-input {
     width: 100%;
     background: #0a0a0a;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 12px;
     color: #ffffff;
     font-family: 'Courier New', Courier, monospace;
@@ -90,16 +91,17 @@ body {
     transition: all 0.3s ease;
     text-align: left;
     letter-spacing: 0.5px;
+    font-weight: 300;
 }
 
 .code-input::placeholder {
-    color: rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.12);
     font-size: 14px;
 }
 
 .code-input:focus {
-    border-color: rgba(255, 255, 255, 0.5);
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.02);
 }
 
 /* ===== VERIFY BUTTON ===== */
@@ -151,38 +153,89 @@ body {
     white-space: pre-wrap;
 }
 
-/* ===== GLITCH ===== */
+/* ===== GLITCH RECTANGLE (همانند Start) ===== */
 .glitch-rectangle {
-    position: absolute;
+    position: fixed;
     pointer-events: none;
     z-index: 3;
-    animation: glitch-real 0.15s forwards;
+    animation: glitchRect 0.2s forwards;
     opacity: 0;
 }
 
-@keyframes glitch-real {
-    0% { opacity: 0; transform: translateX(-5px); }
-    15% { opacity: 0.8; transform: translateX(5px); }
-    30% { opacity: 0.8; transform: translateX(-3px); }
-    100% { opacity: 0; transform: translateX(0); }
-}
-
-.glitch-error {
-    position: absolute;
-    pointer-events: none;
-    z-index: 3;
-    animation: glitch-error 0.3s forwards;
-    opacity: 0;
-}
-
-@keyframes glitch-error {
+@keyframes glitchRect {
     0% { opacity: 0; transform: translateX(-8px) scaleX(1.03); }
-    20% { opacity: 0.9; transform: translateX(8px) scaleX(0.97); }
-    40% { opacity: 0.9; transform: translateX(-4px) scaleX(1.01); }
+    15% { opacity: 0.9; transform: translateX(8px) scaleX(0.97); }
+    30% { opacity: 0.9; transform: translateX(-4px) scaleX(1.01); }
+    50% { opacity: 0.7; transform: translateX(4px) scaleX(0.99); }
     100% { opacity: 0; transform: translateX(0) scaleX(1); }
 }
 
-/* ===== SCANLINES ===== */
+/* ===== GLITCH LINE (خط افقی) ===== */
+.glitch-line-glitch {
+    position: fixed;
+    pointer-events: none;
+    z-index: 3;
+    height: 2px;
+    animation: glitchLine 0.15s forwards;
+    opacity: 0;
+}
+
+@keyframes glitchLine {
+    0% { opacity: 0; transform: translateX(-15px); }
+    20% { opacity: 0.9; transform: translateX(15px); }
+    40% { opacity: 0.9; transform: translateX(-8px); }
+    100% { opacity: 0; transform: translateX(0); }
+}
+
+/* ===== GLITCH FLASH ===== */
+.glitch-flash {
+    position: fixed;
+    pointer-events: none;
+    z-index: 3;
+    animation: glitchFlash 0.1s forwards;
+    opacity: 0;
+}
+
+@keyframes glitchFlash {
+    0% { opacity: 0; }
+    20% { opacity: 0.4; }
+    80% { opacity: 0.4; }
+    100% { opacity: 0; }
+}
+
+/* ===== GLITCH BLOCK ===== */
+.glitch-block {
+    position: fixed;
+    pointer-events: none;
+    z-index: 3;
+    animation: glitchBlock 0.18s forwards;
+    opacity: 0;
+}
+
+@keyframes glitchBlock {
+    0% { opacity: 0; transform: scaleX(1); }
+    20% { opacity: 0.5; transform: scaleX(0.3); }
+    40% { opacity: 0.5; transform: scaleX(1.2); }
+    100% { opacity: 0; transform: scaleX(1); }
+}
+
+/* ===== GLITCH ERROR (برای خطا) ===== */
+.glitch-error {
+    position: fixed;
+    pointer-events: none;
+    z-index: 3;
+    animation: glitchError 0.3s forwards;
+    opacity: 0;
+}
+
+@keyframes glitchError {
+    0% { opacity: 0; transform: translateX(-10px) scaleX(1.04); }
+    20% { opacity: 0.9; transform: translateX(10px) scaleX(0.96); }
+    40% { opacity: 0.9; transform: translateX(-5px) scaleX(1.02); }
+    100% { opacity: 0; transform: translateX(0) scaleX(1); }
+}
+
+/* ===== SCANLINES (همانند Start) ===== */
 .scanlines {
     position: fixed;
     top: 0;
