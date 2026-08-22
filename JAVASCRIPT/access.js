@@ -15,7 +15,7 @@ const correctCode = "developer1123";
 let isLoggingIn = false;
 let glitchInterval = null;
 
-// ===== GLITCH: مستطیل‌ها (همانند Start) =====
+// ===== GLITCH: مستطیل‌ها =====
 function createGlitchRectangles(count = 2) {
     const page = document.querySelector('.access-page');
     const rect = page.getBoundingClientRect();
@@ -125,46 +125,12 @@ function createGlitchBlocks() {
     }
 }
 
-// ===== GLITCH: حرکت عناصر =====
-function applyGlitchMovement() {
-    // حرکت خطوط
-    document.querySelectorAll('.glitch-line').forEach(line => {
-        if (Math.random() < 0.12) {
-            const shiftX = (Math.random() - 0.5) * 14;
-            const shiftY = (Math.random() - 0.5) * 6;
-            line.style.transform = `translate(${shiftX}px, ${shiftY}px)`;
-            setTimeout(() => { line.style.transform = ''; }, 150);
-        }
-    });
-    
-    // حرکت کلمات
-    document.querySelectorAll('.glitch-word').forEach(word => {
-        if (Math.random() < 0.18) {
-            const shiftX = (Math.random() - 0.5) * 8;
-            const shiftY = (Math.random() - 0.5) * 4;
-            word.style.transform = `translate(${shiftX}px, ${shiftY}px)`;
-            setTimeout(() => { word.style.transform = ''; }, 120);
-        }
-    });
-    
-    // حرکت حروف
-    document.querySelectorAll('.glitch-char').forEach(char => {
-        if (Math.random() < 0.22) {
-            const shiftX = (Math.random() - 0.5) * 5;
-            const shiftY = (Math.random() - 0.5) * 3;
-            char.style.transform = `translate(${shiftX}px, ${shiftY}px)`;
-            setTimeout(() => { char.style.transform = ''; }, 100);
-        }
-    });
-}
-
 // ===== GLITCH FULL =====
 function applyFullGlitch() {
     createGlitchRectangles(2);
     createGlitchLines();
     createGlitchFlash();
     createGlitchBlocks();
-    applyGlitchMovement();
 }
 
 // ===== GLITCH ERROR =====
@@ -195,7 +161,6 @@ function applyErrorGlitch() {
         }, i * 100);
     }
     
-    // جابجایی کادرها
     [usernameInput, codeInput, verifyBtn].forEach(el => {
         if (el) {
             const shift = (Math.random() - 0.5) * 8;
@@ -214,7 +179,6 @@ function getWelcomeMessage() {
     const month = now.getMonth() + 1;
     const day = now.getDate();
     
-    // تاریخ‌های خاص
     if (month === 1 && day === 1) {
         return "Happy New Year, Baroon! I wish you a great year... maybe. It was a good year with you!! (◔◡◔)";
     }
@@ -231,12 +195,10 @@ function getWelcomeMessage() {
         return "It's a very special day today. A very, very, very special day. You didn't forget it, did you? (ㆆ_ㆆ) 눈_눈 Say congratulations to her. And if you can, go and see her. Or call her.";
     }
     
-    // ساعت ۰۰:۰۰
     if (hours === 0 && minutes === 0) {
         return "Come on. Wish something ( •̀ ω •́ )y . (Don't tell her I said you this, but Dev wished you A lot of good and beautiful things that make me want to kill you because you were the one she wished for〒▽〒(•ˋ _ ˊ•))";
     }
     
-    // بر اساس ساعت
     if (hours >= 4 && hours < 5) {
         return "Good morning Baroon. ^_~ May I know why you are here at this hour? (´。＿。｀) Just for you to know, Dev is asleep now. A very deep sleep. ◉_◉";
     }
@@ -378,14 +340,14 @@ codeInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') verifyCredentials();
 });
 
-// ===== GLITCH LOOP (همانند Start) =====
+// ===== GLITCH LOOP (فعال در پس‌زمینه) =====
 setInterval(() => {
     if (!welcomeContainer.style.display || welcomeContainer.style.display === 'none') {
-        if (Math.random() < 0.25) {
+        if (Math.random() < 0.30) {
             applyFullGlitch();
         }
     }
-}, 800);
+}, 700);
 
 document.addEventListener('DOMContentLoaded', () => {
     if (localStorage.getItem('deviceVerified') === 'true' && 

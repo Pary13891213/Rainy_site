@@ -68,13 +68,14 @@ body {
     gap: 6px;
 }
 
-/* ===== متن‌های همرنگ Start ===== */
+/* ===== متن‌های سفید (همرنگ Start) ===== */
 .input-label {
-    color: rgba(255, 255, 255, 0.4);
+    color: #ffffff;
     font-size: 11px;
     letter-spacing: 2px;
     text-transform: uppercase;
     font-weight: 300;
+    text-shadow: 0 0 2px rgba(255, 255, 255, 0.1);
 }
 
 /* ===== کادرها ===== */
@@ -95,13 +96,13 @@ body {
 }
 
 .code-input::placeholder {
-    color: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.15);
     font-size: 14px;
 }
 
 .code-input:focus {
     border-color: rgba(255, 255, 255, 0.4);
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.02);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.03);
 }
 
 /* ===== VERIFY BUTTON ===== */
@@ -153,7 +154,7 @@ body {
     white-space: pre-wrap;
 }
 
-/* ===== GLITCH RECTANGLE (همانند Start) ===== */
+/* ===== GLITCH RECTANGLE ===== */
 .glitch-rectangle {
     position: fixed;
     pointer-events: none;
@@ -170,7 +171,7 @@ body {
     100% { opacity: 0; transform: translateX(0) scaleX(1); }
 }
 
-/* ===== GLITCH LINE (خط افقی) ===== */
+/* ===== GLITCH LINE ===== */
 .glitch-line-glitch {
     position: fixed;
     pointer-events: none;
@@ -219,7 +220,7 @@ body {
     100% { opacity: 0; transform: scaleX(1); }
 }
 
-/* ===== GLITCH ERROR (برای خطا) ===== */
+/* ===== GLITCH ERROR ===== */
 .glitch-error {
     position: fixed;
     pointer-events: none;
@@ -235,7 +236,7 @@ body {
     100% { opacity: 0; transform: translateX(0) scaleX(1); }
 }
 
-/* ===== SCANLINES (همانند Start) ===== */
+/* ===== SCANLINES ===== */
 .scanlines {
     position: fixed;
     top: 0;
