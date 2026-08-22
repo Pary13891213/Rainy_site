@@ -8,23 +8,33 @@
 </head>
 <body>
     <div class="access-page">
-        <div class="header-text" id="header-text">WHO ARE YOU...</div>
+        <!-- دکمه Back (فقط در خطا) -->
+        <button id="back-btn" class="back-btn hidden">←</button>
         
-        <div class="access-box">
+        <!-- کادرهای ورودی -->
+        <div class="input-wrapper">
             <div class="input-group">
-                <div class="input-label">USERNAME:</div>
-                <input type="text" id="username-input" class="code-input" placeholder="Enter username...">
+                <div class="input-label">USERNAME</div>
+                <input type="text" id="username-input" class="code-input" placeholder="Enter username..." autocomplete="off">
             </div>
             
             <div class="input-group">
-                <div class="input-label">ACCESS CODE:</div>
-                <input type="text" id="code-input" class="code-input" placeholder="Enter access code...">
+                <div class="input-label">ACCESS CODE</div>
+                <input type="password" id="code-input" class="code-input" placeholder="Enter access code..." autocomplete="off">
             </div>
-            
-            <button id="verify-btn" class="verify-btn">VERIFY</button>
         </div>
+        
+        <!-- دکمه Verify -->
+        <button id="verify-btn" class="verify-btn">VERIFY</button>
+        
+        <!-- پیام خوش‌آمدگویی -->
+        <div id="welcome-message-container" class="welcome-message-container" style="display: none;">
+            <div id="welcome-message" class="welcome-message"></div>
+        </div>
+        
+        <div class="scanlines"></div>
     </div>
-
+    
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script src="/JAVASCRIPT/access.js"></script>
 </body>

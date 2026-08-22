@@ -36,41 +36,47 @@ function buildGlitchStructure(text) {
     return html;
 }
 
-// ===== GLITCH: حرکت مستقل حروف، کلمات، خطوط =====
+// ===== GLITCH: حرکت تصادفی حروف، کلمات، خطوط =====
 function applyGlitchMovement() {
-    // ۱. حرکت خطوط (بزرگ‌ترین)
+    // ۱. حرکت خطوط (بزرگ‌ترین) - هر خط با زمان و مقدار متفاوت
     document.querySelectorAll('.glitch-line').forEach(line => {
-        if (Math.random() < 0.15) {
-            const shiftX = (Math.random() - 0.5) * 8;
-            const shiftY = (Math.random() - 0.5) * 3;
+        if (Math.random() < 0.12) {
+            const shiftX = (Math.random() - 0.5) * 10;
+            const shiftY = (Math.random() - 0.5) * 4;
+            const duration = 100 + Math.random() * 150;
+            line.style.transition = `transform ${duration}ms ease-out`;
             line.style.transform = `translate(${shiftX}px, ${shiftY}px)`;
             setTimeout(() => {
                 line.style.transform = '';
-            }, 150 + Math.random() * 100);
+            }, duration + 50);
         }
     });
     
-    // ۲. حرکت کلمات (متوسط)
+    // ۲. حرکت کلمات (متوسط) - هر کلمه با زمان و مقدار متفاوت
     document.querySelectorAll('.glitch-word').forEach(word => {
-        if (Math.random() < 0.20) {
-            const shiftX = (Math.random() - 0.5) * 5;
-            const shiftY = (Math.random() - 0.5) * 2;
+        if (Math.random() < 0.18) {
+            const shiftX = (Math.random() - 0.5) * 6;
+            const shiftY = (Math.random() - 0.5) * 3;
+            const duration = 80 + Math.random() * 120;
+            word.style.transition = `transform ${duration}ms ease-out`;
             word.style.transform = `translate(${shiftX}px, ${shiftY}px)`;
             setTimeout(() => {
                 word.style.transform = '';
-            }, 120 + Math.random() * 80);
+            }, duration + 40);
         }
     });
     
-    // ۳. حرکت حروف (کوچک‌ترین)
+    // ۳. حرکت حروف (کوچک‌ترین) - هر حرف با زمان و مقدار متفاوت
     document.querySelectorAll('.glitch-char').forEach(char => {
-        if (Math.random() < 0.25) {
-            const shiftX = (Math.random() - 0.5) * 3;
-            const shiftY = (Math.random() - 0.5) * 2;
+        if (Math.random() < 0.22) {
+            const shiftX = (Math.random() - 0.5) * 4;
+            const shiftY = (Math.random() - 0.5) * 2.5;
+            const duration = 60 + Math.random() * 100;
+            char.style.transition = `transform ${duration}ms ease-out`;
             char.style.transform = `translate(${shiftX}px, ${shiftY}px)`;
             setTimeout(() => {
                 char.style.transform = '';
-            }, 100 + Math.random() * 60);
+            }, duration + 30);
         }
     });
 }
