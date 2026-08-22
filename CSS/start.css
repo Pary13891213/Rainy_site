@@ -91,6 +91,28 @@ body {
     width: 100%;
 }
 
+/* ===== BAROON WORD ===== */
+.baroon-word {
+    font-style: italic !important;
+    cursor: pointer;
+    transition: text-decoration 0.3s ease;
+}
+
+.baroon-word:hover {
+    text-decoration: underline;
+    text-decoration-color: rgba(255, 255, 255, 0.3);
+    text-underline-offset: 3px;
+}
+
+.baroon-char {
+    font-style: italic !important;
+}
+
+/* ===== DEVELOPER WORD ===== */
+.glitch-word {
+    cursor: default;
+}
+
 /* ===== GLITCH RECTANGLE ===== */
 .glitch-rectangle {
     position: absolute;

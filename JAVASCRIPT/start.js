@@ -20,14 +20,21 @@ function buildGlitchStructure(text) {
             let wordHtml = '';
             
             chars.forEach((char, charIndex) => {
-                wordHtml += `<span class="glitch-char" data-line="${lineIndex}" data-word="${wordIndex}" data-char="${charIndex}">${char}</span>`;
+                // تشخیص کلمه Baroon برای ایتالیک و کلیک
+                const isBaroon = (word === 'Baroon!' || word === 'Baroon');
+                const charClass = isBaroon ? 'glitch-char baroon-char' : 'glitch-char';
+                wordHtml += `<span class="${charClass}" data-line="${lineIndex}" data-word="${wordIndex}" data-char="${charIndex}">${char}</span>`;
             });
+            
+            // تشخیص کلمه Baroon برای کلیک
+            const isBaroonWord = (word === 'Baroon!' || word === 'Baroon');
+            const wordClass = isBaroonWord ? 'glitch-word baroon-word' : 'glitch-word';
             
             if (wordIndex < words.length - 1) {
                 wordHtml += `<span class="glitch-char" data-line="${lineIndex}" data-word="${wordIndex}" data-char="space"> </span>`;
             }
             
-            lineHtml += `<span class="glitch-word" data-line="${lineIndex}" data-word="${wordIndex}">${wordHtml}</span>`;
+            lineHtml += `<span class="${wordClass}" data-line="${lineIndex}" data-word="${wordIndex}">${wordHtml}</span>`;
         });
         
         html += `<span class="glitch-line" data-line="${lineIndex}">${lineHtml}</span>`;
@@ -36,11 +43,11 @@ function buildGlitchStructure(text) {
     return html;
 }
 
-// ===== GLITCH: حرکت تصادفی حروف، کلمات، خطوط =====
+// ===== GLITCH: حرکت مستقل حروف، کلمات، خطوط =====
 function applyGlitchMovement() {
-    // ۱. حرکت خطوط (بزرگ‌ترین) - هر خط با زمان و مقدار متفاوت
+    // ۱. حرکت خطوط (بزرگ‌ترین)
     document.querySelectorAll('.glitch-line').forEach(line => {
-        if (Math.random() < 0.12) {
+        if (Math.random() < 0.15) {
             const shiftX = (Math.random() - 0.5) * 10;
             const shiftY = (Math.random() - 0.5) * 4;
             const duration = 100 + Math.random() * 150;
@@ -52,9 +59,9 @@ function applyGlitchMovement() {
         }
     });
     
-    // ۲. حرکت کلمات (متوسط) - هر کلمه با زمان و مقدار متفاوت
+    // ۲. حرکت کلمات (متوسط)
     document.querySelectorAll('.glitch-word').forEach(word => {
-        if (Math.random() < 0.18) {
+        if (Math.random() < 0.20) {
             const shiftX = (Math.random() - 0.5) * 6;
             const shiftY = (Math.random() - 0.5) * 3;
             const duration = 80 + Math.random() * 120;
@@ -66,9 +73,9 @@ function applyGlitchMovement() {
         }
     });
     
-    // ۳. حرکت حروف (کوچک‌ترین) - هر حرف با زمان و مقدار متفاوت
+    // ۳. حرکت حروف (کوچک‌ترین)
     document.querySelectorAll('.glitch-char').forEach(char => {
-        if (Math.random() < 0.22) {
+        if (Math.random() < 0.25) {
             const shiftX = (Math.random() - 0.5) * 4;
             const shiftY = (Math.random() - 0.5) * 2.5;
             const duration = 60 + Math.random() * 100;
@@ -81,12 +88,12 @@ function applyGlitchMovement() {
     });
 }
 
-// ===== GLITCH: مستطیل‌های سفید/مشکی =====
+// ===== GLITCH: مستطیل‌ها =====
 function createGlitchRectangles() {
     const typingText = document.querySelector('.typing-text');
     const rect = typingText.getBoundingClientRect();
     
-    const count = Math.floor(Math.random() * 3) + 1;
+    const count = Math.floor(Math.random() * 2) + 1;
     
     for (let i = 0; i < count; i++) {
         const rectangle = document.createElement('div');
@@ -105,40 +112,35 @@ function createGlitchRectangles() {
             ? 'rgba(255, 255, 255, 0.6)' 
             : 'rgba(0, 0, 0, 0.7)';
         
-        setTimeout(() => {
-            typingText.appendChild(rectangle);
-        }, i * 30);
-        
-        setTimeout(() => {
-            rectangle.remove();
-        }, 250 + i * 30);
+        typingText.appendChild(rectangle);
+        setTimeout(() => rectangle.remove(), 200 + i * 30);
     }
 }
 
-// ===== GLITCH FULL =====
+// ===== GLITCH FULL (مستطیل + حرکت) =====
 function applyFullGlitch() {
     createGlitchRectangles();
     applyGlitchMovement();
 }
 
 // ===== TYPEWRITER =====
-function typeWriterWithClickable(text, element, clickableWord, speed = 100, callback = null) {
+function typeWriter(text, element, speed = 100, callback = null) {
     let i = 0;
-    element.innerHTML = '';
-    let wordTyped = false;
-    element.style.opacity = '1';
     let fullTextTyped = '';
     
     function type() {
         if (i >= text.length) {
             // بعد از تایپ کامل، ساختار گلیچ‌دار رو بازسازی کن
             element.innerHTML = buildGlitchStructure(text);
+            // تنظیم کلیک برای Baroon
+            setupBaroonClick();
+            // تنظیم دابل کلیک برای Developer
+            setupDeveloperDblClick();
             if (callback) callback();
             return;
         }
         
         fullTextTyped += text.charAt(i);
-        // نمایش متن ساده هنگام تایپ
         element.innerHTML = fullTextTyped;
         i++;
         
@@ -160,11 +162,23 @@ function typeWriterWithClickable(text, element, clickableWord, speed = 100, call
     type();
 }
 
-// ===== CLICKABLE WORD SETUP =====
-function setupClickableWord() {
-    const clickable = document.querySelector('#text-main .clickable');
-    if (clickable) {
-        clickable.addEventListener('click', function(e) {
+// ===== SETUP: کلیک روی Baroon (تک کلیک) =====
+function setupBaroonClick() {
+    document.querySelectorAll('.baroon-word').forEach(el => {
+        el.style.cursor = 'pointer';
+        el.style.fontStyle = 'italic';
+        
+        // هاور: زیرخط
+        el.addEventListener('mouseenter', () => {
+            el.style.textDecoration = 'underline';
+            el.style.textDecorationColor = 'rgba(255,255,255,0.3)';
+        });
+        el.addEventListener('mouseleave', () => {
+            el.style.textDecoration = 'none';
+        });
+        
+        // کلیک
+        el.addEventListener('click', function(e) {
             e.stopPropagation();
             
             for (let i = 0; i < 6; i++) {
@@ -177,7 +191,42 @@ function setupClickableWord() {
                 window.location.href = "../HTML/access.html";
             }, 500);
         });
-    }
+        
+        // حروف داخل کلمه Baroon هم کلیک‌پذیر باشن
+        el.querySelectorAll('.baroon-char').forEach(char => {
+            char.style.cursor = 'pointer';
+        });
+    });
+}
+
+// ===== SETUP: دابل کلیک روی Developer =====
+function setupDeveloperDblClick() {
+    const textContent = mainElement.textContent || '';
+    const devIndex = textContent.indexOf('Developer');
+    if (devIndex === -1) return;
+    
+    // پیدا کردن کلمه Developer در DOM
+    const allWords = document.querySelectorAll('.glitch-word');
+    allWords.forEach(word => {
+        if (word.textContent.trim() === 'Developer') {
+            word.style.cursor = 'pointer';
+            
+            // دابل کلیک
+            word.addEventListener('dblclick', function(e) {
+                e.stopPropagation();
+                
+                for (let i = 0; i < 6; i++) {
+                    setTimeout(() => {
+                        applyFullGlitch();
+                    }, i * 80);
+                }
+                
+                setTimeout(() => {
+                    window.location.href = "../HTML/dev-enter.html";
+                }, 500);
+            });
+        }
+    });
 }
 
 // ===== START PAGE =====
@@ -201,22 +250,8 @@ function startPage() {
     
     setTimeout(() => {
         // تایپ مجدد با افکت
-        typeWriterWithClickable(fullText, mainElement, 'Baroon!', 100, () => {
+        typeWriter(fullText, mainElement, 100, () => {
             setTimeout(() => {
-                // بعد از تایپ، کلمه کلیک‌پذیر رو تنظیم کن
-                const clickableSpan = document.querySelector('#text-main .clickable');
-                if (clickableSpan) {
-                    clickableSpan.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        for (let i = 0; i < 6; i++) {
-                            setTimeout(() => applyFullGlitch(), i * 80);
-                        }
-                        setTimeout(() => {
-                            window.location.href = "../HTML/access.html";
-                        }, 500);
-                    });
-                }
-                
                 // Glitch بعد از تایپ (۳۰٪)
                 glitchInterval = setInterval(() => {
                     if (Math.random() < 0.30) {
@@ -228,66 +263,9 @@ function startPage() {
     }, 500);
 }
 
-// ===== DEV PANEL ACCESS =====
-document.addEventListener('keydown', function(event) {
-    if ((event.key === 'D' || event.key === 'd') && 
-        event.target.tagName !== 'INPUT' && 
-        event.target.tagName !== 'TEXTAREA') {
-        window.location.href = "../HTML/dev-enter.html";
-    }
-});
-
+// ===== DEV PANEL ACCESS (دابل کلیک روی Developer) =====
 document.addEventListener('DOMContentLoaded', function() {
-    const mainEl = document.getElementById('text-main');
-    if (!mainEl) return;
-    
-    let tapCount = 0;
-    let tapTimer = null;
-    const isMobile = window.innerWidth < 768;
-    
-    function openDevEnter() {
-        if (navigator.vibrate) navigator.vibrate(15);
-        setTimeout(() => {
-            window.location.href = '/HTML/dev-enter.html';
-        }, 200);
-    }
-    
-    function isDeveloperClick(target) {
-        return target && target.textContent && target.textContent.includes('Developer');
-    }
-    
-    mainEl.addEventListener('touchstart', function(e) {
-        if (!isMobile) return;
-        const target = e.target;
-        if (isDeveloperClick(target)) {
-            tapCount++;
-            clearTimeout(tapTimer);
-            if (tapCount >= 2) {
-                tapCount = 0;
-                clearTimeout(tapTimer);
-                e.preventDefault();
-                openDevEnter();
-                return;
-            }
-            tapTimer = setTimeout(() => { tapCount = 0; }, 400);
-        }
-    });
-    
-    mainEl.addEventListener('click', function(e) {
-        if (isMobile) return;
-        const target = e.target;
-        if (isDeveloperClick(target)) {
-            tapCount++;
-            clearTimeout(tapTimer);
-            if (tapCount >= 2) {
-                tapCount = 0;
-                clearTimeout(tapTimer);
-                openDevEnter();
-                return;
-            }
-            tapTimer = setTimeout(() => { tapCount = 0; }, 400);
-        }
-    });
+    // اینجا دیگه نیازی نیست چون توی setupDeveloperDblClick هندل میشه
 });
 
 document.addEventListener('DOMContentLoaded', startPage);
