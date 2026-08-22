@@ -13,7 +13,7 @@ const element3 = document.getElementById("text-three");
 
 let glitchInterval = null;
 
-// ===== GLITCH FUNCTIONS =====
+// ===== GLITCH FUNCTIONS (Medium) =====
 function createGlitchRectangle() {
     const typingText = document.querySelector('.typing-text');
     const rect = typingText.getBoundingClientRect();
@@ -23,10 +23,9 @@ function createGlitchRectangle() {
     for (let i = 0; i < rectangleCount; i++) {
         const rectangle = document.createElement('div');
         rectangle.className = 'glitch-rectangle';
-        rectangle.classList.add(Math.random() < 0.4 ? 'white' : 'black');
         
         const width = 40 + Math.random() * 80;
-        const height = 3 + Math.random() * 2;
+        const height = 2 + Math.random() * 2;
         const posX = Math.random() * (rect.width - width);
         const posY = Math.random() * (rect.height - height);
         
@@ -39,7 +38,7 @@ function createGlitchRectangle() {
         
         setTimeout(() => {
             rectangle.remove();
-        }, 120);
+        }, 150);
     }
 }
 
@@ -50,17 +49,19 @@ function shiftText(element, intensity) {
     const direction = Math.random() > 0.5 ? 1 : -1;
     const originalTransform = element.style.transform || '';
     
+    element.style.transition = 'transform 0.06s ease-out';
     element.style.transform = `${originalTransform} translateX(${shiftAmount * direction}px)`;
     
     setTimeout(() => {
         element.style.transform = originalTransform;
-    }, 80);
+    }, 100);
 }
 
 // ===== TYPEWRITER =====
-function typeWriter(text, element, speed = 80, callback = null) {
+function typeWriter(text, element, speed = 60, callback = null) {
     let i = 0;
     element.innerHTML = '';
+    element.style.opacity = '1';
     
     function type() {
         if (i >= text.length) {
@@ -72,18 +73,17 @@ function typeWriter(text, element, speed = 80, callback = null) {
         element.innerHTML += currentChar;
         i++;
         
-        // Glitch during typing (reduced)
         if (Math.random() < 0.04) {
             createGlitchRectangle();
-            if (Math.random() < 0.3) {
+            if (Math.random() < 0.4) {
                 shiftText(element, 4);
             }
         }
         
         let currentSpeed = speed;
         const char = text.charAt(i - 1);
-        if ('.!?'.includes(char)) currentSpeed = speed * 1.5;
-        else if (',:'.includes(char)) currentSpeed = speed * 1.2;
+        if ('.!?'.includes(char)) currentSpeed = speed * 1.8;
+        else if (',:'.includes(char)) currentSpeed = speed * 1.3;
         
         setTimeout(type, currentSpeed);
     }
@@ -92,10 +92,11 @@ function typeWriter(text, element, speed = 80, callback = null) {
 }
 
 // ===== TYPEWRITER WITH CLICKABLE WORD =====
-function typeWriterWithClickable(text, element, clickableWord, speed = 80, callback = null) {
+function typeWriterWithClickable(text, element, clickableWord, speed = 60, callback = null) {
     let i = 0;
     element.innerHTML = '';
     let wordTyped = false;
+    element.style.opacity = '1';
     
     function type() {
         if (i >= text.length) {
@@ -106,27 +107,27 @@ function typeWriterWithClickable(text, element, clickableWord, speed = 80, callb
         const remaining = text.slice(i);
         const wordIndex = remaining.indexOf(clickableWord);
         
-        // اگه به کلمه رسیدیم و هنوز تایپ نشده
         if (wordIndex === 0 && !wordTyped) {
             wordTyped = true;
             typeClickableWord(0);
             return;
         }
         
-        // تایپ عادی
         const currentChar = text.charAt(i);
         element.innerHTML += currentChar;
         i++;
         
         if (Math.random() < 0.04) {
             createGlitchRectangle();
-            if (Math.random() < 0.3) shiftText(element, 4);
+            if (Math.random() < 0.4) {
+                shiftText(element, 4);
+            }
         }
         
         let currentSpeed = speed;
         const char = text.charAt(i - 1);
-        if ('.!?'.includes(char)) currentSpeed = speed * 1.5;
-        else if (',:'.includes(char)) currentSpeed = speed * 1.2;
+        if ('.!?'.includes(char)) currentSpeed = speed * 1.8;
+        else if (',:'.includes(char)) currentSpeed = speed * 1.3;
         
         setTimeout(type, currentSpeed);
     }
@@ -138,14 +139,13 @@ function typeWriterWithClickable(text, element, clickableWord, speed = 80, callb
             const beforeText = text.slice(0, i);
             const afterText = text.slice(i + word.length);
             
-            // با span clickable
             element.innerHTML = beforeText + 
                 `<span class="clickable" id="clickable-word">${typedWord}</span>` + 
                 afterText;
             
             setTimeout(() => {
                 typeClickableWord(index + 1);
-            }, speed);
+            }, speed * 0.9);
         } else {
             i += word.length;
             setTimeout(type, speed);
@@ -155,18 +155,17 @@ function typeWriterWithClickable(text, element, clickableWord, speed = 80, callb
     type();
 }
 
-// ===== CLICK HANDLER (ONCE) =====
+// ===== CLICK HANDLER (Once) =====
 function setupClickableWord() {
     const clickable = document.getElementById('clickable-word');
     if (clickable) {
         clickable.addEventListener('click', function(e) {
             e.stopPropagation();
             
-            // Glitch effect on click
             for (let i = 0; i < 3; i++) {
                 setTimeout(() => {
                     createGlitchRectangle();
-                    shiftText(element3, 6);
+                    shiftText(element3, 5);
                 }, i * 100);
             }
             
@@ -179,7 +178,6 @@ function setupClickableWord() {
 
 // ===== START PAGE =====
 function startPage() {
-    // Check if already logged in
     const isVerified = localStorage.getItem('deviceVerified') === 'true';
     const isDev = localStorage.getItem('devAccess') === 'true';
     const lastPanel = localStorage.getItem('lastPanel');
@@ -194,20 +192,12 @@ function startPage() {
         return;
     }
     
-    // Add scanlines
-    const startPage = document.querySelector('.start-page');
-    const scanlines = document.createElement('div');
-    scanlines.className = 'scanlines';
-    startPage.appendChild(scanlines);
-    
-    // Start typing
     setTimeout(() => {
-        typeWriter(textOne, element1, 100, () => {
+        typeWriter(textOne, element1, 70, () => {
             setTimeout(() => {
-                typeWriter(textTwo, element2, 80, () => {
+                typeWriter(textTwo, element2, 50, () => {
                     setTimeout(() => {
-                        typeWriterWithClickable(textThree, element3, 'Baroon!', 100, () => {
-                            // After typing complete, start reduced glitch
+                        typeWriterWithClickable(textThree, element3, 'Baroon!', 70, () => {
                             setTimeout(() => {
                                 setupClickableWord();
                                 
@@ -217,7 +207,7 @@ function startPage() {
                                         if (Math.random() < 0.3) {
                                             const elements = [element1, element2, element3];
                                             const el = elements[Math.floor(Math.random() * elements.length)];
-                                            shiftText(el, 3);
+                                            shiftText(el, 4);
                                         }
                                     }
                                 }, 2000);
@@ -227,10 +217,10 @@ function startPage() {
                 });
             }, 300);
         });
-    }, 1000);
+    }, 800);
 }
 
-// ===== DEV PANEL ACCESS (Keyboard: D) =====
+// ===== DEV PANEL ACCESS =====
 document.addEventListener('keydown', function(event) {
     if ((event.key === 'D' || event.key === 'd') && 
         event.target.tagName !== 'INPUT' && 
@@ -239,9 +229,7 @@ document.addEventListener('keydown', function(event) {
     }
 });
 
-// ===== DEV PANEL ACCESS (Double tap on "Developer") =====
 document.addEventListener('DOMContentLoaded', function() {
-    // Double tap on "Developer" in text-one
     const textOneEl = document.getElementById('text-one');
     if (!textOneEl) return;
     
@@ -250,13 +238,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const isMobile = window.innerWidth < 768;
     
     function openDevEnter() {
-        if (navigator.vibrate) navigator.vibrate(20);
+        if (navigator.vibrate) navigator.vibrate(15);
         setTimeout(() => {
             window.location.href = '/HTML/dev-enter.html';
         }, 200);
     }
     
-    // Mobile: touchstart
     textOneEl.addEventListener('touchstart', function(e) {
         if (!isMobile) return;
         const target = e.target;
@@ -274,7 +261,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Desktop: click
     textOneEl.addEventListener('click', function(e) {
         if (isMobile) return;
         const target = e.target;
@@ -292,5 +278,4 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// ===== START =====
 document.addEventListener('DOMContentLoaded', startPage);

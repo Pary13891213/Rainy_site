@@ -5,7 +5,7 @@
 }
 
 body {
-    background: black;
+    background: #000;
     overflow: hidden;
     height: 100vh;
     font-family: 'Courier New', Courier, monospace;
@@ -25,23 +25,24 @@ body {
 }
 
 .typing-text {
-    color: #88ddff;
+    color: #ffffff;
     font-size: 32px;
     line-height: 1.8;
     max-width: 800px;
     padding: 20px;
     text-align: center;
-    font-weight: normal;
+    font-weight: 500;
     direction: ltr;
     position: relative;
     z-index: 2;
     text-shadow: 
-        0 0 2px rgba(136, 221, 255, 0.3),
-        0 0 4px rgba(136, 221, 255, 0.1);
+        0 0 1px rgba(255, 255, 255, 0.2),
+        0 0 2px rgba(255, 255, 255, 0.1);
+    letter-spacing: 0.5px;
 }
 
 #text-one, #text-two, #text-three {
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     white-space: pre-wrap;
 }
 
@@ -49,61 +50,54 @@ body {
     font-style: italic;
     cursor: pointer;
     transition: all 0.3s ease;
-    text-shadow: 0 0 4px rgba(136, 221, 255, 0.2);
+    text-shadow: 0 0 3px rgba(255, 255, 255, 0.15);
     position: relative;
     display: inline-block;
 }
 
 #text-three .clickable:hover {
-    text-shadow: 0 0 8px rgba(136, 221, 255, 0.3);
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.25);
 }
 
+/* ===== GLITCH ===== */
 .glitch-rectangle {
     position: absolute;
-    background: rgba(50, 50, 50, 0.9);
+    background: rgba(255, 255, 255, 0.15);
     pointer-events: none;
     z-index: 3;
-    animation: glitch-rectangle 0.12s forwards;
+    animation: glitch-rectangle 0.15s forwards;
+    border-radius: 1px;
 }
 
 @keyframes glitch-rectangle {
-    0% { opacity: 0; }
-    50% { opacity: 0.8; }
-    100% { opacity: 0; }
+    0% { opacity: 0; transform: translateX(-2px); }
+    20% { opacity: 0.6; }
+    80% { opacity: 0.6; }
+    100% { opacity: 0; transform: translateX(2px); }
 }
 
-.glitch-rectangle.white {
-    background: rgba(255, 255, 255, 0.9);
-}
-
-.glitch-rectangle.black {
-    background: rgba(0, 0, 0, 0.95);
-}
-
+/* ===== SCANLINES ===== */
 .scanlines {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(
-        to bottom,
-        transparent 50%,
-        rgba(100, 200, 255, 0.02) 50%
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(255, 255, 255, 0.008) 2px,
+        rgba(255, 255, 255, 0.008) 4px
     );
-    background-size: 100% 4px;
     pointer-events: none;
     z-index: 1;
-    animation: scanlines 8s linear infinite;
+    animation: scanlines 10s linear infinite;
 }
 
 @keyframes scanlines {
-    0% {
-        background-position: 0 0;
-    }
-    100% {
-        background-position: 0 100%;
-    }
+    0% { transform: translateY(0); }
+    100% { transform: translateY(4px); }
 }
 
 /* ===== RESPONSIVE ===== */
