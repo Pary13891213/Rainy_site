@@ -62,21 +62,20 @@ body {
 /* ===== GLITCH ===== */
 .glitch-rectangle {
     position: absolute;
-    background: rgba(255, 255, 255, 0.15);
     pointer-events: none;
     z-index: 3;
-    animation: glitch-rectangle 0.15s forwards;
+    animation: glitch-rectangle 0.18s forwards;
     border-radius: 1px;
 }
 
 @keyframes glitch-rectangle {
-    0% { opacity: 0; transform: translateX(-2px); }
-    20% { opacity: 0.6; }
-    80% { opacity: 0.6; }
-    100% { opacity: 0; transform: translateX(2px); }
+    0% { opacity: 0; transform: translateX(-3px); }
+    20% { opacity: 0.8; }
+    80% { opacity: 0.8; }
+    100% { opacity: 0; transform: translateX(3px); }
 }
 
-/* ===== SCANLINES ===== */
+/* ===== SCANLINES (Bigger & Smoother) ===== */
 .scanlines {
     position: absolute;
     top: 0;
@@ -86,18 +85,19 @@ body {
     background: repeating-linear-gradient(
         0deg,
         transparent,
-        transparent 3px,
-        rgba(255, 255, 255, 0.06) 3px,
-        rgba(255, 255, 255, 0.06) 4px
+        transparent 5px,
+        rgba(255, 255, 255, 0.05) 5px,
+        rgba(255, 255, 255, 0.05) 6px
     );
     pointer-events: none;
     z-index: 1;
-    animation: scanlines 6s linear infinite;
+    animation: scanlines 8s ease-in-out infinite;
 }
 
 @keyframes scanlines {
     0% { transform: translateY(0); }
-    100% { transform: translateY(4px); }
+    50% { transform: translateY(3px); }
+    100% { transform: translateY(6px); }
 }
 
 /* ===== RESPONSIVE ===== */

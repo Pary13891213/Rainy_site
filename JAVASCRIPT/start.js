@@ -24,8 +24,8 @@ function createGlitchRectangle() {
         const rectangle = document.createElement('div');
         rectangle.className = 'glitch-rectangle';
         
-        const width = 40 + Math.random() * 100;
-        const height = 2 + Math.random() * 2.5;
+        const width = 40 + Math.random() * 120;
+        const height = 2 + Math.random() * 3;
         const posX = Math.random() * (rect.width - width);
         const posY = Math.random() * (rect.height - height);
         
@@ -34,14 +34,14 @@ function createGlitchRectangle() {
         rectangle.style.left = `${posX}px`;
         rectangle.style.top = `${posY}px`;
         rectangle.style.background = Math.random() < 0.4 
-            ? 'rgba(255, 255, 255, 0.7)' 
-            : 'rgba(0, 0, 0, 0.8)';
+            ? 'rgba(255, 255, 255, 0.8)' 
+            : 'rgba(0, 0, 0, 0.85)';
         
         typingText.appendChild(rectangle);
         
         setTimeout(() => {
             rectangle.remove();
-        }, 180);
+        }, 200);
     }
 }
 
@@ -52,16 +52,16 @@ function shiftText(element, intensity) {
     const direction = Math.random() > 0.5 ? 1 : -1;
     const originalTransform = element.style.transform || '';
     
-    element.style.transition = 'transform 0.08s ease-out';
+    element.style.transition = 'transform 0.1s ease-out';
     element.style.transform = `${originalTransform} translateX(${shiftAmount * direction}px)`;
     
     setTimeout(() => {
         element.style.transform = originalTransform;
-    }, 120);
+    }, 150);
 }
 
-// ===== TYPEWRITER (Slower) =====
-function typeWriter(text, element, speed = 100, callback = null) {
+// ===== TYPEWRITER (Smoother) =====
+function typeWriter(text, element, speed = 90, callback = null) {
     let i = 0;
     element.innerHTML = '';
     element.style.opacity = '1';
@@ -76,11 +76,11 @@ function typeWriter(text, element, speed = 100, callback = null) {
         element.innerHTML += currentChar;
         i++;
         
-        // Glitch during typing (8% chance)
-        if (Math.random() < 0.08) {
+        // Glitch during typing (12% chance)
+        if (Math.random() < 0.12) {
             createGlitchRectangle();
             if (Math.random() < 0.5) {
-                shiftText(element, 5);
+                shiftText(element, 6);
             }
         }
         
@@ -89,14 +89,16 @@ function typeWriter(text, element, speed = 100, callback = null) {
         if ('.!?'.includes(char)) currentSpeed = speed * 2;
         else if (',:'.includes(char)) currentSpeed = speed * 1.5;
         
-        setTimeout(type, currentSpeed);
+        // Smooth typing with slight randomness
+        const variation = 0.9 + Math.random() * 0.2;
+        setTimeout(type, currentSpeed * variation);
     }
     
     type();
 }
 
-// ===== TYPEWRITER WITH CLICKABLE WORD (Slower) =====
-function typeWriterWithClickable(text, element, clickableWord, speed = 100, callback = null) {
+// ===== TYPEWRITER WITH CLICKABLE WORD (Smoother) =====
+function typeWriterWithClickable(text, element, clickableWord, speed = 90, callback = null) {
     let i = 0;
     element.innerHTML = '';
     let wordTyped = false;
@@ -121,10 +123,10 @@ function typeWriterWithClickable(text, element, clickableWord, speed = 100, call
         element.innerHTML += currentChar;
         i++;
         
-        if (Math.random() < 0.08) {
+        if (Math.random() < 0.12) {
             createGlitchRectangle();
             if (Math.random() < 0.5) {
-                shiftText(element, 5);
+                shiftText(element, 6);
             }
         }
         
@@ -133,7 +135,8 @@ function typeWriterWithClickable(text, element, clickableWord, speed = 100, call
         if ('.!?'.includes(char)) currentSpeed = speed * 2;
         else if (',:'.includes(char)) currentSpeed = speed * 1.5;
         
-        setTimeout(type, currentSpeed);
+        const variation = 0.9 + Math.random() * 0.2;
+        setTimeout(type, currentSpeed * variation);
     }
     
     function typeClickableWord(index) {
@@ -149,7 +152,7 @@ function typeWriterWithClickable(text, element, clickableWord, speed = 100, call
             
             setTimeout(() => {
                 typeClickableWord(index + 1);
-            }, speed * 0.9);
+            }, speed * 0.85);
         } else {
             i += word.length;
             setTimeout(type, speed);
@@ -166,11 +169,11 @@ function setupClickableWord() {
         clickable.addEventListener('click', function(e) {
             e.stopPropagation();
             
-            for (let i = 0; i < 4; i++) {
+            for (let i = 0; i < 5; i++) {
                 setTimeout(() => {
                     createGlitchRectangle();
-                    shiftText(element3, 6);
-                }, i * 120);
+                    shiftText(element3, 7);
+                }, i * 100);
             }
             
             setTimeout(() => {
@@ -196,27 +199,26 @@ function startPage() {
         return;
     }
     
-    // اسکن‌لاین توی HTML هست
     setTimeout(() => {
-        typeWriter(textOne, element1, 120, () => {
+        typeWriter(textOne, element1, 100, () => {
             setTimeout(() => {
-                typeWriter(textTwo, element2, 80, () => {
+                typeWriter(textTwo, element2, 70, () => {
                     setTimeout(() => {
-                        typeWriterWithClickable(textThree, element3, 'Baroon!', 120, () => {
+                        typeWriterWithClickable(textThree, element3, 'Baroon!', 100, () => {
                             setTimeout(() => {
                                 setupClickableWord();
                                 
-                                // Glitch every 1.5 seconds with 35% chance
+                                // More frequent glitch (every 1.2s with 45% chance)
                                 glitchInterval = setInterval(() => {
-                                    if (Math.random() < 0.35) {
+                                    if (Math.random() < 0.45) {
                                         createGlitchRectangle();
-                                        if (Math.random() < 0.4) {
+                                        if (Math.random() < 0.5) {
                                             const elements = [element1, element2, element3];
                                             const el = elements[Math.floor(Math.random() * elements.length)];
-                                            shiftText(el, 5);
+                                            shiftText(el, 6);
                                         }
                                     }
-                                }, 1500);
+                                }, 1200);
                             }, 600);
                         });
                     }, 500);
