@@ -151,9 +151,9 @@ function createGlitchBlocks() {
     }
 }
 
-// ===== GLITCH: حرکت شدیدتر =====
+// ===== GLITCH: حرکت حروف/کلمات/خطوط =====
 function applyGlitchMovement() {
-    // حرکت خطوط (شدیدتر)
+    // حرکت خطوط
     document.querySelectorAll('.glitch-line').forEach(line => {
         if (Math.random() < 0.18) {
             const shiftX = (Math.random() - 0.5) * 20;
@@ -165,7 +165,7 @@ function applyGlitchMovement() {
         }
     });
     
-    // حرکت کلمات (شدیدتر)
+    // حرکت کلمات
     document.querySelectorAll('.glitch-word').forEach(word => {
         if (Math.random() < 0.25) {
             const shiftX = (Math.random() - 0.5) * 12;
@@ -177,7 +177,7 @@ function applyGlitchMovement() {
         }
     });
     
-    // حرکت حروف (شدیدتر)
+    // حرکت حروف
     document.querySelectorAll('.glitch-char').forEach(char => {
         if (Math.random() < 0.30) {
             const shiftX = (Math.random() - 0.5) * 7;
@@ -190,7 +190,7 @@ function applyGlitchMovement() {
     });
 }
 
-// ===== GLITCH FULL (شدیدتر) =====
+// ===== GLITCH FULL =====
 function applyFullGlitch() {
     createGlitchRectangles();
     createGlitchLines();
@@ -199,8 +199,8 @@ function applyFullGlitch() {
     applyGlitchMovement();
 }
 
-// ===== TYPEWRITER (سرعت کمتر) =====
-function typeWriter(text, element, speed = 150, callback = null) {
+// ===== TYPEWRITER (سرعت 130ms) =====
+function typeWriter(text, element, speed = 130, callback = null) {
     let i = 0;
     let fullTextTyped = '';
     
@@ -217,9 +217,15 @@ function typeWriter(text, element, speed = 150, callback = null) {
         element.innerHTML = fullTextTyped;
         i++;
         
-        // Glitch هنگام تایپ (بیشتر)
+        // Glitch هنگام تایپ با حرکت حروف/کلمات/خطوط
         if (Math.random() < 0.45) {
-            applyFullGlitch();
+            // مستطیل‌ها و خطوط
+            createGlitchRectangles();
+            createGlitchLines();
+            createGlitchFlash();
+            createGlitchBlocks();
+            // حرکت حروف/کلمات/خطوط
+            applyGlitchMovement();
         }
         
         let currentSpeed = speed;
@@ -298,7 +304,7 @@ function startPage() {
     mainElement.innerHTML = buildGlitchStructure(fullText);
     
     setTimeout(() => {
-        typeWriter(fullText, mainElement, 150, () => {
+        typeWriter(fullText, mainElement, 130, () => {
             setTimeout(() => {
                 glitchInterval = setInterval(() => {
                     if (Math.random() < 0.50) {
