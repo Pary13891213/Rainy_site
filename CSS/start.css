@@ -8,7 +8,9 @@ body {
     background: #0a0a0a;
     overflow: hidden;
     height: 100vh;
+
     font-family: 'Courier New', Courier, monospace;
+
     display: flex;
     justify-content: center;
     align-items: center;
@@ -17,90 +19,130 @@ body {
 .start-page {
     width: 100%;
     height: 100vh;
+
     display: flex;
     justify-content: center;
     align-items: center;
+
     position: relative;
     overflow: hidden;
 }
 
+
+/* =====================================================
+   MAIN TEXT
+===================================================== */
+
 .typing-text {
     color: #ffffff;
+
     font-size: 34px;
     line-height: 2;
+
     max-width: 800px;
     padding: 30px;
+
     text-align: center;
     font-weight: 300;
+
     direction: ltr;
+
     position: relative;
     z-index: 2;
-    text-shadow: 
-        0 0 2px rgba(255, 255, 255, 0.15),
-        0 0 4px rgba(255, 255, 255, 0.08);
+
     letter-spacing: 1px;
+
+    text-shadow:
+        0 0 2px rgba(255, 255, 255, 0.15),
+        0 0 5px rgba(255, 255, 255, 0.05);
 }
 
 #text-main {
-    white-space: pre-wrap;
     position: relative;
+    white-space: pre-wrap;
+
+    will-change: transform, opacity, filter;
 }
 
-/* ===== هر خط ===== */
+
+/* =====================================================
+   TEXT STRUCTURE
+===================================================== */
+
 .glitch-line {
     display: block;
-    transition: transform 0.08s ease-out;
     position: relative;
+
+    will-change: transform;
 }
 
-/* ===== هر کلمه ===== */
 .glitch-word {
     display: inline-block;
-    transition: transform 0.06s ease-out;
     position: relative;
+
+    will-change: transform;
 }
 
-/* ===== هر حرف ===== */
 .glitch-char {
     display: inline-block;
-    transition: transform 0.05s ease-out;
     position: relative;
+
+    will-change: transform;
 }
+
+
+/* =====================================================
+   CLICKABLE
+===================================================== */
 
 #text-main .clickable {
     font-style: italic;
     cursor: pointer;
-    transition: all 0.4s ease;
-    text-shadow: 0 0 3px rgba(255, 255, 255, 0.12);
+
     position: relative;
     display: inline-block;
+
+    transition:
+        transform 0.3s ease,
+        text-shadow 0.3s ease;
 }
 
 #text-main .clickable::after {
     content: '';
+
     position: absolute;
-    bottom: -2px;
+
+    bottom: -3px;
     left: 0;
+
     width: 0;
     height: 1px;
-    background: rgba(255, 255, 255, 0.25);
-    transition: width 0.4s ease;
+
+    background: rgba(255, 255, 255, 0.35);
+
+    transition: width 0.3s ease;
 }
 
 #text-main .clickable:hover::after {
     width: 100%;
 }
 
-/* ===== BAROON WORD ===== */
+
+/* =====================================================
+   BAROON
+===================================================== */
+
 .baroon-word {
     font-style: italic !important;
     cursor: pointer;
-    transition: text-decoration 0.3s ease;
 }
 
 .baroon-word:hover {
     text-decoration: underline;
-    text-decoration-color: rgba(255, 255, 255, 0.3);
+
+    text-decoration-color:
+        rgba(255, 255, 255, 0.3);
+
     text-underline-offset: 3px;
 }
 
@@ -108,53 +150,189 @@ body {
     font-style: italic !important;
 }
 
-/* ===== DEVELOPER WORD ===== */
+
+/* =====================================================
+   DEVELOPER
+===================================================== */
+
 .glitch-word {
     cursor: default;
 }
 
-/* ===== GLITCH RECTANGLE ===== */
-.glitch-rectangle {
+
+/* =====================================================
+   MAIN GLITCH
+===================================================== */
+
+#text-main.glitch-active {
+    animation:
+        glitch-main 0.16s steps(2, end),
+        glitch-flicker 0.16s steps(2, end);
+}
+
+
+/* =====================================================
+   SUBTLE MAIN MOVEMENT
+===================================================== */
+
+@keyframes glitch-main {
+
+    0% {
+        transform: translate(0, 0);
+    }
+
+    20% {
+        transform: translate(-3px, 0);
+    }
+
+    40% {
+        transform: translate(3px, 1px);
+    }
+
+    60% {
+        transform: translate(-2px, -1px);
+    }
+
+    80% {
+        transform: translate(2px, 0);
+    }
+
+    100% {
+        transform: translate(0, 0);
+    }
+}
+
+
+/* =====================================================
+   SUBTLE FLICKER
+===================================================== */
+
+@keyframes glitch-flicker {
+
+    0% {
+        opacity: 1;
+        filter: contrast(1);
+    }
+
+    25% {
+        opacity: 0.88;
+        filter: contrast(1.25);
+    }
+
+    45% {
+        opacity: 1;
+    }
+
+    65% {
+        opacity: 0.72;
+        filter: contrast(1.35);
+    }
+
+    100% {
+        opacity: 1;
+        filter: none;
+    }
+}
+
+
+/* =====================================================
+   HORIZONTAL GLITCH BAR
+===================================================== */
+
+.glitch-bar {
     position: absolute;
+
     pointer-events: none;
-    z-index: 3;
-    animation: glitch-rect 0.2s forwards;
+
+    z-index: 10;
+
     opacity: 0;
+
+    animation:
+        glitch-bar 0.13s steps(2, end)
+        forwards;
 }
 
-@keyframes glitch-rect {
-    0% { opacity: 0; transform: translateX(-4px) scaleX(1.02); }
-    15% { opacity: 0.8; transform: translateX(4px) scaleX(0.98); }
-    30% { opacity: 0.8; transform: translateX(-2px) scaleX(1.01); }
-    100% { opacity: 0; transform: translateX(0) scaleX(1); }
+
+@keyframes glitch-bar {
+
+    0% {
+        opacity: 0;
+        transform: translateX(0);
+    }
+
+    20% {
+        opacity: 0.65;
+        transform: translateX(-5px);
+    }
+
+    45% {
+        opacity: 0.8;
+        transform: translateX(6px);
+    }
+
+    70% {
+        opacity: 0.35;
+        transform: translateX(-3px);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateX(0);
+    }
 }
 
-/* ===== SCANLINES ===== */
+
+/* =====================================================
+   SCANLINES
+===================================================== */
+
 .scanlines {
     position: fixed;
-    top: 0;
-    left: 0;
+
+    inset: 0;
+
     width: 100%;
     height: 100%;
-    background: repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 3px,
-        rgba(255, 255, 255, 0.04) 3px,
-        rgba(255, 255, 255, 0.04) 4px
-    );
+
     pointer-events: none;
-    z-index: 1;
-    animation: scanlines 6s linear infinite;
+
+    z-index: 5;
+
+    opacity: 0.3;
+
+    background:
+        repeating-linear-gradient(
+            to bottom,
+            transparent 0px,
+            transparent 3px,
+            rgba(255, 255, 255, 0.025) 3px,
+            rgba(255, 255, 255, 0.025) 4px
+        );
+
+    animation:
+        scanlines 8s linear infinite;
 }
+
 
 @keyframes scanlines {
-    0% { transform: translateY(0); }
-    100% { transform: translateY(4px); }
+
+    from {
+        transform: translateY(0);
+    }
+
+    to {
+        transform: translateY(4px);
+    }
 }
 
-/* ===== RESPONSIVE ===== */
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
 @media (max-width: 768px) {
+
     .typing-text {
         font-size: 24px;
         max-width: 95%;
@@ -163,7 +341,9 @@ body {
     }
 }
 
+
 @media (max-width: 480px) {
+
     .typing-text {
         font-size: 18px;
         max-width: 98%;
