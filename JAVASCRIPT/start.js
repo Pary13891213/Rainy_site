@@ -2,18 +2,14 @@ const socket = io('https://baroon-server.onrender.com', {
     transports: ['websocket', 'polling']
 });
 
-// ===== TEXTS =====
-const textOne = "Welcome back Developer";
-const textTwo = "And";
-const textThree = "Welcome Back Baroon!";
+// ===== TEXT (یک متن کامل با \n) =====
+const fullText = "Welcome back Developer\nAnd\nWelcome Back Baroon!";
 
-const element1 = document.getElementById("text-one");
-const element2 = document.getElementById("text-two");
-const element3 = document.getElementById("text-three");
+const mainElement = document.getElementById("text-main");
 
 let glitchInterval = null;
 
-// ===== GLITCH FUNCTIONS (More active) =====
+// ===== GLITCH FUNCTIONS =====
 function createGlitchRectangle() {
     const typingText = document.querySelector('.typing-text');
     const rect = typingText.getBoundingClientRect();
@@ -60,42 +56,6 @@ function shiftText(element, intensity) {
     }, 150);
 }
 
-// ===== TYPEWRITER =====
-function typeWriter(text, element, speed = 80, callback = null) {
-    let i = 0;
-    element.innerHTML = '';
-    element.style.opacity = '1';
-    
-    function type() {
-        if (i >= text.length) {
-            if (callback) callback();
-            return;
-        }
-        
-        const currentChar = text.charAt(i);
-        element.innerHTML += currentChar;
-        i++;
-        
-        // Glitch during typing (18% chance)
-        if (Math.random() < 0.18) {
-            createGlitchRectangle();
-            if (Math.random() < 0.5) {
-                shiftText(element, 8);
-            }
-        }
-        
-        let currentSpeed = speed;
-        const char = text.charAt(i - 1);
-        if ('.!?'.includes(char)) currentSpeed = speed * 2;
-        else if (',:'.includes(char)) currentSpeed = speed * 1.5;
-        
-        const variation = 0.85 + Math.random() * 0.3;
-        setTimeout(type, currentSpeed * variation);
-    }
-    
-    type();
-}
-
 // ===== TYPEWRITER WITH CLICKABLE WORD =====
 function typeWriterWithClickable(text, element, clickableWord, speed = 80, callback = null) {
     let i = 0;
@@ -122,7 +82,8 @@ function typeWriterWithClickable(text, element, clickableWord, speed = 80, callb
         element.innerHTML += currentChar;
         i++;
         
-        if (Math.random() < 0.18) {
+        // Glitch during typing (20% chance)
+        if (Math.random() < 0.20) {
             createGlitchRectangle();
             if (Math.random() < 0.5) {
                 shiftText(element, 8);
@@ -133,6 +94,7 @@ function typeWriterWithClickable(text, element, clickableWord, speed = 80, callb
         const char = text.charAt(i - 1);
         if ('.!?'.includes(char)) currentSpeed = speed * 2;
         else if (',:'.includes(char)) currentSpeed = speed * 1.5;
+        else if (char === '\n') currentSpeed = speed * 1.5;
         
         const variation = 0.85 + Math.random() * 0.3;
         setTimeout(type, currentSpeed * variation);
@@ -145,9 +107,11 @@ function typeWriterWithClickable(text, element, clickableWord, speed = 80, callb
             const beforeText = text.slice(0, i);
             const afterText = text.slice(i + word.length);
             
-            element.innerHTML = beforeText + 
+            // به جای span جداگانه، کل متن رو با clickable می‌سازیم
+            const fullHtml = beforeText + 
                 `<span class="clickable" id="clickable-word">${typedWord}</span>` + 
                 afterText;
+            element.innerHTML = fullHtml;
             
             setTimeout(() => {
                 typeClickableWord(index + 1);
@@ -171,7 +135,7 @@ function setupClickableWord() {
             for (let i = 0; i < 6; i++) {
                 setTimeout(() => {
                     createGlitchRectangle();
-                    shiftText(element3, 9);
+                    shiftText(mainElement, 9);
                 }, i * 80);
             }
             
@@ -199,30 +163,20 @@ function startPage() {
     }
     
     setTimeout(() => {
-        typeWriter(textOne, element1, 90, () => {
+        typeWriterWithClickable(fullText, mainElement, 'Baroon!', 85, () => {
             setTimeout(() => {
-                typeWriter(textTwo, element2, 60, () => {
-                    setTimeout(() => {
-                        typeWriterWithClickable(textThree, element3, 'Baroon!', 90, () => {
-                            setTimeout(() => {
-                                setupClickableWord();
-                                
-                                // Continuous glitch after typing (every 0.8s with 55% chance)
-                                glitchInterval = setInterval(() => {
-                                    if (Math.random() < 0.55) {
-                                        createGlitchRectangle();
-                                        if (Math.random() < 0.5) {
-                                            const elements = [element1, element2, element3];
-                                            const el = elements[Math.floor(Math.random() * elements.length)];
-                                            shiftText(el, 8);
-                                        }
-                                    }
-                                }, 800);
-                            }, 600);
-                        });
-                    }, 500);
-                });
-            }, 400);
+                setupClickableWord();
+                
+                // Continuous glitch after typing (every 0.7s with 60% chance)
+                glitchInterval = setInterval(() => {
+                    if (Math.random() < 0.60) {
+                        createGlitchRectangle();
+                        if (Math.random() < 0.5) {
+                            shiftText(mainElement, 8);
+                        }
+                    }
+                }, 700);
+            }, 600);
         });
     }, 1000);
 }
@@ -237,8 +191,9 @@ document.addEventListener('keydown', function(event) {
 });
 
 document.addEventListener('DOMContentLoaded', function() {
-    const textOneEl = document.getElementById('text-one');
-    if (!textOneEl) return;
+    // Double tap on "Developer" in the text
+    const mainEl = document.getElementById('text-main');
+    if (!mainEl) return;
     
     let tapCount = 0;
     let tapTimer = null;
@@ -251,10 +206,15 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 200);
     }
     
-    textOneEl.addEventListener('touchstart', function(e) {
+    // Check if click/touch is on "Developer"
+    function isDeveloperClick(target) {
+        return target && target.textContent && target.textContent.includes('Developer');
+    }
+    
+    mainEl.addEventListener('touchstart', function(e) {
         if (!isMobile) return;
         const target = e.target;
-        if (target && target.textContent && target.textContent.includes('Developer')) {
+        if (isDeveloperClick(target)) {
             tapCount++;
             clearTimeout(tapTimer);
             if (tapCount >= 2) {
@@ -268,10 +228,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    textOneEl.addEventListener('click', function(e) {
+    mainEl.addEventListener('click', function(e) {
         if (isMobile) return;
         const target = e.target;
-        if (target && target.textContent && target.textContent.includes('Developer')) {
+        if (isDeveloperClick(target)) {
             tapCount++;
             clearTimeout(tapTimer);
             if (tapCount >= 2) {

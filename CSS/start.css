@@ -43,12 +43,11 @@ body {
     letter-spacing: 0.5px;
 }
 
-#text-one, #text-two, #text-three {
-    margin-bottom: 8px;
+#text-main {
     white-space: pre-wrap;
 }
 
-#text-three .clickable {
+#text-main .clickable {
     font-style: italic;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -57,7 +56,7 @@ body {
     display: inline-block;
 }
 
-#text-three .clickable:hover {
+#text-main .clickable:hover {
     text-shadow: 0 0 12px rgba(255, 255, 255, 0.4), 0 0 24px rgba(255, 255, 255, 0.2);
 }
 
@@ -77,30 +76,34 @@ body {
     100% { opacity: 0; transform: translateX(4px); }
 }
 
-/* ===== SCANLINES (مثل dev-enter) ===== */
+/* ===== SCANLINES WITH NEON GLOW ===== */
 .scanlines {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(
-        to bottom,
-        transparent 50%,
-        rgba(255, 255, 255, 0.025) 50%
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 3px,
+        rgba(255, 255, 255, 0.04) 3px,
+        rgba(255, 255, 255, 0.04) 4px
     );
-    background-size: 100% 4px;
     pointer-events: none;
     z-index: 1;
     animation: scanlines 6s linear infinite;
+    box-shadow: 
+        inset 0 0 20px rgba(255, 255, 255, 0.02),
+        0 0 30px rgba(255, 255, 255, 0.01);
 }
 
 @keyframes scanlines {
     0% {
-        background-position: 0 0;
+        transform: translateY(0);
     }
     100% {
-        background-position: 0 100%;
+        transform: translateY(4px);
     }
 }
 
