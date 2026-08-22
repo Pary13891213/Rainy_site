@@ -180,54 +180,54 @@ function getWelcomeMessage() {
     const day = now.getDate();
     
     if (month === 1 && day === 1) {
-        return "Happy New Year, Baroon! I wish you a great year... maybe. It was a good year with you!! (◔◡◔)";
+        return "Happy New Year, Baroon! I wish you a great year... maybe. It was a good year with you!! \n (◔◡◔)";
     }
     if (month === 12 && day === 25) {
-        return "Merry Christmas! (Why are we celebrating this? (ಥ _ ಥ))";
+        return "Merry Christmas! (Why are we celebrating this? ) \n(ಥ _ ಥ)";
     }
     if (month === 9 && day === 25) {
-        return "Why must I say \"Happy longest night of the year\" when it's just one minute more?? (⊙_⊙)？ What do you want to do in that one minute?";
+        return "Why must I say \"Happy longest night of the year\" when it's just one minute more?? \n (⊙_⊙)？\n (What do you want to do in that one minute?)";
     }
     if (month === 3 && day === 10) {
-        return "Let me see... Oh look! It's your birthday today. Happy birthday, Baroon (Dear Rainy Weather). (o゜▽゜)o☆ Wait for Dev to write you a book just to say congratulations! HEHEHEHE";
+        return "Let me see... Oh look! It's your birthday today. Happy birthday, Baroon (Dear Rainy Weather). \n(o゜▽゜)o☆\n (Wait for Dev to write you a book just to say congratulations! HEHEHEHE)";
     }
     if (month === 3 && day === 13) {
-        return "It's a very special day today. A very, very, very special day. You didn't forget it, did you? (ㆆ_ㆆ) 눈_눈 Say congratulations to her. And if you can, go and see her. Or call her.";
+        return "It's a very special day today. A very, very, very special day. You didn't forget it, did you? \n(ㆆ_ㆆ) 눈_눈\n (Say congratulations to her. And if you can, go and see her. Or call her.)";
     }
     
     if (hours === 0 && minutes === 0) {
-        return "Come on. Wish something ( •̀ ω •́ )y . (Don't tell her I said you this, but Dev wished you A lot of good and beautiful things that make me want to kill you because you were the one she wished for〒▽〒(•ˋ _ ˊ•))";
+        return "Come on. Wish something ( •̀ ω •́ )y . \n(Don't tell her I said you this, but Dev wished you A lot of good and beautiful things that make me want to kill you because you were the one she wished for) \n〒▽〒(•ˋ _ ˊ•)";
     }
     
     if (hours >= 4 && hours < 5) {
-        return "Good morning Baroon. ^_~ May I know why you are here at this hour? (´。＿。｀) Just for you to know, Dev is asleep now. A very deep sleep. ◉_◉";
+        return "Good morning Baroon. \n^_~\n May I know why you are here at this hour? \n(´。＿。｀)\n Just for you to know, Dev is asleep now. A very deep sleep. \n◉_◉";
     }
     if (hours >= 5 && hours < 12) {
-        return "Good morning Baroon. ^_~";
+        return "Good morning Baroon.\n ^_~";
     }
     if (hours >= 12 && hours < 14) {
-        return "What do you expect me to say? Good noon?? (。_。)";
+        return "What do you expect me to say? Good noon?? \n(。_。)";
     }
     if (hours >= 14 && hours < 17) {
-        return "Good afternoon, Rainy weather! (HEHEHEHE) (¬‿¬)";
+        return "Good afternoon, Rainy weather! (HEHEHEHE) \n(¬‿¬)";
     }
     if (hours >= 17 && hours < 21) {
-        return "Good evening. How was your day? ╰(*°▽°*)╯";
+        return "Good evening. How was your day? \n╰(*°▽°*)╯";
     }
     if (hours >= 21 && hours < 23) {
-        return "Was your day good? How was it? Did you enjoy your day? (°°)～";
+        return "Was your day good? How was it? Did you enjoy your day? \n(°°)～";
     }
     if (hours >= 23 && hours < 24) {
-        return "Don't you want to sleep? It's better to sleep now than to be sleepy tomorrow. ( ఠ ͟ʖ ఠ)";
+        return "Don't you want to sleep? It's better to sleep now than to be sleepy tomorrow. \n( ఠ ͟ʖ ఠ)";
     }
     if (hours >= 0 && hours < 1) {
-        return "GO AND SLEEP NOW. RIGHT NOW!! ಠ_ಠ Really, what are you doing? (ㆆ_ㆆ)";
+        return "GO AND SLEEP NOW. RIGHT NOW!! \nಠ_ಠ\n Really, what are you doing? \n(ㆆ_ㆆ)";
     }
     if (hours >= 1 && hours < 4) {
-        return "Don't you want to rest? Are you an owl or what? ಠಿ_ಠ Anyway, do whatever you want, I don't care. (GO AND SLEEP!) ᕦ(ò_óˇ)ᕤ";
+        return "Don't you want to rest? Are you an owl or what? \nಠಿ_ಠ\n Anyway, do whatever you want, I don't care. (GO AND SLEEP!) \nᕦ(ò_óˇ)ᕤ";
     }
     
-    return "Welcome Baroon. ^_~";
+    return "Welcome Baroon. \n^_~";
 }
 
 // ===== TYPEWRITER =====
