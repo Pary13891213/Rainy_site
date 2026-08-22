@@ -203,7 +203,7 @@ function applyFullGlitch() {
 function typeWriter(text, element, speed = 130, callback = null) {
     let i = 0;
     let fullTextTyped = '';
-    
+
     function type() {
         if (i >= text.length) {
             element.innerHTML = buildGlitchStructure(text);
@@ -212,32 +212,31 @@ function typeWriter(text, element, speed = 130, callback = null) {
             if (callback) callback();
             return;
         }
-        
+
         fullTextTyped += text.charAt(i);
-        element.innerHTML = fullTextTyped;
+        // ===== تغییر اصلی اینجاست =====
+        element.innerHTML = buildGlitchStructure(fullTextTyped);
         i++;
-        
+
         // Glitch هنگام تایپ با حرکت حروف/کلمات/خطوط
         if (Math.random() < 0.45) {
-            // مستطیل‌ها و خطوط
             createGlitchRectangles();
             createGlitchLines();
             createGlitchFlash();
             createGlitchBlocks();
-            // حرکت حروف/کلمات/خطوط
             applyGlitchMovement();
         }
-        
+
         let currentSpeed = speed;
         const char = text.charAt(i - 1);
         if ('.!?'.includes(char)) currentSpeed = speed * 2;
         else if (',:'.includes(char)) currentSpeed = speed * 1.5;
         else if (char === '\n') currentSpeed = speed * 1.5;
-        
+
         const variation = 0.9 + Math.random() * 0.2;
         setTimeout(type, currentSpeed * variation);
     }
-    
+
     type();
 }
 
