@@ -36,9 +36,10 @@ body {
     position: relative;
     z-index: 2;
     text-shadow: 
-        0 0 2px rgba(255, 255, 255, 0.3),
-        0 0 4px rgba(255, 255, 255, 0.15),
-        0 0 8px rgba(255, 255, 255, 0.08);
+        0 0 3px rgba(255, 255, 255, 0.4),
+        0 0 6px rgba(255, 255, 255, 0.2),
+        0 0 12px rgba(255, 255, 255, 0.1),
+        0 0 20px rgba(255, 255, 255, 0.05);
     letter-spacing: 0.5px;
 }
 
@@ -51,13 +52,13 @@ body {
     font-style: italic;
     cursor: pointer;
     transition: all 0.3s ease;
-    text-shadow: 0 0 4px rgba(255, 255, 255, 0.25), 0 0 8px rgba(255, 255, 255, 0.1);
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.3), 0 0 10px rgba(255, 255, 255, 0.15);
     position: relative;
     display: inline-block;
 }
 
 #text-three .clickable:hover {
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.35), 0 0 20px rgba(255, 255, 255, 0.15);
+    text-shadow: 0 0 12px rgba(255, 255, 255, 0.4), 0 0 24px rgba(255, 255, 255, 0.2);
 }
 
 /* ===== GLITCH ===== */
@@ -86,7 +87,7 @@ body {
     background: linear-gradient(
         to bottom,
         transparent 50%,
-        rgba(255, 255, 255, 0.02) 50%
+        rgba(255, 255, 255, 0.025) 50%
     );
     background-size: 100% 4px;
     pointer-events: none;

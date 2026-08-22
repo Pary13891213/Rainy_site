@@ -24,8 +24,8 @@ function createGlitchRectangle() {
         const rectangle = document.createElement('div');
         rectangle.className = 'glitch-rectangle';
         
-        const width = 40 + Math.random() * 140;
-        const height = 2 + Math.random() * 3;
+        const width = 40 + Math.random() * 150;
+        const height = 2 + Math.random() * 3.5;
         const posX = Math.random() * (rect.width - width);
         const posY = Math.random() * (rect.height - height);
         
@@ -35,13 +35,13 @@ function createGlitchRectangle() {
         rectangle.style.top = `${posY}px`;
         rectangle.style.background = Math.random() < 0.4 
             ? 'rgba(255, 255, 255, 0.85)' 
-            : 'rgba(0, 0, 0, 0.9)';
+            : 'rgba(0, 0, 0, 0.92)';
         
         typingText.appendChild(rectangle);
         
         setTimeout(() => {
             rectangle.remove();
-        }, 220);
+        }, 250);
     }
 }
 
@@ -52,15 +52,15 @@ function shiftText(element, intensity) {
     const direction = Math.random() > 0.5 ? 1 : -1;
     const originalTransform = element.style.transform || '';
     
-    element.style.transition = 'transform 0.12s ease-out';
+    element.style.transition = 'transform 0.1s ease-out';
     element.style.transform = `${originalTransform} translateX(${shiftAmount * direction}px)`;
     
     setTimeout(() => {
         element.style.transform = originalTransform;
-    }, 180);
+    }, 150);
 }
 
-// ===== TYPEWRITER (Smoother) =====
+// ===== TYPEWRITER =====
 function typeWriter(text, element, speed = 80, callback = null) {
     let i = 0;
     element.innerHTML = '';
@@ -76,11 +76,11 @@ function typeWriter(text, element, speed = 80, callback = null) {
         element.innerHTML += currentChar;
         i++;
         
-        // Glitch during typing (15% chance)
-        if (Math.random() < 0.15) {
+        // Glitch during typing (18% chance)
+        if (Math.random() < 0.18) {
             createGlitchRectangle();
             if (Math.random() < 0.5) {
-                shiftText(element, 7);
+                shiftText(element, 8);
             }
         }
         
@@ -89,7 +89,6 @@ function typeWriter(text, element, speed = 80, callback = null) {
         if ('.!?'.includes(char)) currentSpeed = speed * 2;
         else if (',:'.includes(char)) currentSpeed = speed * 1.5;
         
-        // Smooth typing with random variation
         const variation = 0.85 + Math.random() * 0.3;
         setTimeout(type, currentSpeed * variation);
     }
@@ -97,7 +96,7 @@ function typeWriter(text, element, speed = 80, callback = null) {
     type();
 }
 
-// ===== TYPEWRITER WITH CLICKABLE WORD (Smoother) =====
+// ===== TYPEWRITER WITH CLICKABLE WORD =====
 function typeWriterWithClickable(text, element, clickableWord, speed = 80, callback = null) {
     let i = 0;
     element.innerHTML = '';
@@ -123,10 +122,10 @@ function typeWriterWithClickable(text, element, clickableWord, speed = 80, callb
         element.innerHTML += currentChar;
         i++;
         
-        if (Math.random() < 0.15) {
+        if (Math.random() < 0.18) {
             createGlitchRectangle();
             if (Math.random() < 0.5) {
-                shiftText(element, 7);
+                shiftText(element, 8);
             }
         }
         
@@ -169,11 +168,11 @@ function setupClickableWord() {
         clickable.addEventListener('click', function(e) {
             e.stopPropagation();
             
-            for (let i = 0; i < 5; i++) {
+            for (let i = 0; i < 6; i++) {
                 setTimeout(() => {
                     createGlitchRectangle();
-                    shiftText(element3, 8);
-                }, i * 100);
+                    shiftText(element3, 9);
+                }, i * 80);
             }
             
             setTimeout(() => {
@@ -208,17 +207,17 @@ function startPage() {
                             setTimeout(() => {
                                 setupClickableWord();
                                 
-                                // More frequent glitch (every 1s with 50% chance)
+                                // Continuous glitch after typing (every 0.8s with 55% chance)
                                 glitchInterval = setInterval(() => {
-                                    if (Math.random() < 0.50) {
+                                    if (Math.random() < 0.55) {
                                         createGlitchRectangle();
                                         if (Math.random() < 0.5) {
                                             const elements = [element1, element2, element3];
                                             const el = elements[Math.floor(Math.random() * elements.length)];
-                                            shiftText(el, 7);
+                                            shiftText(el, 8);
                                         }
                                     }
-                                }, 1000);
+                                }, 800);
                             }, 600);
                         });
                     }, 500);
