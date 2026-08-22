@@ -20,17 +20,21 @@ socket.on('chat-history', (history) => {
 socket.on('chat-message', (data) => {
     const userName = localStorage.getItem('userName') || 'User';
     
+    let sender = data.username;
+    let type = data.username === 'DEV' ? 'dev' : 'other';
+    
     if (data.username === userName) {
-        return;
+        sender = 'You';
+        type = 'user';
     }
     
     const newMessage = {
-        sender: data.username === 'DEV' ? 'DEV' : data.username,
+        sender: sender,
         content: data.message || '',
         time: data.time,
-        type: data.username === 'DEV' ? 'dev' : 'other',
+        type: type,
         isImage: data.isImage || false,
-        imagePath: data.imagePath || ''  // ← فقط imagePath
+        imagePath: data.imagePath || ''
     };
     
     messages.push(newMessage);

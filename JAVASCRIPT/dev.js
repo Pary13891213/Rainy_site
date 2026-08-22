@@ -15,16 +15,15 @@ socket.on('chat-history', (history) => {
 });
 
 socket.on('chat-message', (data) => {
-    // اگه پیام از DEV هست، نادیده بگیر (چون قبلاً توی sendMessage اضافه شده)
     if (data.username === 'DEV') {
         return;
     }
     
     const newMessage = {
-        sender: data.username === 'DEV' ? 'DEV' : data.username,
+        sender: data.username,
         content: data.message || '',
         time: data.time,
-        type: data.username === 'DEV' ? 'dev' : 'other',
+        type: 'other',
         isImage: data.isImage || false,
         imagePath: data.imagePath || ''
     };
