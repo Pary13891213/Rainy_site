@@ -36,8 +36,9 @@ body {
     position: relative;
     z-index: 2;
     text-shadow: 
-        0 0 1px rgba(255, 255, 255, 0.2),
-        0 0 2px rgba(255, 255, 255, 0.1);
+        0 0 2px rgba(255, 255, 255, 0.3),
+        0 0 4px rgba(255, 255, 255, 0.15),
+        0 0 8px rgba(255, 255, 255, 0.08);
     letter-spacing: 0.5px;
 }
 
@@ -50,13 +51,13 @@ body {
     font-style: italic;
     cursor: pointer;
     transition: all 0.3s ease;
-    text-shadow: 0 0 3px rgba(255, 255, 255, 0.15);
+    text-shadow: 0 0 4px rgba(255, 255, 255, 0.25), 0 0 8px rgba(255, 255, 255, 0.1);
     position: relative;
     display: inline-block;
 }
 
 #text-three .clickable:hover {
-    text-shadow: 0 0 8px rgba(255, 255, 255, 0.25);
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.35), 0 0 20px rgba(255, 255, 255, 0.15);
 }
 
 /* ===== GLITCH ===== */
@@ -64,40 +65,42 @@ body {
     position: absolute;
     pointer-events: none;
     z-index: 3;
-    animation: glitch-rectangle 0.18s forwards;
+    animation: glitch-rectangle 0.2s forwards;
     border-radius: 1px;
 }
 
 @keyframes glitch-rectangle {
-    0% { opacity: 0; transform: translateX(-3px); }
-    20% { opacity: 0.8; }
-    80% { opacity: 0.8; }
-    100% { opacity: 0; transform: translateX(3px); }
+    0% { opacity: 0; transform: translateX(-4px); }
+    20% { opacity: 0.9; }
+    80% { opacity: 0.9; }
+    100% { opacity: 0; transform: translateX(4px); }
 }
 
-/* ===== SCANLINES (Bigger & Smoother) ===== */
+/* ===== SCANLINES (مثل dev-enter) ===== */
 .scanlines {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 5px,
-        rgba(255, 255, 255, 0.05) 5px,
-        rgba(255, 255, 255, 0.05) 6px
+    background: linear-gradient(
+        to bottom,
+        transparent 50%,
+        rgba(255, 255, 255, 0.02) 50%
     );
+    background-size: 100% 4px;
     pointer-events: none;
     z-index: 1;
-    animation: scanlines 8s ease-in-out infinite;
+    animation: scanlines 6s linear infinite;
 }
 
 @keyframes scanlines {
-    0% { transform: translateY(0); }
-    50% { transform: translateY(3px); }
-    100% { transform: translateY(6px); }
+    0% {
+        background-position: 0 0;
+    }
+    100% {
+        background-position: 0 100%;
+    }
 }
 
 /* ===== RESPONSIVE ===== */

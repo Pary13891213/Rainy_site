@@ -24,7 +24,7 @@ function createGlitchRectangle() {
         const rectangle = document.createElement('div');
         rectangle.className = 'glitch-rectangle';
         
-        const width = 40 + Math.random() * 120;
+        const width = 40 + Math.random() * 140;
         const height = 2 + Math.random() * 3;
         const posX = Math.random() * (rect.width - width);
         const posY = Math.random() * (rect.height - height);
@@ -34,14 +34,14 @@ function createGlitchRectangle() {
         rectangle.style.left = `${posX}px`;
         rectangle.style.top = `${posY}px`;
         rectangle.style.background = Math.random() < 0.4 
-            ? 'rgba(255, 255, 255, 0.8)' 
-            : 'rgba(0, 0, 0, 0.85)';
+            ? 'rgba(255, 255, 255, 0.85)' 
+            : 'rgba(0, 0, 0, 0.9)';
         
         typingText.appendChild(rectangle);
         
         setTimeout(() => {
             rectangle.remove();
-        }, 200);
+        }, 220);
     }
 }
 
@@ -52,16 +52,16 @@ function shiftText(element, intensity) {
     const direction = Math.random() > 0.5 ? 1 : -1;
     const originalTransform = element.style.transform || '';
     
-    element.style.transition = 'transform 0.1s ease-out';
+    element.style.transition = 'transform 0.12s ease-out';
     element.style.transform = `${originalTransform} translateX(${shiftAmount * direction}px)`;
     
     setTimeout(() => {
         element.style.transform = originalTransform;
-    }, 150);
+    }, 180);
 }
 
 // ===== TYPEWRITER (Smoother) =====
-function typeWriter(text, element, speed = 90, callback = null) {
+function typeWriter(text, element, speed = 80, callback = null) {
     let i = 0;
     element.innerHTML = '';
     element.style.opacity = '1';
@@ -76,11 +76,11 @@ function typeWriter(text, element, speed = 90, callback = null) {
         element.innerHTML += currentChar;
         i++;
         
-        // Glitch during typing (12% chance)
-        if (Math.random() < 0.12) {
+        // Glitch during typing (15% chance)
+        if (Math.random() < 0.15) {
             createGlitchRectangle();
             if (Math.random() < 0.5) {
-                shiftText(element, 6);
+                shiftText(element, 7);
             }
         }
         
@@ -89,8 +89,8 @@ function typeWriter(text, element, speed = 90, callback = null) {
         if ('.!?'.includes(char)) currentSpeed = speed * 2;
         else if (',:'.includes(char)) currentSpeed = speed * 1.5;
         
-        // Smooth typing with slight randomness
-        const variation = 0.9 + Math.random() * 0.2;
+        // Smooth typing with random variation
+        const variation = 0.85 + Math.random() * 0.3;
         setTimeout(type, currentSpeed * variation);
     }
     
@@ -98,7 +98,7 @@ function typeWriter(text, element, speed = 90, callback = null) {
 }
 
 // ===== TYPEWRITER WITH CLICKABLE WORD (Smoother) =====
-function typeWriterWithClickable(text, element, clickableWord, speed = 90, callback = null) {
+function typeWriterWithClickable(text, element, clickableWord, speed = 80, callback = null) {
     let i = 0;
     element.innerHTML = '';
     let wordTyped = false;
@@ -123,10 +123,10 @@ function typeWriterWithClickable(text, element, clickableWord, speed = 90, callb
         element.innerHTML += currentChar;
         i++;
         
-        if (Math.random() < 0.12) {
+        if (Math.random() < 0.15) {
             createGlitchRectangle();
             if (Math.random() < 0.5) {
-                shiftText(element, 6);
+                shiftText(element, 7);
             }
         }
         
@@ -135,7 +135,7 @@ function typeWriterWithClickable(text, element, clickableWord, speed = 90, callb
         if ('.!?'.includes(char)) currentSpeed = speed * 2;
         else if (',:'.includes(char)) currentSpeed = speed * 1.5;
         
-        const variation = 0.9 + Math.random() * 0.2;
+        const variation = 0.85 + Math.random() * 0.3;
         setTimeout(type, currentSpeed * variation);
     }
     
@@ -152,7 +152,7 @@ function typeWriterWithClickable(text, element, clickableWord, speed = 90, callb
             
             setTimeout(() => {
                 typeClickableWord(index + 1);
-            }, speed * 0.85);
+            }, speed * 0.8);
         } else {
             i += word.length;
             setTimeout(type, speed);
@@ -172,7 +172,7 @@ function setupClickableWord() {
             for (let i = 0; i < 5; i++) {
                 setTimeout(() => {
                     createGlitchRectangle();
-                    shiftText(element3, 7);
+                    shiftText(element3, 8);
                 }, i * 100);
             }
             
@@ -200,25 +200,25 @@ function startPage() {
     }
     
     setTimeout(() => {
-        typeWriter(textOne, element1, 100, () => {
+        typeWriter(textOne, element1, 90, () => {
             setTimeout(() => {
-                typeWriter(textTwo, element2, 70, () => {
+                typeWriter(textTwo, element2, 60, () => {
                     setTimeout(() => {
-                        typeWriterWithClickable(textThree, element3, 'Baroon!', 100, () => {
+                        typeWriterWithClickable(textThree, element3, 'Baroon!', 90, () => {
                             setTimeout(() => {
                                 setupClickableWord();
                                 
-                                // More frequent glitch (every 1.2s with 45% chance)
+                                // More frequent glitch (every 1s with 50% chance)
                                 glitchInterval = setInterval(() => {
-                                    if (Math.random() < 0.45) {
+                                    if (Math.random() < 0.50) {
                                         createGlitchRectangle();
                                         if (Math.random() < 0.5) {
                                             const elements = [element1, element2, element3];
                                             const el = elements[Math.floor(Math.random() * elements.length)];
-                                            shiftText(el, 6);
+                                            shiftText(el, 7);
                                         }
                                     }
-                                }, 1200);
+                                }, 1000);
                             }, 600);
                         });
                     }, 500);
