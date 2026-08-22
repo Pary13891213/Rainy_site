@@ -83,31 +83,31 @@ body {
     font-style: italic !important;
 }
 
-/* ===== GLITCH RECTANGLE (مستطیل‌های گلیچ) ===== */
+/* ===== GLITCH RECTANGLE (شدیدتر) ===== */
 .glitch-rectangle {
-    position: absolute;
+    position: fixed;
     pointer-events: none;
     z-index: 3;
-    animation: glitchRect 0.15s forwards;
+    animation: glitchRect 0.2s forwards;
     opacity: 0;
 }
 
 @keyframes glitchRect {
     0% { 
         opacity: 0; 
-        transform: translateX(-6px) scaleX(1.03);
+        transform: translateX(-12px) scaleX(1.05);
     }
     15% { 
         opacity: 0.9; 
-        transform: translateX(6px) scaleX(0.97);
+        transform: translateX(12px) scaleX(0.95);
     }
     30% { 
         opacity: 0.9; 
-        transform: translateX(-3px) scaleX(1.01);
+        transform: translateX(-6px) scaleX(1.02);
     }
-    45% { 
+    50% { 
         opacity: 0.7; 
-        transform: translateX(3px) scaleX(0.99);
+        transform: translateX(6px) scaleX(0.98);
     }
     100% { 
         opacity: 0; 
@@ -115,38 +115,53 @@ body {
     }
 }
 
-/* ===== GLITCH LINE (خط افقی گلیچ) ===== */
+/* ===== GLITCH LINE (خط افقی شدیدتر) ===== */
 .glitch-line-glitch {
-    position: absolute;
+    position: fixed;
     pointer-events: none;
     z-index: 3;
     height: 2px;
-    background: rgba(255, 255, 255, 0.6);
-    animation: glitchLine 0.12s forwards;
+    animation: glitchLine 0.15s forwards;
     opacity: 0;
 }
 
 @keyframes glitchLine {
-    0% { opacity: 0; transform: translateX(-10px); }
-    20% { opacity: 0.8; transform: translateX(10px); }
-    40% { opacity: 0.8; transform: translateX(-5px); }
+    0% { opacity: 0; transform: translateX(-20px); }
+    20% { opacity: 0.9; transform: translateX(20px); }
+    40% { opacity: 0.9; transform: translateX(-10px); }
     100% { opacity: 0; transform: translateX(0); }
 }
 
-/* ===== GLITCH FLASH (فلش سفید/مشکی) ===== */
+/* ===== GLITCH FLASH (فلش شدیدتر) ===== */
 .glitch-flash {
-    position: absolute;
+    position: fixed;
     pointer-events: none;
     z-index: 3;
-    animation: glitchFlash 0.08s forwards;
+    animation: glitchFlash 0.1s forwards;
     opacity: 0;
 }
 
 @keyframes glitchFlash {
     0% { opacity: 0; }
-    20% { opacity: 0.3; }
-    80% { opacity: 0.3; }
+    20% { opacity: 0.4; }
+    80% { opacity: 0.4; }
     100% { opacity: 0; }
+}
+
+/* ===== GLITCH BLOCK (بلوک بزرگ) ===== */
+.glitch-block {
+    position: fixed;
+    pointer-events: none;
+    z-index: 3;
+    animation: glitchBlock 0.18s forwards;
+    opacity: 0;
+}
+
+@keyframes glitchBlock {
+    0% { opacity: 0; transform: scaleX(1); }
+    20% { opacity: 0.5; transform: scaleX(0.3); }
+    40% { opacity: 0.5; transform: scaleX(1.2); }
+    100% { opacity: 0; transform: scaleX(1); }
 }
 
 /* ===== SCANLINES ===== */
