@@ -33,9 +33,12 @@ socket.on('chat-history', (history) => {
     });
     displayMessages();
     
-    // ===== بعد از لود تاریخچه، پیام سیستمی ارسال کن =====
+    // ===== بعد از لود تاریخچه، پیام سیستمی ارسال کن (اگه نیاز باشه) =====
     setTimeout(() => {
-        sendSystemMessageIfNeeded();
+        const currentHour = new Date().getHours();
+        if (lastMessageHour !== currentHour) {
+            sendSystemMessageIfNeeded();
+        }
     }, 500);
 });
 
@@ -83,7 +86,7 @@ socket.on('user-typing', (username) => {
 // ===== VARIABLES =====
 let messages = [];
 let lastMessageCount = 0;
-let lastMessageHour = -1;
+let lastMessageHour = parseInt(localStorage.getItem('lastMessageHour')) || -1;
 
 const messagesBox = document.getElementById('user-messages-box');
 const messageInput = document.getElementById('user-message-input');
@@ -281,7 +284,7 @@ function getSystemMessage() {
         return "Don't you want to rest? Are you an owl or what? \nಠಿ_ಠ\n Anyway, do whatever you want, I don't care. (GO AND SLEEP!) \nᕦ(ò_óˇ)ᕤ";
     }
     
-    return "Welcome Baroon. \n^_~";
+    return null;
 }
 
 // ===== ارسال پیام سیستمی در صورت نیاز =====
@@ -295,6 +298,7 @@ function sendSystemMessageIfNeeded() {
         if (message) {
             addSystemMessage(message);
             lastMessageHour = currentHour;
+            localStorage.setItem('lastMessageHour', currentHour);
         }
     }
 }
@@ -515,14 +519,13 @@ function init() {
     }
     
     // ===== SYSTEM MESSAGES BY HOUR =====
-    // اگر تاریخچه خالی بود، پیام سیستمی ارسال کن
     setTimeout(() => {
-        if (messages.length === 0) {
+        const currentHour = new Date().getHours();
+        if (lastMessageHour !== currentHour) {
             sendSystemMessageIfNeeded();
         }
     }, 1500);
     
-    // چک کردن هر دقیقه
     setInterval(sendSystemMessageIfNeeded, 60000);
 }
 
@@ -539,6 +542,7 @@ document.getElementById('logout-btn').addEventListener('click', function() {
     localStorage.removeItem('user_online');
     localStorage.removeItem('devAccess');
     localStorage.removeItem('lastPanel');
+    localStorage.removeItem('lastMessageHour');
     
     socket.emit('user-logout', {
         username: 'baroon'
@@ -659,11 +663,11 @@ function renderNotesList() {
     notes.forEach(note => {
         const item = document.createElement('div');
         item.className = 'note-item' + (currentNoteId === note._id ? ' active' : '');
-        const lockIcon = note.isLocked ? 'LOCKED' : '';
+        const lockIcon = note.isLocked ? '🔒' : '';
         item.innerHTML = `
             <div class="note-item-title">
                 ${note.title || 'Untitled'}
-                ${note.isLocked ? '<span class="note-item-locked">LOCKED</span>' : ''}
+                ${note.isLocked ? '<span class="note-item-locked">🔒</span>' : ''}
             </div>
             <div class="note-item-meta">
                 ${new Date(note.updatedAt).toLocaleString()}
