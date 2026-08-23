@@ -71,11 +71,41 @@
 
             <!-- تب NOTES -->
             <div class="tab" id="notes-tab">
-                <div class="notes-container" style="flex:1; display:flex; flex-direction:column; background: rgba(0,10,20,0.4); border:1px solid rgba(136,221,255,0.12); border-radius:8px; padding:20px; overflow:hidden;">
-                    <div class="notes-header" style="padding:10px 16px; font-size:15px; font-weight:bold; border-bottom:1px solid rgba(136,221,255,0.08); color: #88ddff; text-shadow: 0 0 10px rgba(136,221,255,0.05);">NOTES</div>
-                    <div class="notes-body" style="flex:1; display:flex; justify-content:center; align-items:center; color: rgba(255,255,255,0.2); font-weight:300; font-size:16px; letter-spacing:2px;">
-                        No notes yet.<br>
-                        <span style="font-size:13px; opacity:0.6;">Coming soon...</span>
+                <div class="notes-container">
+                    <div class="notes-header">
+                        <span>NOTES</span>
+                        <button id="new-note-btn" class="notes-action-btn">NEW</button>
+                    </div>
+                    
+                    <div class="notes-body">
+                        <!-- لیست افقی یادداشت‌ها -->
+                        <div class="notes-list-horizontal" id="notes-list">
+                            <!-- یادداشت‌ها با js اضافه میشن -->
+                        </div>
+                        
+                        <!-- محتوای یادداشت -->
+                        <div class="notes-editor" id="notes-editor" style="display: none;">
+                            <div class="notes-editor-header">
+                                <input type="text" id="note-title-input" class="note-title-input" placeholder="Note title..." value="Untitled">
+                                <div class="notes-editor-actions">
+                                    <button id="note-save-btn" class="notes-action-btn">SAVE</button>
+                                    <button id="note-lock-btn" class="notes-action-btn">LOCK</button>
+                                    <button id="note-delete-btn" class="notes-action-btn">DELETE</button>
+                                    <button id="note-close-btn" class="notes-action-btn">CLOSE</button>
+                                </div>
+                            </div>
+                            <textarea id="note-content-input" class="note-content-input" placeholder="Write your note here..." dir="rtl"></textarea>
+                            <div class="note-status">
+                                <span id="note-lock-status">Unlocked</span>
+                                <span id="note-time-status">Last saved: --</span>
+                            </div>
+                        </div>
+                        
+                        <!-- حالت خالی -->
+                        <div class="notes-empty" id="notes-empty">
+                            <p>No notes yet</p>
+                            <p class="notes-empty-sub">Click NEW to create your first note</p>
+                        </div>
                     </div>
                 </div>
             </div>

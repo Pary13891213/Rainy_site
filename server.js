@@ -78,6 +78,19 @@ const userSchema = new mongoose.Schema({
 });
 const User = mongoose.model('User', userSchema);
 
+// ===== NOTES SCHEMA =====
+const noteSchema = new mongoose.Schema({
+    userId: { type: String, default: 'baroon' },
+    title: { type: String, default: 'Untitled' },
+    content: { type: String, default: '' },
+    isLocked: { type: Boolean, default: false },
+    password: { type: String, default: '' },
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now }
+});
+
+const Note = mongoose.model('Note', noteSchema);
+
 // ===== FIND OR CREATE USER =====
 async function findOrCreateUser(data) {
     try {
@@ -409,6 +422,100 @@ io.on('connection', async (socket) => {
                 isSystem: savedMessage.isSystem,
                 imagePath: savedMessage.imagePath
             });
+        }
+    });
+
+        // ===== NOTES CRUD =====
+    // دریافت همه یادداشت‌ها
+    socket.on('get-notes', async (data) => {
+        try {
+            const notes = await Note.find({ userId: data.userId || 'baroon' })
+                .sort({ updatedAt: -1 });
+            socket.emit('notes-list', notes);
+        } catch (err) {
+            console.error('Error getting notes:', err);
+            socket.emit('notes-error', { error: 'Failed to get notes' });
+        }
+    });
+
+    // ایجاد یادداشت جدید
+    socket.on('create-note', async (data) => {
+        try {
+            const newNote = new Note({
+                userId: data.userId || 'baroon',
+                title: data.title || 'Untitled',
+                content: data.content || '',
+                isLocked: false,
+                password: ''
+            });
+            await newNote.save();
+            socket.emit('note-created', newNote);
+        } catch (err) {
+            console.error('Error creating note:', err);
+            socket.emit('notes-error', { error: 'Failed to create note' });
+        }
+    });
+
+    // ذخیره یادداشت
+    socket.on('save-note', async (data) => {
+        try {
+            const note = await Note.findOne({ _id: data.noteId, userId: data.userId || 'baroon' });
+            if (!note) {
+                socket.emit('notes-error', { error: 'Note not found' });
+                return;
+            }
+            
+            note.title = data.title || 'Untitled';
+            note.content = data.content || '';
+            note.updatedAt = new Date();
+            await note.save();
+            socket.emit('note-saved', note);
+        } catch (err) {
+            console.error('Error saving note:', err);
+            socket.emit('notes-error', { error: 'Failed to save note' });
+        }
+    });
+
+    // قفل/باز کردن یادداشت
+    socket.on('toggle-note-lock', async (data) => {
+        try {
+            const note = await Note.findOne({ _id: data.noteId, userId: data.userId || 'baroon' });
+            if (!note) {
+                socket.emit('notes-error', { error: 'Note not found' });
+                return;
+            }
+            
+            if (data.password && note.isLocked) {
+                if (note.password !== data.password) {
+                    socket.emit('notes-error', { error: 'Wrong password' });
+                    return;
+                }
+            }
+            
+            if (note.isLocked) {
+                note.isLocked = false;
+                note.password = '';
+            } else {
+                note.isLocked = true;
+                note.password = data.password || '1234';
+            }
+            
+            await note.save();
+            socket.emit('note-lock-toggled', note);
+        } catch (err) {
+            console.error('Error toggling note lock:', err);
+            socket.emit('notes-error', { error: 'Failed to toggle lock' });
+        }
+    });
+
+    // حذف یادداشت
+    socket.on('delete-note', async (data) => {
+        try {
+            await Note.findOneAndDelete({ _id: data.noteId, userId: data.userId || 'baroon' });
+            socket.emit('note-deleted', { noteId: data.noteId });
+        } catch (err) {
+            console.error('Error deleting note:', err);
+            socket.emit('notes-error', { error: 'Failed to delete note' });
         }
     });
 });

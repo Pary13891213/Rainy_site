@@ -566,4 +566,299 @@ document.getElementById('update-code-btn').addEventListener('click', function() 
     showSystemDialog('✅ Access code updated!');
 });
 
+// ============================================================
+// NOTES
+// ============================================================
+let notes = [];
+let currentNoteId = null;
+let isNoteLocked = false;
+
+const notesList = document.getElementById('notes-list');
+const notesEditor = document.getElementById('notes-editor');
+const notesEmpty = document.getElementById('notes-empty');
+const noteTitleInput = document.getElementById('note-title-input');
+const noteContentInput = document.getElementById('note-content-input');
+const noteLockStatus = document.getElementById('note-lock-status');
+const noteTimeStatus = document.getElementById('note-time-status');
+
+// دریافت یادداشت‌ها
+function loadNotes() {
+    socket.emit('get-notes', { userId: 'baroon' });
+}
+
+socket.on('notes-list', (data) => {
+    notes = data;
+    renderNotesList();
+    if (notes.length > 0 && !currentNoteId) {
+        openNote(notes[0]._id);
+    } else if (notes.length === 0) {
+        closeEditor();
+    }
+});
+
+socket.on('note-created', (note) => {
+    notes.unshift(note);
+    renderNotesList();
+    openNote(note._id);
+});
+
+socket.on('note-saved', (note) => {
+    const index = notes.findIndex(n => n._id === note._id);
+    if (index !== -1) {
+        notes[index] = note;
+        renderNotesList();
+        updateNoteStatus(note);
+    }
+});
+
+socket.on('note-lock-toggled', (note) => {
+    const index = notes.findIndex(n => n._id === note._id);
+    if (index !== -1) {
+        notes[index] = note;
+        renderNotesList();
+        if (currentNoteId === note._id) {
+            isNoteLocked = note.isLocked;
+            updateNoteStatus(note);
+            if (note.isLocked) {
+                noteContentInput.value = 'This note is locked. Click LOCK to unlock.';
+                noteContentInput.disabled = true;
+            } else {
+                noteContentInput.value = note.content;
+                noteContentInput.disabled = false;
+            }
+        }
+    }
+});
+
+socket.on('note-deleted', (data) => {
+    notes = notes.filter(n => n._id !== data.noteId);
+    renderNotesList();
+    if (currentNoteId === data.noteId) {
+        if (notes.length > 0) {
+            openNote(notes[0]._id);
+        } else {
+            closeEditor();
+        }
+    }
+});
+
+socket.on('notes-error', (data) => {
+    showSystemDialog(data.error);
+});
+
+// ===== RENDER NOTES LIST =====
+function renderNotesList() {
+    notesList.innerHTML = '';
+    if (notes.length === 0) {
+        notesEmpty.style.display = 'flex';
+        notesEditor.style.display = 'none';
+        return;
+    }
+    notesEmpty.style.display = 'none';
+    
+    notes.forEach(note => {
+        const item = document.createElement('div');
+        item.className = 'note-item' + (currentNoteId === note._id ? ' active' : '');
+        const lockIcon = note.isLocked ? 'LOCKED' : '';
+        item.innerHTML = `
+            <div class="note-item-title">
+                ${note.title || 'Untitled'}
+                ${note.isLocked ? '<span class="note-item-locked">LOCKED</span>' : ''}
+            </div>
+            <div class="note-item-meta">
+                ${new Date(note.updatedAt).toLocaleString()}
+            </div>
+        `;
+        item.addEventListener('click', () => openNote(note._id));
+        notesList.appendChild(item);
+    });
+}
+
+// ===== OPEN NOTE =====
+function openNote(noteId) {
+    const note = notes.find(n => n._id === noteId);
+    if (!note) return;
+    
+    currentNoteId = noteId;
+    isNoteLocked = note.isLocked;
+    
+    notesEditor.style.display = 'flex';
+    notesEmpty.style.display = 'none';
+    noteTitleInput.value = note.title || 'Untitled';
+    
+    if (note.isLocked) {
+        noteContentInput.value = 'This note is locked. Click LOCK to unlock.';
+        noteContentInput.disabled = true;
+    } else {
+        noteContentInput.value = note.content || '';
+        noteContentInput.disabled = false;
+    }
+    
+    updateNoteStatus(note);
+    renderNotesList();
+}
+
+// ===== CLOSE EDITOR =====
+function closeEditor() {
+    notesEditor.style.display = 'none';
+    if (notes.length === 0) {
+        notesEmpty.style.display = 'flex';
+    }
+    currentNoteId = null;
+    renderNotesList();
+}
+
+// ===== UPDATE NOTE STATUS =====
+function updateNoteStatus(note) {
+    const lockText = note.isLocked ? 'Locked' : 'Unlocked';
+    noteLockStatus.textContent = lockText;
+    noteTimeStatus.textContent = 'Last saved: ' + new Date(note.updatedAt).toLocaleString();
+}
+
+// ===== CREATE NEW NOTE =====
+document.getElementById('new-note-btn').addEventListener('click', () => {
+    socket.emit('create-note', { userId: 'baroon' });
+});
+
+// ===== SAVE NOTE =====
+document.getElementById('note-save-btn').addEventListener('click', () => {
+    if (!currentNoteId) return;
+    
+    const note = notes.find(n => n._id === currentNoteId);
+    if (!note || note.isLocked) {
+        showSystemDialog('Cannot save a locked note!');
+        return;
+    }
+    
+    socket.emit('save-note', {
+        noteId: currentNoteId,
+        userId: 'baroon',
+        title: noteTitleInput.value || 'Untitled',
+        content: noteContentInput.value || ''
+    });
+});
+
+// ===== TOGGLE LOCK =====
+document.getElementById('note-lock-btn').addEventListener('click', () => {
+    if (!currentNoteId) return;
+    showLockModal(currentNoteId);
+});
+
+// ===== LOCK MODAL =====
+const lockModal = document.createElement('div');
+lockModal.className = 'note-lock-modal';
+lockModal.id = 'note-lock-modal';
+lockModal.innerHTML = `
+    <div class="note-lock-modal-content">
+        <h3 id="lock-modal-title">Enter Password</h3>
+        <input type="password" id="lock-password-input" placeholder="Enter password...">
+        <div class="note-lock-modal-actions">
+            <button id="lock-modal-confirm">Confirm</button>
+            <button id="lock-modal-cancel">Cancel</button>
+        </div>
+    </div>
+`;
+document.body.appendChild(lockModal);
+
+let lockModalNoteId = null;
+
+function showLockModal(noteId) {
+    const note = notes.find(n => n._id === noteId);
+    if (!note) return;
+    
+    lockModalNoteId = noteId;
+    const title = note.isLocked ? 'Enter password to unlock' : 'Set a password to lock';
+    document.getElementById('lock-modal-title').textContent = title;
+    document.getElementById('lock-password-input').value = '';
+    lockModal.classList.add('show');
+    document.getElementById('lock-password-input').focus();
+}
+
+document.getElementById('lock-modal-confirm').addEventListener('click', () => {
+    const password = document.getElementById('lock-password-input').value.trim();
+    if (!password) {
+        showSystemDialog('Please enter a password!');
+        return;
+    }
+    
+    socket.emit('toggle-note-lock', {
+        noteId: lockModalNoteId,
+        userId: 'baroon',
+        password: password
+    });
+    
+    lockModal.classList.remove('show');
+});
+
+document.getElementById('lock-modal-cancel').addEventListener('click', () => {
+    lockModal.classList.remove('show');
+});
+
+lockModal.addEventListener('click', (e) => {
+    if (e.target === lockModal) {
+        lockModal.classList.remove('show');
+    }
+});
+
+document.getElementById('lock-password-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        document.getElementById('lock-modal-confirm').click();
+    }
+});
+
+// ===== DELETE NOTE =====
+document.getElementById('note-delete-btn').addEventListener('click', () => {
+    if (!currentNoteId) return;
+    
+    if (confirm('Delete this note?')) {
+        socket.emit('delete-note', {
+            noteId: currentNoteId,
+            userId: 'baroon'
+        });
+    }
+});
+
+// ===== CLOSE NOTE =====
+document.getElementById('note-close-btn').addEventListener('click', closeEditor);
+
+// ===== AUTO-SAVE =====
+let autoSaveTimer = null;
+
+noteContentInput.addEventListener('input', () => {
+    if (!currentNoteId) return;
+    const note = notes.find(n => n._id === currentNoteId);
+    if (!note || note.isLocked) return;
+    
+    clearTimeout(autoSaveTimer);
+    autoSaveTimer = setTimeout(() => {
+        socket.emit('save-note', {
+            noteId: currentNoteId,
+            userId: 'baroon',
+            title: noteTitleInput.value || 'Untitled',
+            content: noteContentInput.value || ''
+        });
+    }, 1000);
+});
+
+noteTitleInput.addEventListener('input', () => {
+    if (!currentNoteId) return;
+    const note = notes.find(n => n._id === currentNoteId);
+    if (!note || note.isLocked) return;
+    
+    clearTimeout(autoSaveTimer);
+    autoSaveTimer = setTimeout(() => {
+        socket.emit('save-note', {
+            noteId: currentNoteId,
+            userId: 'baroon',
+            title: noteTitleInput.value || 'Untitled',
+            content: noteContentInput.value || ''
+        });
+    }, 1000);
+});
+
+// ===== LOAD NOTES ON TAB OPEN =====
+document.querySelector('[data-tab="notes"]').addEventListener('click', () => {
+    loadNotes();
+});
+
 document.addEventListener('DOMContentLoaded', init);
