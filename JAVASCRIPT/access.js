@@ -287,7 +287,6 @@ function verifyCredentials() {
         localStorage.setItem('lastPanel', 'user');
         localStorage.setItem('accessCode', code);
         localStorage.setItem('userPassword', correctCode);
-        localStorage.setItem('userName', 'baroon');
         
         socket.emit('save-user', {
             username: 'baroon',

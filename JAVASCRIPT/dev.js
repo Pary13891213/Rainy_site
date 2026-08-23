@@ -9,13 +9,13 @@ socket.on('chat-history', (history) => {
         time: msg.time,
         type: msg.username === 'DEV' ? 'dev' : 'other',
         isImage: msg.isImage || false,
-        imagePath: msg.imagePath || ''  // ← فقط imagePath
+        imagePath: msg.imagePath || ''
     }));
     displayMessages();
 });
 
 socket.on('chat-message', (data) => {
-    // اگه پیام از DEV هست، به لیست اضافه کن (چون توی sendMessage اضافه نشده)
+    // اگه پیام از DEV هست، به لیست اضافه کن
     if (data.username === 'DEV') {
         const newMessage = {
             sender: 'DEV',
@@ -30,9 +30,10 @@ socket.on('chat-message', (data) => {
         return;
     }
     
-    // پیام از کاربر عادی
+    // ===== کاربر عادی (baroon) =====
+    // چون اسم کاربر همیشه 'baroon' هست، فرستنده رو 'baroon' نشون بده
     const newMessage = {
-        sender: data.username,
+        sender: 'baroon',  // ← همیشه baroon
         content: data.message || '',
         time: data.time,
         type: 'other',
@@ -46,7 +47,7 @@ socket.on('chat-message', (data) => {
 
 // ===== SOCKET EVENTS =====
 socket.on('user-joined', (data) => {
-    // ذخیره اسم کاربر در localStorage
+    // ===== ذخیره اسم کاربر در localStorage (فقط برای dev) =====
     if (data.username && data.username !== 'DEV') {
         localStorage.setItem('userName', data.username);
         localStorage.setItem('displayName', data.username);
@@ -134,34 +135,28 @@ function displayMessages() {
         const messageDiv = document.createElement('div');
         
         // تعیین نوع پیام
-        // تعیین نوع پیام
         if (msg.type === 'dev') {
-            messageDiv.className = 'message mine';  // ← این رو 'mine' بذار
+            messageDiv.className = 'message mine';
             msg.sender = 'DEV';
         } else if (msg.type === 'user' || msg.type === 'other') {
             messageDiv.className = 'message other';
-            msg.sender = msg.sender || 'Unknown';
+            msg.sender = msg.sender || 'baroon';  // ← پیش‌فرض baroon
         } else if (msg.type === 'system') {
             messageDiv.className = 'message system';
         } else {
             messageDiv.className = 'message other';
-            msg.sender = msg.sender || 'Unknown';
+            msg.sender = msg.sender || 'baroon';
         }
         
         // ===== نمایش پیام =====
         if (msg.isImage) {
-            // ساخت آدرس کامل تصویر
             let imageUrl = msg.imagePath || msg.content || '';
             
-            // اگه آدرس با / شروع شد، آدرس کامل رو بساز
             if (imageUrl && !imageUrl.startsWith('http')) {
                 imageUrl = 'https://baroon-server.onrender.com' + imageUrl;
             }
             
-            // اگه آدرس خالی بود، placeholder بذار
-            // جایگزین placeholder با یه دیتا URI ساده
             if (!imageUrl) {
-                // یه جایگزین ساده با SVG
                 imageUrl = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect width='200' height='200' fill='%23333'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%23666' font-family='monospace' font-size='14'%3ENo Image%3C/text%3E%3C/svg%3E";
             }
             
@@ -179,7 +174,6 @@ function displayMessages() {
                 <div class="message-time-bottom">${msg.time}</div>
             `;
         } else {
-            // پیام متنی
             messageDiv.innerHTML = `
                 <div class="message-header">
                     <span class="message-sender">${msg.sender}</span>
@@ -195,6 +189,7 @@ function displayMessages() {
     lastMessageCount = messages.length;
     messagesBox.scrollTop = messagesBox.scrollHeight;
 }
+
 // ============================================================
 // ===== SYSTEM MESSAGES =====
 // ============================================================
@@ -255,7 +250,9 @@ function createGlitchEffect() {
     }
 }
 
-
+// ============================================================
+// ===== UPLOAD IMAGE =====
+// ============================================================
 uploadBtn.addEventListener('click', () => {
     fileInput.click();
 });
@@ -282,7 +279,6 @@ fileInput.addEventListener('change', async function(event) {
         const result = await response.json();
         
         if (result.success) {
-            // فقط به سرور بفرست (خودت به لیست اضافه نکن)
             socket.emit('chat-message', {
                 username: 'DEV',
                 message: '',
@@ -298,6 +294,9 @@ fileInput.addEventListener('change', async function(event) {
     fileInput.value = '';
 });
 
+// ============================================================
+// ===== LIGHTBOX =====
+// ============================================================
 function openImageLightbox(src) {
     const oldLightbox = document.getElementById('lightbox-overlay');
     if (oldLightbox) oldLightbox.remove();
@@ -338,7 +337,7 @@ function openImageLightbox(src) {
     });
 }
 
-// استایل‌های Lightbox (فقط یک بار اضافه بشه)
+// استایل‌های Lightbox
 if (!document.getElementById('lightbox-styles')) {
     const lightboxStyle = document.createElement('style');
     lightboxStyle.id = 'lightbox-styles';
@@ -354,6 +353,7 @@ if (!document.getElementById('lightbox-styles')) {
     `;
     document.head.appendChild(lightboxStyle);
 }
+
 // ============================================================
 // ===== SEND MESSAGE =====
 // ============================================================
@@ -399,15 +399,11 @@ function init() {
     
     // ===== MESSAGE INPUT =====
     messageInput.addEventListener('keydown', (e) => {
-        // در گوشی، اینتر فقط خط جدید میده (نه ارسال)
         if (e.key === 'Enter') {
-            // هیچ کاری نکن - فقط خط جدید
-            // (textarea خودش خط جدید میسازه)
             return;
         }
     });
 
-    // دکمه Send فقط ارسال کنه
     sendBtn.addEventListener('click', sendMessage);
     
     if (clearChatBtn) {
