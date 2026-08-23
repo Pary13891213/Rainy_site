@@ -61,6 +61,7 @@ const messageSchema = new mongoose.Schema({
     time: String,
     timestamp: { type: Date, default: Date.now },
     isImage: { type: Boolean, default: false },
+    isSystem: { type: Boolean, default: false },
     imagePath: { type: String, default: '' }
 });
 const Message = mongoose.model('Message', messageSchema);
@@ -220,10 +221,11 @@ async function getChatHistory() {
 async function saveMessage(data) {
     try {
         const newMessage = new Message({
-            username: data.username,
+            username: data.username || 'System',
             message: data.message || '',
             time: data.time,
             isImage: data.isImage || false,
+            isSystem: data.isSystem || false,
             imagePath: data.imagePath || ''
         });
         await newMessage.save();
@@ -342,11 +344,12 @@ io.on('connection', async (socket) => {
             message: data.message || '',
             time: new Date().toLocaleTimeString('en-US', { timeZone: 'Asia/Tehran' }),
             isImage: data.isImage || false,
+            isSystem: data.isSystem || false,
             imagePath: data.imagePath || ''
         };
-
+        
         const savedMessage = await saveMessage(messageData);
-
+        
         if (savedMessage) {
             console.log('💬 ' + data.username + ': ' + (data.isImage ? '[Image]' : data.message));
             io.emit('chat-message', {
@@ -354,6 +357,7 @@ io.on('connection', async (socket) => {
                 message: savedMessage.message,
                 time: savedMessage.time,
                 isImage: savedMessage.isImage,
+                isSystem: savedMessage.isSystem,
                 imagePath: savedMessage.imagePath
             });
         }
@@ -380,6 +384,31 @@ io.on('connection', async (socket) => {
             console.log('🔴 ' + username + ' disconnected');
             delete users[socket.id];
             io.emit('user-left', { username, users: Object.values(users) });
+        }
+    });
+
+    // ===== SYSTEM MESSAGE =====
+    socket.on('system-message', async (data) => {
+        const messageData = {
+            username: 'System',
+            message: data.message || '',
+            time: new Date().toLocaleTimeString('en-US', { timeZone: 'Asia/Tehran' }),
+            isImage: false,
+            isSystem: true,
+            imagePath: ''
+        };
+        
+        const savedMessage = await saveMessage(messageData);
+        
+        if (savedMessage) {
+            io.emit('chat-message', {
+                username: savedMessage.username,
+                message: savedMessage.message,
+                time: savedMessage.time,
+                isImage: savedMessage.isImage,
+                isSystem: savedMessage.isSystem,
+                imagePath: savedMessage.imagePath
+            });
         }
     });
 });

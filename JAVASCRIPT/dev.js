@@ -4,18 +4,35 @@ const socket = io('https://baroon-server.onrender.com', {
 
 socket.on('chat-history', (history) => {
     messages = history.map(msg => ({
-        sender: msg.username === 'DEV' ? 'DEV' : msg.username,
+        sender: msg.isSystem ? 'System' : (msg.username === 'DEV' ? 'DEV' : msg.username),
         content: msg.message || '',
         time: msg.time,
-        type: msg.username === 'DEV' ? 'dev' : 'other',
+        type: msg.isSystem ? 'system' : (msg.username === 'DEV' ? 'dev' : 'other'),
         isImage: msg.isImage || false,
+        isSystem: msg.isSystem || false,
         imagePath: msg.imagePath || ''
     }));
     displayMessages();
 });
 
 socket.on('chat-message', (data) => {
-    // اگه پیام از DEV هست، به لیست اضافه کن
+    // ===== تشخیص پیام سیستمی =====
+    if (data.isSystem) {
+        const newMessage = {
+            sender: 'System',
+            content: data.message || '',
+            time: data.time,
+            type: 'system',
+            isImage: false,
+            isSystem: true,
+            imagePath: ''
+        };
+        messages.push(newMessage);
+        displayMessages();
+        return;
+    }
+    
+    // اگه پیام از DEV هست
     if (data.username === 'DEV') {
         const newMessage = {
             sender: 'DEV',
@@ -30,10 +47,9 @@ socket.on('chat-message', (data) => {
         return;
     }
     
-    // ===== کاربر عادی (baroon) =====
-    // چون اسم کاربر همیشه 'baroon' هست، فرستنده رو 'baroon' نشون بده
+    // پیام از کاربر عادی
     const newMessage = {
-        sender: 'baroon',  // ← همیشه baroon
+        sender: 'baroon',
         content: data.message || '',
         time: data.time,
         type: 'other',

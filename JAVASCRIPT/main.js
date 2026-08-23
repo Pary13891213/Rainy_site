@@ -12,7 +12,11 @@ socket.on('chat-history', (history) => {
         let sender = msg.username;
         let type = msg.username === 'DEV' ? 'dev' : 'other';
         
-        if (msg.username === userName) {
+        // ===== تشخیص پیام سیستمی =====
+        if (msg.isSystem) {
+            type = 'system';
+            sender = 'System';
+        } else if (msg.username === userName) {
             sender = 'You';
             type = 'user';
         }
@@ -23,10 +27,16 @@ socket.on('chat-history', (history) => {
             time: msg.time,
             type: type,
             isImage: msg.isImage || false,
+            isSystem: msg.isSystem || false,
             imagePath: msg.imagePath || ''
         };
     });
     displayMessages();
+    
+    // ===== بعد از لود تاریخچه، پیام سیستمی ارسال کن =====
+    setTimeout(() => {
+        sendSystemMessageIfNeeded();
+    }, 500);
 });
 
 socket.on('chat-message', (data) => {
@@ -35,7 +45,11 @@ socket.on('chat-message', (data) => {
     let sender = data.username;
     let type = data.username === 'DEV' ? 'dev' : 'other';
     
-    if (data.username === userName) {
+    // ===== تشخیص پیام سیستمی =====
+    if (data.isSystem) {
+        type = 'system';
+        sender = 'System';
+    } else if (data.username === userName) {
         sender = 'You';
         type = 'user';
     }
@@ -46,6 +60,7 @@ socket.on('chat-message', (data) => {
         time: data.time,
         type: type,
         isImage: data.isImage || false,
+        isSystem: data.isSystem || false,
         imagePath: data.imagePath || ''
     };
     
@@ -193,11 +208,18 @@ function displayMessages() {
 
 // ===== SYSTEM MESSAGES =====
 function addSystemMessage(content) {
+    // ===== ارسال به سرور برای ذخیره =====
+    socket.emit('system-message', {
+        message: content
+    });
+    
+    // ===== نمایش فوری =====
     const systemMsg = {
         sender: 'System',
         content: content,
         time: new Date().toLocaleTimeString(),
-        type: 'system'
+        type: 'system',
+        isSystem: true
     };
     messages.push(systemMsg);
     displayMessages();
@@ -262,10 +284,12 @@ function getSystemMessage() {
     return "Welcome Baroon. \n^_~";
 }
 
-function checkAndSendSystemMessage() {
+// ===== ارسال پیام سیستمی در صورت نیاز =====
+function sendSystemMessageIfNeeded() {
     const now = new Date();
     const currentHour = now.getHours();
     
+    // اگه قبلاً برای این ساعت پیام فرستاده نشده
     if (currentHour !== lastMessageHour) {
         const message = getSystemMessage();
         if (message) {
@@ -491,15 +515,15 @@ function init() {
     }
     
     // ===== SYSTEM MESSAGES BY HOUR =====
+    // اگر تاریخچه خالی بود، پیام سیستمی ارسال کن
     setTimeout(() => {
-        const initialMessage = getSystemMessage();
-        if (initialMessage) {
-            addSystemMessage(initialMessage);
-            lastMessageHour = new Date().getHours();
+        if (messages.length === 0) {
+            sendSystemMessageIfNeeded();
         }
     }, 1500);
     
-    setInterval(checkAndSendSystemMessage, 60000);
+    // چک کردن هر دقیقه
+    setInterval(sendSystemMessageIfNeeded, 60000);
 }
 
 // ============================================================
