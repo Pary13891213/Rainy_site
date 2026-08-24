@@ -22,6 +22,7 @@
                 <a href="#" class="menu-link active" data-tab="chat">CHAT</a>
                 <a href="#" class="menu-link" data-tab="hack">HACK</a>
                 <a href="#" class="menu-link" data-tab="notes">NOTES</a>
+                <a href="#" class="menu-link" data-tab="ai">AI</a>
                 <a href="#" class="menu-link" data-tab="setting">SETTING</a>
                 <a href="#" class="menu-link" data-tab="game">GAME</a>
             </div>
@@ -106,6 +107,25 @@
                             <p>No notes yet</p>
                             <p class="notes-empty-sub">Click NEW to create your first note</p>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- تب AI (Zephyr) -->
+            <div class="tab" id="ai-tab">
+                <div class="chat-container" style="display: flex; flex-direction: column; height: 100%;">
+                    <div class="chat-header">
+                        <div class="chat-title">ZEPHYR</div>
+                        <div class="chat-info" id="ai-status">STATUS: ONLINE</div>
+                    </div>
+                    
+                    <div class="messages-box" id="ai-messages-box">
+                        <!-- پیام‌ها اینجا با js اضافه می‌شن -->
+                    </div>
+                    
+                    <div class="message-input-area">
+                        <textarea id="ai-message-input" class="message-input" placeholder="Type your message to Zephyr..." autocomplete="off" enterkeyhint="enter" rows="1"></textarea>
+                        <button id="ai-send-btn" class="send-btn">SEND</button>
                     </div>
                 </div>
             </div>
