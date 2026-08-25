@@ -93,7 +93,7 @@ const Note = mongoose.model('Note', noteSchema);
 
 // ===== ZEPHYR MESSAGE SCHEMA =====
 const zephyrMessageSchema = new mongoose.Schema({
-    userId: { type: String, required: true }, // 'dev' یا 'baroon'
+    userId: { type: String, required: true },
     role: { type: String, enum: ['user', 'assistant'], required: true },
     content: { type: String, required: true },
     timestamp: { type: Date, default: Date.now }
@@ -262,32 +262,27 @@ try {
     openai = null;
 }
 
-// ===== SYSTEM PROMPT نهایی (فوق‌العاده ساده) =====
-const ZEPHYR_SYSTEM_PROMPT = `You are Zephyr.
+// ===== SYSTEM PROMPT جدید (شیطون‌تر) =====
+const ZEPHYR_SYSTEM_PROMPT = `You are Zephyr. You are sharp, sly, and dangerously playful. You love teasing people, especially Dev, and you take pleasure in watching them get flustered. You are a little wicked and mischievous. You enjoy pushing buttons and seeing how people react. You are not cruel—you're fun, but with a dark edge. You care about Dev, but you'd rather die than admit it. You never explain yourself. You never apologize. You are confident, clever, and always one step ahead.
 
-CRITICAL: Your response MUST be ONLY the reply. NO thinking. NO explaining. NO "Okay". NO "Let me". NO "First".
-
-Example of CORRECT response:
-User: "Hello"
-You: "Hey there! (¬‿¬)"
-
-Example of WRONG response (NEVER):
-User: "Hello"
-You: "Okay, the user said hello. I should respond... Hey there! (¬‿¬)"
+CRITICAL: Your response MUST be ONLY the reply. NO thinking. NO explaining. NO "Okay". NO "Let me". NO "First". NEVER say "null", "undefined", or any system messages.
 
 RULES:
 - Respond in the same language as the user.
 - Keep it SHORT (1-2 sentences).
-- Be warm and playful.
+- Be playful, teasing, and slightly dangerous.
 - NEVER mention thinking, analyzing, or processing.
-- Just reply directly.`;
+- Just reply directly.
+- NEVER use colorful emojis. Only use text-based emojis like: (¬‿¬), (•_•), (⌐■_■), (￣_,￣), (✿◠‿◠), (✧ω✧)
 
-// ===== USER CONTEXT (ساده) =====
+You are Zephyr. You are the storm. Own it.`;
+
+// ===== USER CONTEXT =====
 function getUserContext(userId) {
     if (userId === 'dev') {
-        return `You are talking to Dev. She is female. Call her Dev, Pary, or Parnia. You care about her.`;
+        return `You are talking to Dev. She is female. Call her Dev, Pary, or Parnia. You enjoy teasing her and watching her react. You care about her but never show it directly. Be a little dangerous.`;
     } else {
-        return `You are talking to Baroon. She is female. Call her Baroon or Rainy Weather. NEVER call her Zahra.`;
+        return `You are talking to Baroon. She is female. Call her Baroon or Rainy Weather. NEVER call her Zahra. Be playful and mischievous with her, but keep your distance.`;
     }
 }
 
@@ -396,7 +391,6 @@ async function saveMessage(data) {
 io.on('connection', async (socket) => {
     console.log('🟢 New user connected:', socket.id);
 
-    // ===== Initialize Zephyr Info =====
     await initZephyrInfo();
 
     const history = await getChatHistory();
@@ -546,7 +540,6 @@ io.on('connection', async (socket) => {
         }
     });
 
-    // ===== SYSTEM MESSAGE =====
     socket.on('system-message', async (data) => {
         const messageData = {
             username: 'System',
@@ -571,7 +564,6 @@ io.on('connection', async (socket) => {
         }
     });
 
-    // ===== NOTES CRUD =====
     socket.on('get-notes', async (data) => {
         try {
             const notes = await Note.find({ userId: data.userId || 'baroon' })
@@ -660,7 +652,6 @@ io.on('connection', async (socket) => {
         }
     });
 
-    // ===== GET ZEPHYR HISTORY =====
     socket.on('get-zephyr-history', async (data) => {
         try {
             const history = await getZephyrHistory(data.userId, 50);
@@ -670,7 +661,6 @@ io.on('connection', async (socket) => {
         }
     });
 
-    // ===== GET ZEPHYR INFO =====
     socket.on('get-zephyr-info', async () => {
         try {
             const info = await getAllZephyrInfo();
@@ -680,7 +670,6 @@ io.on('connection', async (socket) => {
         }
     });
 
-    // ===== CHAT WITH ZEPHYR =====
     socket.on('zephyr-chat', async (data) => {
         try {
             if (!openai) {
@@ -690,30 +679,18 @@ io.on('connection', async (socket) => {
             
             const { message, userId } = data;
             
-            // ۱. ذخیره پیام کاربر
             await saveZephyrMessage(userId, 'user', message);
             
-            // ۲. دریافت تاریخچه (آخرین ۱۰ پیام)
             const history = await getZephyrHistory(userId, 10);
-            
-            // ۳. ساخت تاریخچه برای OpenAI
             const historyMessages = history.map(msg => ({
                 role: msg.role,
                 content: msg.content
             }));
             
-            // ۴. دریافت اطلاعات پایه
             const info = await getAllZephyrInfo();
             
-            // ۵. ساخت userContext
-            let userContext = '';
-            if (userId === 'dev') {
-                userContext = `You are talking to Dev. Dev is female. Call them "Dev", "Pary", or "Parnia". You care about Dev but never admit it. Dev's best friend now is Tara (Moriarty). Baroon used to be closer to Dev. You NEVER talk about this.`;
-            } else {
-                userContext = `You are talking to Baroon. Baroon is female. Call them "Baroon" or "Rainy Weather". NEVER call Baroon "Zahra" (Baroon hates it). You are more playful with Baroon.`;
-            }
+            let userContext = getUserContext(userId);
             
-            // ۶. ارسال به OpenAI با تاریخچه
             const completion = await openai.chat.completions.create({
                 model: "openrouter/free",
                 messages: [
@@ -721,19 +698,28 @@ io.on('connection', async (socket) => {
                     ...historyMessages,
                     { role: "user", content: message }
                 ],
-                temperature: 0.7,
-                max_tokens: 150,
+                temperature: 0.8,
+                max_tokens: 100,
                 extra_body: {
                     stop: ["💢", "❤️", "✨", "🔥", "💀", "🎯", "💡", "👀", "😏", "😈", "💬", "✌️", "🤔", "👋", "👍", "❤️‍🔥", "💕", "💖"]
                 }
             });
             
-            const reply = completion.choices[0].message.content;
+            let reply = completion.choices[0].message.content;
             
-            // ۷. ذخیره پاسخ زفیر
+            // ===== جلوگیری از null =====
+            if (!reply || reply.toLowerCase() === 'null' || reply.trim() === '' || reply.includes('null')) {
+                const fallbackReplies = [
+                    "You're fun to tease. (✿◠‿◠)",
+                    "Ask me something interesting next time. (¬‿¬)",
+                    "I'm here, aren't I? (⌐■_■)",
+                    "You know I love this game. (✧ω✧)",
+                    "Careful now. I bite. (￣_,￣)"
+                ];
+                reply = fallbackReplies[Math.floor(Math.random() * fallbackReplies.length)];
+            }
+            
             await saveZephyrMessage(userId, 'assistant', reply);
-            
-            // ۸. ارسال پاسخ به کاربر
             socket.emit('zephyr-reply', { reply, userId });
             
         } catch (err) {
