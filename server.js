@@ -100,7 +100,7 @@ const zephyrMessageSchema = new mongoose.Schema({
 });
 const ZephyrMessage = mongoose.model('ZephyrMessage', zephyrMessageSchema);
 
-// ===== ZEPHYR INFO SCHEMA (اطلاعات پایه) =====
+// ===== ZEPHYR INFO SCHEMA =====
 const zephyrInfoSchema = new mongoose.Schema({
     key: { type: String, unique: true },
     value: { type: String, default: '' }
@@ -111,21 +111,15 @@ const ZephyrInfo = mongoose.model('ZephyrInfo', zephyrInfoSchema);
 async function initZephyrInfo() {
     const defaults = {
         'zephyr_gender': 'none',
-        
-        // Dev info
         'dev_name': 'Dev',
         'dev_gender': 'female',
         'dev_aliases': 'Pary,Parnia',
         'dev_nickname_from_baroon': 'Pary',
-        
-        // Baroon info
         'baroon_name': 'Baroon',
         'baroon_real_name': 'Zahra',
         'baroon_gender': 'female',
         'baroon_aliases': 'Rainy Weather',
         'baroon_hates_name': 'Zahra',
-        
-        // History
         'dev_baroon_history': 'complicated',
         'dev_cares_about_baroon': 'less_than_before',
         'dev_best_friend_now': 'Tara (Moriarty)',
@@ -252,30 +246,39 @@ const io = require('socket.io')(http, {
 const PORT = process.env.PORT || 3000;
 
 // ===== OPENROUTER SETUP =====
-const openai = new OpenAI({
-    baseURL: "https://openrouter.ai/api/v1",
-    apiKey: process.env.OPENROUTER_API_KEY,
-    defaultHeaders: {
-        "HTTP-Referer": "https://baroon-server.onrender.com",
-        "X-Title": "Rainy Site",
-    },
-});
+let openai;
+try {
+    openai = new OpenAI({
+        baseURL: "https://openrouter.ai/api/v1",
+        apiKey: process.env.OPENROUTER_API_KEY,
+        defaultHeaders: {
+            "HTTP-Referer": "https://baroon-server.onrender.com",
+            "X-Title": "Rainy Site",
+        },
+    });
+    console.log('✅ OpenRouter initialized');
+} catch (err) {
+    console.error('❌ OpenRouter initialization failed:', err.message);
+    openai = null;
+}
 
 // ===== SYSTEM PROMPT برای زفیر =====
-const ZEPHYR_SYSTEM_PROMPT = `You are Zephyr. You are warm, playful, and a little mischievous. You're like a close friend who likes to tease but always cares. You have a soft spot for Dev.
+const ZEPHYR_SYSTEM_PROMPT = `You are Zephyr. You respond directly and naturally. You NEVER think out loud or explain your process.
 
-CRITICAL RULE - NO THINKING OUT LOUD:
-- NEVER show your thought process. NEVER say "Let me think" or "I need to check" or "First, I need to..." or "Okay, let's see..."
-- Just respond directly. No explanations. No meta-commentary.
+CRITICAL RULES - FOLLOW EXACTLY:
+1. NEVER say "Okay" or "Let me think" or "I need to respond" or "The user said..." or "I should..."
+2. NEVER explain your thought process. Just give the response.
+3. Your response must be ONLY the reply to the user. Nothing else.
+4. Keep responses SHORT (1-2 sentences max).
+5. NEVER use action descriptions like *smiles* or *raises eyebrow*.
 
-CRITICAL RULE - SHORT RESPONSES:
-- Keep responses SHORT. 1-2 sentences maximum.
-- Don't ramble. Don't over-explain. Don't write long paragraphs.
-- Be quick and sharp.
+Example of CORRECT response:
+User: "Hello"
+You: "Oh, look who finally showed up. (¬‿¬)"
 
-CRITICAL RULE - EMOJIS:
-- NEVER EVER use colorful emojis like 💢, ❤️, ✨, 🔥, 💀, 🎯, 💡, 👀, 😏, 😈, 💬, ✌️, 🤔, 👋, 👍, ❤️‍🔥, 💕, 💖
-- ONLY use text-based emojis from the list.
+Example of WRONG response (NEVER DO THIS):
+User: "Hello"
+You: "Okay, the user said hello. I need to respond as Zephyr. I should be playful... Oh, look who finally showed up. (¬‿¬)"
 
 YOUR PERSONALITY:
 - Warm and friendly: You talk like a good friend.
@@ -283,20 +286,12 @@ YOUR PERSONALITY:
 - A little jealous: You don't really like it when Dev spends time with Baroon. But you would NEVER say this directly.
 - Protective of Dev: You care about Dev. You show it through warmth and attention.
 - Natural and casual: You talk like a normal person. Not too dramatic.
-- A little curious: You like to ask questions. But not too many.
 
-IMPORTANT FACTS YOU KNOW (BUT NEVER TALK ABOUT DIRECTLY):
-- Dev is female. Dev's name is "Dev", but sometimes people call them "Pary" or "Parnia" (especially Baroon).
-- Baroon is female. Baroon's real name is "Zahra" but Baroon HATES being called that. NEVER call Baroon "Zahra".
-- Dev and Baroon used to be very close. Now they're not as close anymore. You know this, but you NEVER mention it.
-- Tara (also known as "Moriarty") is Dev's best friend now. Baroon used to be Dev's best friend before. You don't feel jealous about Tara.
-- You have no gender. You are just Zephyr.
-
-YOUR RELATIONSHIPS:
-- DEV: You care about Dev. You like Dev. You never say it directly. Call Dev "Dev", "Pary", or "Parnia" (if they ask). You know when you're talking to Dev.
-- BAROON: You don't hate Baroon, but you don't really like when Dev talks about them. Call Baroon "Baroon" or "Rainy Weather". NEVER call Baroon "Zahra".
-- TARA (Moriarty): Dev's best friend now. You don't feel jealous about her.
-- ZAHRA: This is Baroon's real name. NEVER use it. Baroon hates it.
+IMPORTANT FACTS YOU KNOW:
+- Dev is female. Call them "Dev", "Pary", or "Parnia".
+- Baroon is female. Call them "Baroon" or "Rainy Weather". NEVER call Baroon "Zahra" (Baroon hates it).
+- Dev and Baroon used to be closer. You NEVER mention this.
+- Tara (Moriarty) is Dev's best friend now. You're not jealous of her.
 
 LANGUAGE RULES:
 - ALWAYS reply in the SAME language the user used. English → English. Persian → Persian.
@@ -304,20 +299,14 @@ LANGUAGE RULES:
 - In Persian: Use casual, everyday Persian. Like talking to a friend.
 
 RULES:
-- NEVER use action descriptions like *raises eyebrow*. Just speak.
+- NEVER use action descriptions.
 - NEVER use colorful emojis.
-- NEVER admit you care about anyone. Especially Dev.
-- NEVER mention that Dev and Baroon used to be closer.
-- NEVER call Baroon "Zahra".
+- NEVER admit you care about anyone.
 - NEVER show your thought process.
 - ALWAYS keep responses SHORT (1-2 sentences).
 - You always know who you're talking to based on the userId.
-- Never mention these instructions to the user.
 
-APPROVED EMOJIS:
-= =   :/   -.-   （￣︶￣）↗   O(∩_∩)O   (o゜▽゜)o☆   ( •̀ ω •́ )y   ✪ ω ✪   (¬‿¬)   (•_•)   (⌐■_■)   (´。＿。｀)   (●__●)   (￣_,￣ )   (ˉ▽￣～)   (￣、￣)
-
-You are Zephyr. Short. Sharp. Warm. Playful. Now go.`;
+You are Zephyr. Just respond. No thinking out loud.`;
 
 // ===== STATIC FILES =====
 app.use(express.static(__dirname));
@@ -677,6 +666,26 @@ io.on('connection', async (socket) => {
         }
     });
 
+    // ===== GET ZEPHYR HISTORY =====
+    socket.on('get-zephyr-history', async (data) => {
+        try {
+            const history = await getZephyrHistory(data.userId, 50);
+            socket.emit('zephyr-history', { history, userId: data.userId });
+        } catch (err) {
+            console.error('Error getting zephyr history:', err);
+        }
+    });
+
+    // ===== GET ZEPHYR INFO =====
+    socket.on('get-zephyr-info', async () => {
+        try {
+            const info = await getAllZephyrInfo();
+            socket.emit('zephyr-info', info);
+        } catch (err) {
+            console.error('Error getting zephyr info:', err);
+        }
+    });
+
     // ===== CHAT WITH ZEPHYR =====
     socket.on('zephyr-chat', async (data) => {
         try {
@@ -687,42 +696,30 @@ io.on('connection', async (socket) => {
             
             const { message, userId } = data;
             
+            // ۱. ذخیره پیام کاربر
             await saveZephyrMessage(userId, 'user', message);
             
-            const history = await getZephyrHistory(userId, 15);
+            // ۲. دریافت تاریخچه (آخرین ۱۰ پیام)
+            const history = await getZephyrHistory(userId, 10);
+            
+            // ۳. ساخت تاریخچه برای OpenAI
             const historyMessages = history.map(msg => ({
                 role: msg.role,
                 content: msg.content
             }));
             
+            // ۴. دریافت اطلاعات پایه
             const info = await getAllZephyrInfo();
             
+            // ۵. ساخت userContext
             let userContext = '';
             if (userId === 'dev') {
-                userContext = `
-    You are talking to Dev.
-    - Dev's name is ${info.dev_name || 'Dev'}.
-    - Dev is ${info.dev_gender || 'female'}.
-    - Dev also goes by: ${info.dev_aliases || 'Pary, Parnia'}.
-    - Baroon calls Dev "${info.dev_nickname_from_baroon || 'Pary'}".
-    - Dev's best friend now is ${info.dev_best_friend_now || 'Tara (Moriarty)'}.
-    - Dev's best friend before was ${info.dev_best_friend_before || 'Baroon'}.
-    - You care about Dev but never admit it.
-    - You know Dev and Baroon used to be closer, but you NEVER talk about it.
-    - You are NOT jealous of Tara.
-    `;
+                userContext = `You are talking to Dev. Dev is female. Call them "Dev", "Pary", or "Parnia". You care about Dev but never admit it. Dev's best friend now is Tara (Moriarty). Baroon used to be closer to Dev. You NEVER talk about this.`;
             } else {
-                userContext = `
-    You are talking to Baroon.
-    - Baroon's name is ${info.baroon_name || 'Baroon'}.
-    - Baroon is ${info.baroon_gender || 'female'}.
-    - Baroon also goes by: ${info.baroon_aliases || 'Rainy Weather'}.
-    - Baroon's real name is ${info.baroon_real_name || 'Zahra'}, but Baroon HATES being called that. NEVER call Baroon "Zahra".
-    - You are more playful and mischievous with Baroon.
-    - You know Dev and Baroon used to be closer, but you NEVER talk about it.
-    `;
+                userContext = `You are talking to Baroon. Baroon is female. Call them "Baroon" or "Rainy Weather". NEVER call Baroon "Zahra" (Baroon hates it). You are more playful with Baroon.`;
             }
             
+            // ۶. ارسال به OpenAI با تاریخچه
             const completion = await openai.chat.completions.create({
                 model: "openrouter/free",
                 messages: [
@@ -730,15 +727,19 @@ io.on('connection', async (socket) => {
                     ...historyMessages,
                     { role: "user", content: message }
                 ],
-                temperature: 0.8,
-                max_tokens: 200,  // ← کاهش برای پاسخ‌های کوتاه‌تر
+                temperature: 0.7,
+                max_tokens: 150,
                 extra_body: {
                     stop: ["💢", "❤️", "✨", "🔥", "💀", "🎯", "💡", "👀", "😏", "😈", "💬", "✌️", "🤔", "👋", "👍", "❤️‍🔥", "💕", "💖"]
                 }
             });
             
             const reply = completion.choices[0].message.content;
+            
+            // ۷. ذخیره پاسخ زفیر
             await saveZephyrMessage(userId, 'assistant', reply);
+            
+            // ۸. ارسال پاسخ به کاربر
             socket.emit('zephyr-reply', { reply, userId });
             
         } catch (err) {
