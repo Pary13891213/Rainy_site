@@ -552,7 +552,8 @@ io.on('connection', async (socket) => {
     socket.on('zephyr-chat', async (data) => {
         try {
             if (!openai) {
-                socket.emit('zephyr-error', { error: 'AI service is not available.' });
+                console.error('Zephyr: openai not initialized');
+                socket.emit('zephyr-error', { error: 'AI service not available' });
                 return;
             }
             
@@ -565,8 +566,10 @@ io.on('connection', async (socket) => {
                 userContext = 'You are talking to Baroon (Rainy Weather). Be more playful and mischievous.';
             }
             
+            console.log('Zephyr request:', { userId, message: message.substring(0, 50) + '...' });
+            
             const completion = await openai.chat.completions.create({
-                model: "google/gemini-2.0-flash-exp:free",  // ← تغییر به Gemini
+                model: "openrouter/free",
                 messages: [
                     { role: "system", content: ZEPHYR_SYSTEM_PROMPT + '\n\n' + userContext },
                     { role: "user", content: message }
@@ -575,12 +578,30 @@ io.on('connection', async (socket) => {
                 max_tokens: 400,
             });
             
+            if (!completion || !completion.choices || completion.choices.length === 0) {
+                throw new Error('No response from AI');
+            }
+            
             const reply = completion.choices[0].message.content;
+            console.log('Zephyr reply:', reply.substring(0, 50) + '...');
             socket.emit('zephyr-reply', { reply, userId });
             
         } catch (err) {
-            console.error('Zephyr error:', err);
-            socket.emit('zephyr-error', { error: 'Something went wrong. Try again.' });
+            console.error('Zephyr FULL error:', err);
+            console.error('Zephyr status:', err.status);
+            console.error('Zephyr message:', err.message);
+            console.error('Zephyr stack:', err.stack);
+            
+            let errorMsg = 'Something went wrong. Try again.';
+            if (err.status === 429) {
+                errorMsg = 'Rate limit exceeded. Try again later.';
+            } else if (err.status === 401) {
+                errorMsg = 'API key invalid. Check configuration.';
+            } else if (err.status === 404) {
+                errorMsg = 'Model not available. Try again later.';
+            }
+            
+            socket.emit('zephyr-error', { error: errorMsg });
         }
     });
 });
