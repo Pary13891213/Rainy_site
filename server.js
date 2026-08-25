@@ -579,7 +579,7 @@ io.on('connection', async (socket) => {
             }
             
             const completion = await openai.chat.completions.create({
-                model: "meta-llama/llama-3.3-70b-instruct:free",
+                model: "openrouter/free",
                 messages: [
                     { role: "system", content: ZEPHYR_SYSTEM_PROMPT + '\n\n' + userContext },
                     { role: "user", content: message }
