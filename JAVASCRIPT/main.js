@@ -866,7 +866,7 @@ document.querySelector('[data-tab="notes"]').addEventListener('click', () => {
 });
 
 // ============================================================
-// ZEPHYR CHAT (AI TAB)
+// ZEPHYR CHAT (AI TAB) - با حافظه و تاریخچه
 // ============================================================
 const zephyrMessagesBox = document.getElementById('zephyr-messages-box');
 const zephyrInput = document.getElementById('zephyr-message-input');
@@ -874,6 +874,7 @@ const zephyrSendBtn = document.getElementById('zephyr-send-btn');
 const zephyrTypingIndicator = document.getElementById('zephyr-typing-indicator');
 
 let isZephyrWaiting = false;
+let zephyrHistoryLoaded = false;
 
 function addZephyrMessage(sender, content, isUser = false) {
     if (!zephyrMessagesBox) return;
@@ -889,12 +890,53 @@ function addZephyrMessage(sender, content, isUser = false) {
     zephyrMessagesBox.scrollTop = zephyrMessagesBox.scrollHeight;
 }
 
+function loadZephyrHistory() {
+    if (zephyrHistoryLoaded) return;
+    socket.emit('get-zephyr-history', { userId: 'baroon' });
+}
+
+socket.on('zephyr-history', (data) => {
+    if (data.userId === 'baroon') {
+        zephyrHistoryLoaded = true;
+        // پاک کردن پیام‌های قبلی
+        if (zephyrMessagesBox) {
+            zephyrMessagesBox.innerHTML = '';
+        }
+        
+        // نمایش تاریخچه
+        data.history.forEach(msg => {
+            const isUser = msg.role === 'user';
+            const sender = isUser ? 'You' : 'Zephyr';
+            addZephyrMessage(sender, msg.content, isUser);
+        });
+        
+        // اگر تاریخچه خالی بود، یه پیام خوش‌آمدگویی
+        if (data.history.length === 0) {
+            addZephyrMessage('Zephyr', 'Hey! I\'m Zephyr. (¬‿¬) What brings you here?');
+        }
+    }
+});
+
+// ===== دریافت اطلاعات پایه زفیر =====
+socket.on('zephyr-info', (info) => {
+    console.log('Zephyr info loaded:', info);
+});
+
 function sendToZephyr() {
     if (!zephyrInput) return;
     if (isZephyrWaiting) return;
     
     const message = zephyrInput.value.trim();
     if (!message) return;
+    
+    // چک کردن پیام تکراری
+    const lastMessage = zephyrMessagesBox?.lastElementChild;
+    if (lastMessage) {
+        const lastContent = lastMessage.querySelector('.message-content')?.textContent;
+        if (lastContent === message) {
+            return;
+        }
+    }
     
     addZephyrMessage('You', message, true);
     zephyrInput.value = '';
@@ -946,5 +988,13 @@ if (zephyrInput) {
         }
     });
 }
+
+// ===== لود تاریخچه وقتی تب AI باز میشه =====
+document.querySelector('[data-tab="ai"]')?.addEventListener('click', () => {
+    setTimeout(loadZephyrHistory, 200);
+});
+
+// ===== لود تاریخچه در ابتدا =====
+setTimeout(loadZephyrHistory, 1000);
 
 document.addEventListener('DOMContentLoaded', init);

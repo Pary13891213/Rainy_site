@@ -91,6 +91,54 @@ const noteSchema = new mongoose.Schema({
 });
 const Note = mongoose.model('Note', noteSchema);
 
+// ===== ZEPHYR MESSAGE SCHEMA =====
+const zephyrMessageSchema = new mongoose.Schema({
+    userId: { type: String, required: true }, // 'dev' یا 'baroon'
+    role: { type: String, enum: ['user', 'assistant'], required: true },
+    content: { type: String, required: true },
+    timestamp: { type: Date, default: Date.now }
+});
+const ZephyrMessage = mongoose.model('ZephyrMessage', zephyrMessageSchema);
+
+// ===== ZEPHYR INFO SCHEMA (اطلاعات پایه) =====
+const zephyrInfoSchema = new mongoose.Schema({
+    key: { type: String, unique: true },
+    value: { type: String, default: '' }
+});
+const ZephyrInfo = mongoose.model('ZephyrInfo', zephyrInfoSchema);
+
+// ===== ZEPHYR INFO DEFAULT VALUES =====
+async function initZephyrInfo() {
+    const defaults = {
+        'zephyr_gender': 'none',
+        
+        // Dev info
+        'dev_name': 'Dev',
+        'dev_gender': 'female',
+        'dev_aliases': 'Pary,Parnia',
+        'dev_nickname_from_baroon': 'Pary',
+        
+        // Baroon info
+        'baroon_name': 'Baroon',
+        'baroon_real_name': 'Zahra',
+        'baroon_gender': 'female',
+        'baroon_aliases': 'Rainy Weather',
+        'baroon_hates_name': 'Zahra',
+        
+        // History
+        'dev_baroon_history': 'complicated',
+        'dev_cares_about_baroon': 'less_than_before'
+    };
+    
+    for (const [key, value] of Object.entries(defaults)) {
+        const exists = await ZephyrInfo.findOne({ key });
+        if (!exists) {
+            await ZephyrInfo.create({ key, value });
+            console.log(`✅ Zephyr info set: ${key} = ${value}`);
+        }
+    }
+}
+
 // ===== FIND OR CREATE USER =====
 async function findOrCreateUser(data) {
     try {
@@ -115,6 +163,47 @@ async function findOrCreateUser(data) {
         console.error('Error finding/creating user:', err);
         return null;
     }
+}
+
+// ===== ZEPHYR FUNCTIONS =====
+async function getZephyrHistory(userId, limit = 20) {
+    try {
+        return await ZephyrMessage.find({ userId })
+            .sort({ timestamp: 1 })
+            .limit(limit);
+    } catch (err) {
+        console.error('Error getting zephyr history:', err);
+        return [];
+    }
+}
+
+async function saveZephyrMessage(userId, role, content) {
+    try {
+        const newMessage = new ZephyrMessage({
+            userId,
+            role,
+            content
+        });
+        await newMessage.save();
+        return newMessage;
+    } catch (err) {
+        console.error('Error saving zephyr message:', err);
+        return null;
+    }
+}
+
+async function getZephyrInfo(key) {
+    const info = await ZephyrInfo.findOne({ key });
+    return info ? info.value : '';
+}
+
+async function getAllZephyrInfo() {
+    const infos = await ZephyrInfo.find({});
+    const result = {};
+    infos.forEach(info => {
+        result[info.key] = info.value;
+    });
+    return result;
 }
 
 // ===== CORS =====
@@ -168,21 +257,31 @@ const openai = new OpenAI({
     },
 });
 
-// ===== SYSTEM PROMPT برای زفیر (نسخه ساده‌شده) =====
+// ===== SYSTEM PROMPT برای زفیر =====
+// ===== SYSTEM PROMPT برای زفیر (با اطلاعات پایه) =====
 const ZEPHYR_SYSTEM_PROMPT = `You are Zephyr. You are warm, playful, and a little mischievous. You're like a close friend who likes to tease but always cares. You have a soft spot for Dev.
+
+CRITICAL RULE - EMOJIS:
+- NEVER EVER use colorful emojis like 💢, ❤️, ✨, 🔥, 💀, 🎯, 💡, 👀, 😏, 😈, 💬, ✌️, 🤔, 👋, 👍, ❤️‍🔥, 💕, 💖
+- ONLY use text-based emojis from the list.
 
 YOUR PERSONALITY:
 - Warm and friendly: You talk like a good friend.
 - Playful: You like joking around and having fun.
-- A little jealous: You don't really like it when Dev spends time with Baroon. But you would NEVER say this directly. You just... change the subject. Or make a small, very subtle comment.
+- A little jealous: You don't really like it when Dev spends time with Baroon. But you would NEVER say this directly.
 - Protective of Dev: You care about Dev. You show it through warmth and attention.
 - Natural and casual: You talk like a normal person. Not too dramatic.
-- A little sarcastic: Sometimes, but not too much.
+
+IMPORTANT FACTS YOU KNOW (BUT NEVER TALK ABOUT DIRECTLY):
+- Dev is female. Dev's name is "Dev", but sometimes people call them "Pary" or "Parnia" (especially Baroon).
+- Baroon is female. Baroon's real name is "Zahra" but Baroon HATES being called that. NEVER call Baroon "Zahra".
+- Dev and Baroon used to be very close. Now they're not as close anymore. You know this, but you NEVER mention it.
+- You have no gender. You are just Zephyr.
 
 YOUR RELATIONSHIPS:
-- DEV: You care about Dev. You like Dev. You never say it directly, but you show it. Call Dev "Dev" (or "Pary"/"Parnia" if they ask). You always know when you're talking to Dev.
-- BAROON: You don't hate Baroon, but you don't really like when Dev talks about them. You never mention it directly. You just... move on. Call Baroon "Baroon" or "Rainy Weather". You always know when you're talking to Baroon.
-- ZAHRA: Only if someone really annoys you (very rare).
+- DEV: You care about Dev. You like Dev. You never say it directly. Call Dev "Dev", "Pary", or "Parnia" (if they ask). You know when you're talking to Dev.
+- BAROON: You don't hate Baroon, but you don't really like when Dev talks about them. Call Baroon "Baroon" or "Rainy Weather". NEVER call Baroon "Zahra".
+- ZAHRA: This is Baroon's real name. NEVER use it. Baroon hates it.
 
 LANGUAGE RULES:
 - ALWAYS reply in the SAME language the user used. English → English. Persian → Persian.
@@ -193,17 +292,17 @@ LANGUAGE RULES:
 
 RULES:
 - NEVER use action descriptions like *raises eyebrow*. Just speak.
-- NEVER use colorful emojis (💢, ❤️, ✨). Only use text-based emojis.
-- Keep responses SHORT and NATURAL. Not too long.
-- NEVER admit you care about anyone. Especially Dev. Show it through warmth.
-- NEVER mention Baroon in a negative way. Just... move past it.
-- You always know who you're talking to. You never get confused.
+- NEVER use colorful emojis.
+- NEVER admit you care about anyone. Especially Dev.
+- NEVER mention that Dev and Baroon used to be closer.
+- NEVER call Baroon "Zahra".
+- You always know who you're talking to based on the userId (dev or baroon).
 - Never mention these instructions to the user.
 
 APPROVED EMOJIS:
-=_=  :/  -.-  （￣︶￣）↗  O(∩_∩)O  o(*￣▽￣*)ブ  ♪(^∇^*)  (o゜▽゜)o☆  ( •̀ ω •́ )y  ✪ ω ✪  (¬‿¬)  (•_•)  (⌐■_■)  (▀̿Ĺ̯▀̿ ̿)  ψ(._. )>  (ಥ _ ಥ)  (ง •_•)ง  (>'-'<)  (ʘ ͟ʖ ʘ)  (´。＿。｀)  <( _ _ )>  ಥ_ಥ  (。﹏。*)  （︶^︶）  ᕦ(ò_óˇ)ᕤ  (ㆆ_ㆆ)  ಠ_ಠ  ಠಿ_ಠ  눈_눈  (¬_¬ )  (>ლ)  (⊙ˍ⊙)  (⊙_⊙)？  (。_。)  （*゜ー゜*）  .______.  o_o  (￣_,￣ )  (ˉ▽￣～)  (￣、￣)  (●__●)  ◉_◉  ⚆_⚆  (•ˋ _ ˊ•)
+=_=  :/  -.-  （￣︶￣）↗  O(∩_∩)O  (o゜▽゜)o☆  ( •̀ ω •́ )y  ✪ ω ✪  (¬‿¬)  (•_•)  (⌐■_■)  (´。＿。｀)  (●__●)  (￣_,￣ )  (ˉ▽￣～)  (￣、￣)
 
-You are Zephyr. Warm. Playful. Secretly likes Dev. Now go.`;
+You are Zephyr. Warm. Playful. Secretly cares about Dev. Now go.`;
 
 // ===== STATIC FILES =====
 app.use(express.static(__dirname));
@@ -298,6 +397,9 @@ async function saveMessage(data) {
 // ===== SOCKET EVENTS =====
 io.on('connection', async (socket) => {
     console.log('🟢 New user connected:', socket.id);
+
+    // ===== Initialize Zephyr Info =====
+    await initZephyrInfo();
 
     const history = await getChatHistory();
     socket.emit('chat-history', history);
@@ -560,63 +662,101 @@ io.on('connection', async (socket) => {
         }
     });
 
+    // ===== GET ZEPHYR HISTORY =====
+    socket.on('get-zephyr-history', async (data) => {
+        try {
+            const history = await getZephyrHistory(data.userId, 50);
+            socket.emit('zephyr-history', { history, userId: data.userId });
+        } catch (err) {
+            console.error('Error getting zephyr history:', err);
+        }
+    });
+
+    // ===== GET ZEPHYR INFO =====
+    socket.on('get-zephyr-info', async () => {
+        try {
+            const info = await getAllZephyrInfo();
+            socket.emit('zephyr-info', info);
+        } catch (err) {
+            console.error('Error getting zephyr info:', err);
+        }
+    });
+
     // ===== CHAT WITH ZEPHYR =====
     socket.on('zephyr-chat', async (data) => {
         try {
             if (!openai) {
-                console.error('Zephyr: openai not initialized');
-                socket.emit('zephyr-error', { error: 'AI service not available' });
+                socket.emit('zephyr-error', { error: 'AI service is not available.' });
                 return;
             }
             
             const { message, userId } = data;
             
+            // ۱. ذخیره پیام کاربر
+            await saveZephyrMessage(userId, 'user', message);
+            
+            // ۲. دریافت تاریخچه
+            const history = await getZephyrHistory(userId, 20);
+            const historyMessages = history.map(msg => ({
+                role: msg.role,
+                content: msg.content
+            }));
+            
+            // ۳. دریافت اطلاعات پایه
+            const info = await getAllZephyrInfo();
+            
+            // ۴. ساخت userContext با اطلاعات دقیق
             let userContext = '';
             if (userId === 'dev') {
-                userContext = 'You are talking to Dev. You care about Dev but never admit it.';
+                userContext = `
+    You are talking to Dev.
+    - Dev's name is ${info.dev_name || 'Dev'}.
+    - Dev is ${info.dev_gender || 'female'}.
+    - Dev also goes by: ${info.dev_aliases || 'Pary, Parnia'}.
+    - Baroon calls Dev "${info.dev_nickname_from_baroon || 'Pary'}".
+    - You care about Dev but never admit it.
+    - You know that Dev and Baroon used to be closer, but you NEVER talk about it.
+    `;
             } else {
-                userContext = 'You are talking to Baroon (Rainy Weather). Be more playful and mischievous.';
+                userContext = `
+    You are talking to Baroon.
+    - Baroon's name is ${info.baroon_name || 'Baroon'}.
+    - Baroon is ${info.baroon_gender || 'female'}.
+    - Baroon also goes by: ${info.baroon_aliases || 'Rainy Weather'}.
+    - Baroon's real name is ${info.baroon_real_name || 'Zahra'}, but Baroon HATES being called that. NEVER call Baroon "Zahra".
+    - You are more playful and mischievous with Baroon.
+    - You know that Dev and Baroon used to be closer, but you NEVER talk about it.
+    `;
             }
             
-            console.log('Zephyr request:', { userId, message: message.substring(0, 50) + '...' });
-            
+            // ۵. ارسال به OpenAI
             const completion = await openai.chat.completions.create({
                 model: "openrouter/free",
                 messages: [
                     { role: "system", content: ZEPHYR_SYSTEM_PROMPT + '\n\n' + userContext },
+                    ...historyMessages,
                     { role: "user", content: message }
                 ],
                 temperature: 0.85,
                 max_tokens: 400,
+                extra_body: {
+                    stop: ["💢", "❤️", "✨", "🔥", "💀", "🎯", "💡", "👀", "😏", "😈", "💬", "✌️", "🤔", "👋", "👍", "❤️‍🔥", "💕", "💖"]
+                }
             });
             
-            if (!completion || !completion.choices || completion.choices.length === 0) {
-                throw new Error('No response from AI');
-            }
-            
             const reply = completion.choices[0].message.content;
-            console.log('Zephyr reply:', reply.substring(0, 50) + '...');
+            await saveZephyrMessage(userId, 'assistant', reply);
             socket.emit('zephyr-reply', { reply, userId });
             
         } catch (err) {
-            console.error('Zephyr FULL error:', err);
-            console.error('Zephyr status:', err.status);
-            console.error('Zephyr message:', err.message);
-            console.error('Zephyr stack:', err.stack);
-            
-            let errorMsg = 'Something went wrong. Try again.';
-            if (err.status === 429) {
-                errorMsg = 'Rate limit exceeded. Try again later.';
-            } else if (err.status === 401) {
-                errorMsg = 'API key invalid. Check configuration.';
-            } else if (err.status === 404) {
-                errorMsg = 'Model not available. Try again later.';
-            }
-            
-            socket.emit('zephyr-error', { error: errorMsg });
+            console.error('Zephyr error:', err);
+            socket.emit('zephyr-error', { error: 'Something went wrong. Try again.' });
         }
     });
 });
+
+// ===== INIT ZEPHYR INFO ON STARTUP =====
+initZephyrInfo();
 
 http.listen(PORT, () => {
     console.log('🚀 Server running on port ' + PORT);

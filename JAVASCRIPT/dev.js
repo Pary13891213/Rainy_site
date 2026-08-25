@@ -489,7 +489,7 @@ document.getElementById('dev-logout-btn').addEventListener('click', function() {
 });
 
 // ============================================================
-// ZEPHYR CHAT (ZEPHYR TAB)
+// ZEPHYR CHAT (ZEPHYR TAB) - با حافظه و تاریخچه
 // ============================================================
 const zephyrMessagesBox = document.getElementById('zephyr-messages-box');
 const zephyrInput = document.getElementById('zephyr-message-input');
@@ -497,6 +497,7 @@ const zephyrSendBtn = document.getElementById('zephyr-send-btn');
 const zephyrTypingIndicator = document.getElementById('zephyr-typing-indicator');
 
 let isZephyrWaiting = false;
+let zephyrHistoryLoaded = false;
 
 function addZephyrMessageDev(sender, content, isUser = false) {
     if (!zephyrMessagesBox) return;
@@ -512,12 +513,48 @@ function addZephyrMessageDev(sender, content, isUser = false) {
     zephyrMessagesBox.scrollTop = zephyrMessagesBox.scrollHeight;
 }
 
+function loadZephyrHistoryDev() {
+    if (zephyrHistoryLoaded) return;
+    socket.emit('get-zephyr-history', { userId: 'dev' });
+}
+
+socket.on('zephyr-history', (data) => {
+    if (data.userId === 'dev') {
+        zephyrHistoryLoaded = true;
+        if (zephyrMessagesBox) {
+            zephyrMessagesBox.innerHTML = '';
+        }
+        
+        data.history.forEach(msg => {
+            const isUser = msg.role === 'user';
+            const sender = isUser ? 'Dev' : 'Zephyr';
+            addZephyrMessageDev(sender, msg.content, isUser);
+        });
+        
+        if (data.history.length === 0) {
+            addZephyrMessageDev('Zephyr', 'Hey Dev! (¬‿¬) Finally decided to talk to me?');
+        }
+    }
+});
+
+socket.on('zephyr-info', (info) => {
+    console.log('Zephyr info loaded:', info);
+});
+
 function sendToZephyrDev() {
     if (!zephyrInput) return;
     if (isZephyrWaiting) return;
     
     const message = zephyrInput.value.trim();
     if (!message) return;
+    
+    const lastMessage = zephyrMessagesBox?.lastElementChild;
+    if (lastMessage) {
+        const lastContent = lastMessage.querySelector('.message-content')?.textContent;
+        if (lastContent === message) {
+            return;
+        }
+    }
     
     addZephyrMessageDev('Dev', message, true);
     zephyrInput.value = '';
@@ -569,6 +606,12 @@ if (zephyrInput) {
         }
     });
 }
+
+document.querySelector('[data-tab="zephyr"]')?.addEventListener('click', () => {
+    setTimeout(loadZephyrHistoryDev, 200);
+});
+
+setTimeout(loadZephyrHistoryDev, 1000);
 
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
