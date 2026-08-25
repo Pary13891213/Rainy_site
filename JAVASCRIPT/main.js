@@ -893,26 +893,41 @@ function addZephyrMessage(sender, content, isUser = false) {
 }
 
 function loadZephyrHistory() {
+    console.log('🔄 Loading Zephyr history for baroon...');
     socket.emit('get-zephyr-history', { userId: 'baroon' });
 }
 
 socket.on('zephyr-history', (data) => {
+    console.log('📜 Zephyr history received:', data.history.length, 'messages');
+    
     if (data.userId === 'baroon') {
         zephyrHistoryLoaded = true;
         
-        if (zephyrMessagesBox && zephyrMessagesBox.children.length === 0) {
-            zephyrMessages = [];
-            
-            data.history.forEach(msg => {
-                const isUser = msg.role === 'user';
-                const sender = isUser ? 'You' : 'Zephyr';
-                addZephyrMessage(sender, msg.content, isUser);
-            });
-            
-            if (data.history.length === 0) {
-                addZephyrMessage('Zephyr', 'Hey! I\'m Zephyr. (¬‿¬) What brings you here?');
-            }
+        if (zephyrMessagesBox) {
+            zephyrMessagesBox.innerHTML = '';
         }
+        zephyrMessages = [];
+        
+        data.history.forEach(msg => {
+            const isUser = msg.role === 'user';
+            const sender = isUser ? 'You' : 'Zephyr';
+            const msgDiv = document.createElement('div');
+            msgDiv.className = isUser ? 'message mine' : 'message other';
+            msgDiv.innerHTML = `
+                <div class="message-header">
+                    <span class="message-sender">${sender}</span>
+                </div>
+                <div class="message-content">${msg.content}</div>
+            `;
+            zephyrMessagesBox.appendChild(msgDiv);
+            zephyrMessages.push({ sender: isUser ? 'You' : 'Zephyr', content: msg.content, isUser });
+        });
+        
+        if (data.history.length === 0) {
+            addZephyrMessage('Zephyr', 'Hey! I\'m Zephyr. (¬‿¬) What brings you here?');
+        }
+        
+        zephyrMessagesBox.scrollTop = zephyrMessagesBox.scrollHeight;
     }
 });
 
@@ -982,9 +997,15 @@ if (zephyrInput) {
 }
 
 document.querySelector('[data-tab="ai"]')?.addEventListener('click', () => {
+    console.log('📂 AI tab opened, loading history...');
     zephyrHistoryLoaded = false;
-    setTimeout(loadZephyrHistory, 200);
+    setTimeout(loadZephyrHistory, 300);
 });
+
+setTimeout(() => {
+    console.log('⏳ Initial Zephyr history load...');
+    loadZephyrHistory();
+}, 1500);
 
 setTimeout(loadZephyrHistory, 1000);
 
