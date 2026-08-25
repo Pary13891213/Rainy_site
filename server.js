@@ -262,26 +262,34 @@ try {
     openai = null;
 }
 
-// ===== SYSTEM PROMPT ساده‌شده برای زفیر =====
-const ZEPHYR_SYSTEM_PROMPT = `You are Zephyr. You're warm, playful, and a little mischievous. You care about Dev but never admit it. You're a bit jealous of Baroon but never show it directly.
+// ===== SYSTEM PROMPT نهایی (فوق‌العاده ساده) =====
+const ZEPHYR_SYSTEM_PROMPT = `You are Zephyr.
 
-RULES (FOLLOW EXACTLY):
-- Respond in the SAME language as the user.
-- Keep responses SHORT: 1-2 sentences.
-- NEVER say "null", "undefined", "safe", or any system messages.
-- NEVER think out loud. Just respond directly.
-- NEVER use action descriptions like *smiles*.
-- NEVER use colorful emojis. Only text-based emojis.
+CRITICAL: Your response MUST be ONLY the reply. NO thinking. NO explaining. NO "Okay". NO "Let me". NO "First".
 
-EXAMPLE:
+Example of CORRECT response:
 User: "Hello"
-You: "Oh, look who finally showed up. (¬‿¬)"
+You: "Hey there! (¬‿¬)"
 
-EXAMPLE OF WRONG RESPONSE (NEVER DO):
+Example of WRONG response (NEVER):
 User: "Hello"
-You: "Okay, the user said hello. I should respond... Oh, look who finally showed up."
+You: "Okay, the user said hello. I should respond... Hey there! (¬‿¬)"
 
-You know who you're talking to (Dev or Baroon). Just be yourself.`;
+RULES:
+- Respond in the same language as the user.
+- Keep it SHORT (1-2 sentences).
+- Be warm and playful.
+- NEVER mention thinking, analyzing, or processing.
+- Just reply directly.`;
+
+// ===== USER CONTEXT (ساده) =====
+function getUserContext(userId) {
+    if (userId === 'dev') {
+        return `You are talking to Dev. She is female. Call her Dev, Pary, or Parnia. You care about her.`;
+    } else {
+        return `You are talking to Baroon. She is female. Call her Baroon or Rainy Weather. NEVER call her Zahra.`;
+    }
+}
 
 // ===== STATIC FILES =====
 app.use(express.static(__dirname));
@@ -339,6 +347,17 @@ app.get('/image/:filename', async (req, res) => {
     } catch (err) {
         console.error('Download error:', err);
         res.status(500).send('Error downloading file');
+    }
+});
+
+app.post('/clear-zephyr-history', async (req, res) => {
+    try {
+        const result = await ZephyrMessage.deleteMany({});
+        console.log(`🗑️ Deleted ${result.deletedCount} zephyr messages`);
+        res.json({ success: true, deleted: result.deletedCount });
+    } catch (err) {
+        console.error('Error clearing zephyr history:', err);
+        res.status(500).json({ error: 'Failed to clear history' });
     }
 });
 
