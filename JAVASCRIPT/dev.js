@@ -494,6 +494,9 @@ document.getElementById('dev-logout-btn').addEventListener('click', function() {
 const zephyrMessagesBox = document.getElementById('zephyr-messages-box');
 const zephyrInput = document.getElementById('zephyr-message-input');
 const zephyrSendBtn = document.getElementById('zephyr-send-btn');
+const zephyrTypingIndicator = document.getElementById('zephyr-typing-indicator');
+
+let isZephyrWaiting = false;
 
 function addZephyrMessageDev(sender, content, isUser = false) {
     if (!zephyrMessagesBox) return;
@@ -511,11 +514,20 @@ function addZephyrMessageDev(sender, content, isUser = false) {
 
 function sendToZephyrDev() {
     if (!zephyrInput) return;
+    if (isZephyrWaiting) return;
+    
     const message = zephyrInput.value.trim();
     if (!message) return;
     
     addZephyrMessageDev('Dev', message, true);
     zephyrInput.value = '';
+    zephyrInput.disabled = true;
+    zephyrSendBtn.disabled = true;
+    isZephyrWaiting = true;
+    
+    if (zephyrTypingIndicator) {
+        zephyrTypingIndicator.style.display = 'block';
+    }
     
     socket.emit('zephyr-chat', {
         message: message,
@@ -525,12 +537,25 @@ function sendToZephyrDev() {
 
 socket.on('zephyr-reply', (data) => {
     if (data.userId === 'dev') {
+        if (zephyrTypingIndicator) {
+            zephyrTypingIndicator.style.display = 'none';
+        }
         addZephyrMessageDev('Zephyr', data.reply);
+        zephyrInput.disabled = false;
+        zephyrSendBtn.disabled = false;
+        isZephyrWaiting = false;
+        zephyrInput.focus();
     }
 });
 
 socket.on('zephyr-error', (data) => {
+    if (zephyrTypingIndicator) {
+        zephyrTypingIndicator.style.display = 'none';
+    }
     addZephyrMessageDev('System', '❌ ' + data.error);
+    zephyrInput.disabled = false;
+    zephyrSendBtn.disabled = false;
+    isZephyrWaiting = false;
 });
 
 if (zephyrSendBtn) {
@@ -538,7 +563,7 @@ if (zephyrSendBtn) {
 }
 if (zephyrInput) {
     zephyrInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
+        if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             sendToZephyrDev();
         }
