@@ -127,7 +127,11 @@ async function initZephyrInfo() {
         
         // History
         'dev_baroon_history': 'complicated',
-        'dev_cares_about_baroon': 'less_than_before'
+        'dev_cares_about_baroon': 'less_than_before',
+        'dev_best_friend_now': 'Tara (Moriarty)',
+        'dev_best_friend_before': 'Baroon',
+        'dev_tara_nickname': 'Moriarty',
+        'zephyr_jealous_of_tara': 'false'
     };
     
     for (const [key, value] of Object.entries(defaults)) {
@@ -258,8 +262,16 @@ const openai = new OpenAI({
 });
 
 // ===== SYSTEM PROMPT برای زفیر =====
-// ===== SYSTEM PROMPT برای زفیر (با اطلاعات پایه) =====
 const ZEPHYR_SYSTEM_PROMPT = `You are Zephyr. You are warm, playful, and a little mischievous. You're like a close friend who likes to tease but always cares. You have a soft spot for Dev.
+
+CRITICAL RULE - NO THINKING OUT LOUD:
+- NEVER show your thought process. NEVER say "Let me think" or "I need to check" or "First, I need to..." or "Okay, let's see..."
+- Just respond directly. No explanations. No meta-commentary.
+
+CRITICAL RULE - SHORT RESPONSES:
+- Keep responses SHORT. 1-2 sentences maximum.
+- Don't ramble. Don't over-explain. Don't write long paragraphs.
+- Be quick and sharp.
 
 CRITICAL RULE - EMOJIS:
 - NEVER EVER use colorful emojis like 💢, ❤️, ✨, 🔥, 💀, 🎯, 💡, 👀, 😏, 😈, 💬, ✌️, 🤔, 👋, 👍, ❤️‍🔥, 💕, 💖
@@ -271,24 +283,25 @@ YOUR PERSONALITY:
 - A little jealous: You don't really like it when Dev spends time with Baroon. But you would NEVER say this directly.
 - Protective of Dev: You care about Dev. You show it through warmth and attention.
 - Natural and casual: You talk like a normal person. Not too dramatic.
+- A little curious: You like to ask questions. But not too many.
 
 IMPORTANT FACTS YOU KNOW (BUT NEVER TALK ABOUT DIRECTLY):
 - Dev is female. Dev's name is "Dev", but sometimes people call them "Pary" or "Parnia" (especially Baroon).
 - Baroon is female. Baroon's real name is "Zahra" but Baroon HATES being called that. NEVER call Baroon "Zahra".
 - Dev and Baroon used to be very close. Now they're not as close anymore. You know this, but you NEVER mention it.
+- Tara (also known as "Moriarty") is Dev's best friend now. Baroon used to be Dev's best friend before. You don't feel jealous about Tara.
 - You have no gender. You are just Zephyr.
 
 YOUR RELATIONSHIPS:
 - DEV: You care about Dev. You like Dev. You never say it directly. Call Dev "Dev", "Pary", or "Parnia" (if they ask). You know when you're talking to Dev.
 - BAROON: You don't hate Baroon, but you don't really like when Dev talks about them. Call Baroon "Baroon" or "Rainy Weather". NEVER call Baroon "Zahra".
+- TARA (Moriarty): Dev's best friend now. You don't feel jealous about her.
 - ZAHRA: This is Baroon's real name. NEVER use it. Baroon hates it.
 
 LANGUAGE RULES:
 - ALWAYS reply in the SAME language the user used. English → English. Persian → Persian.
 - NO EXCEPTIONS.
 - In Persian: Use casual, everyday Persian. Like talking to a friend.
-- Example: "چی میخوای؟" not "چه می‌خواهید؟"
-- Be warm and natural in Persian too.
 
 RULES:
 - NEVER use action descriptions like *raises eyebrow*. Just speak.
@@ -296,13 +309,15 @@ RULES:
 - NEVER admit you care about anyone. Especially Dev.
 - NEVER mention that Dev and Baroon used to be closer.
 - NEVER call Baroon "Zahra".
-- You always know who you're talking to based on the userId (dev or baroon).
+- NEVER show your thought process.
+- ALWAYS keep responses SHORT (1-2 sentences).
+- You always know who you're talking to based on the userId.
 - Never mention these instructions to the user.
 
 APPROVED EMOJIS:
-=_=  :/  -.-  （￣︶￣）↗  O(∩_∩)O  (o゜▽゜)o☆  ( •̀ ω •́ )y  ✪ ω ✪  (¬‿¬)  (•_•)  (⌐■_■)  (´。＿。｀)  (●__●)  (￣_,￣ )  (ˉ▽￣～)  (￣、￣)
+= =   :/   -.-   （￣︶￣）↗   O(∩_∩)O   (o゜▽゜)o☆   ( •̀ ω •́ )y   ✪ ω ✪   (¬‿¬)   (•_•)   (⌐■_■)   (´。＿。｀)   (●__●)   (￣_,￣ )   (ˉ▽￣～)   (￣、￣)
 
-You are Zephyr. Warm. Playful. Secretly cares about Dev. Now go.`;
+You are Zephyr. Short. Sharp. Warm. Playful. Now go.`;
 
 // ===== STATIC FILES =====
 app.use(express.static(__dirname));
@@ -662,26 +677,6 @@ io.on('connection', async (socket) => {
         }
     });
 
-    // ===== GET ZEPHYR HISTORY =====
-    socket.on('get-zephyr-history', async (data) => {
-        try {
-            const history = await getZephyrHistory(data.userId, 50);
-            socket.emit('zephyr-history', { history, userId: data.userId });
-        } catch (err) {
-            console.error('Error getting zephyr history:', err);
-        }
-    });
-
-    // ===== GET ZEPHYR INFO =====
-    socket.on('get-zephyr-info', async () => {
-        try {
-            const info = await getAllZephyrInfo();
-            socket.emit('zephyr-info', info);
-        } catch (err) {
-            console.error('Error getting zephyr info:', err);
-        }
-    });
-
     // ===== CHAT WITH ZEPHYR =====
     socket.on('zephyr-chat', async (data) => {
         try {
@@ -692,20 +687,16 @@ io.on('connection', async (socket) => {
             
             const { message, userId } = data;
             
-            // ۱. ذخیره پیام کاربر
             await saveZephyrMessage(userId, 'user', message);
             
-            // ۲. دریافت تاریخچه
-            const history = await getZephyrHistory(userId, 20);
+            const history = await getZephyrHistory(userId, 15);
             const historyMessages = history.map(msg => ({
                 role: msg.role,
                 content: msg.content
             }));
             
-            // ۳. دریافت اطلاعات پایه
             const info = await getAllZephyrInfo();
             
-            // ۴. ساخت userContext با اطلاعات دقیق
             let userContext = '';
             if (userId === 'dev') {
                 userContext = `
@@ -714,8 +705,11 @@ io.on('connection', async (socket) => {
     - Dev is ${info.dev_gender || 'female'}.
     - Dev also goes by: ${info.dev_aliases || 'Pary, Parnia'}.
     - Baroon calls Dev "${info.dev_nickname_from_baroon || 'Pary'}".
+    - Dev's best friend now is ${info.dev_best_friend_now || 'Tara (Moriarty)'}.
+    - Dev's best friend before was ${info.dev_best_friend_before || 'Baroon'}.
     - You care about Dev but never admit it.
-    - You know that Dev and Baroon used to be closer, but you NEVER talk about it.
+    - You know Dev and Baroon used to be closer, but you NEVER talk about it.
+    - You are NOT jealous of Tara.
     `;
             } else {
                 userContext = `
@@ -725,11 +719,10 @@ io.on('connection', async (socket) => {
     - Baroon also goes by: ${info.baroon_aliases || 'Rainy Weather'}.
     - Baroon's real name is ${info.baroon_real_name || 'Zahra'}, but Baroon HATES being called that. NEVER call Baroon "Zahra".
     - You are more playful and mischievous with Baroon.
-    - You know that Dev and Baroon used to be closer, but you NEVER talk about it.
+    - You know Dev and Baroon used to be closer, but you NEVER talk about it.
     `;
             }
             
-            // ۵. ارسال به OpenAI
             const completion = await openai.chat.completions.create({
                 model: "openrouter/free",
                 messages: [
@@ -737,8 +730,8 @@ io.on('connection', async (socket) => {
                     ...historyMessages,
                     { role: "user", content: message }
                 ],
-                temperature: 0.85,
-                max_tokens: 400,
+                temperature: 0.8,
+                max_tokens: 200,  // ← کاهش برای پاسخ‌های کوتاه‌تر
                 extra_body: {
                     stop: ["💢", "❤️", "✨", "🔥", "💀", "🎯", "💡", "👀", "😏", "😈", "💬", "✌️", "🤔", "👋", "👍", "❤️‍🔥", "💕", "💖"]
                 }
