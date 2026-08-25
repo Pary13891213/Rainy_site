@@ -498,6 +498,7 @@ const zephyrTypingIndicator = document.getElementById('zephyr-typing-indicator')
 
 let isZephyrWaiting = false;
 let zephyrHistoryLoaded = false;
+let zephyrMessages = []; // ذخیره پیام‌ها برای جلوگیری از پاک شدن
 
 function addZephyrMessageDev(sender, content, isUser = false) {
     if (!zephyrMessagesBox) return;
@@ -511,28 +512,33 @@ function addZephyrMessageDev(sender, content, isUser = false) {
     `;
     zephyrMessagesBox.appendChild(msgDiv);
     zephyrMessagesBox.scrollTop = zephyrMessagesBox.scrollHeight;
+    
+    // ذخیره در آرایه محلی
+    zephyrMessages.push({ sender, content, isUser });
 }
 
 function loadZephyrHistoryDev() {
-    if (zephyrHistoryLoaded) return;
+    // ===== حذف شرط =====
     socket.emit('get-zephyr-history', { userId: 'dev' });
 }
 
 socket.on('zephyr-history', (data) => {
     if (data.userId === 'dev') {
         zephyrHistoryLoaded = true;
-        if (zephyrMessagesBox) {
-            zephyrMessagesBox.innerHTML = '';
-        }
         
-        data.history.forEach(msg => {
-            const isUser = msg.role === 'user';
-            const sender = isUser ? 'Dev' : 'Zephyr';
-            addZephyrMessageDev(sender, msg.content, isUser);
-        });
-        
-        if (data.history.length === 0) {
-            addZephyrMessageDev('Zephyr', 'Hey Dev! (¬‿¬) Finally decided to talk to me?');
+        // ===== فقط اگه پیامی وجود نداره، لود کن =====
+        if (zephyrMessagesBox && zephyrMessagesBox.children.length === 0) {
+            zephyrMessages = [];
+            
+            data.history.forEach(msg => {
+                const isUser = msg.role === 'user';
+                const sender = isUser ? 'Dev' : 'Zephyr';
+                addZephyrMessageDev(sender, msg.content, isUser);
+            });
+            
+            if (data.history.length === 0) {
+                addZephyrMessageDev('Zephyr', 'Hey Dev! (¬‿¬) Finally decided to talk to me?');
+            }
         }
     }
 });
@@ -548,10 +554,10 @@ function sendToZephyrDev() {
     const message = zephyrInput.value.trim();
     if (!message) return;
     
-    const lastMessage = zephyrMessagesBox?.lastElementChild;
-    if (lastMessage) {
-        const lastContent = lastMessage.querySelector('.message-content')?.textContent;
-        if (lastContent === message) {
+    // چک کردن پیام تکراری
+    if (zephyrMessages.length > 0) {
+        const lastMsg = zephyrMessages[zephyrMessages.length - 1];
+        if (lastMsg.content === message && lastMsg.isUser) {
             return;
         }
     }
@@ -608,9 +614,12 @@ if (zephyrInput) {
 }
 
 document.querySelector('[data-tab="zephyr"]')?.addEventListener('click', () => {
+    // ===== هر بار که تب باز میشه، دوباره لود کن =====
+    zephyrHistoryLoaded = false;
     setTimeout(loadZephyrHistoryDev, 200);
 });
 
+// ===== لود تاریخچه در ابتدا =====
 setTimeout(loadZephyrHistoryDev, 1000);
 
 if (document.readyState === 'loading') {
