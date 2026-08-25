@@ -488,6 +488,63 @@ document.getElementById('dev-logout-btn').addEventListener('click', function() {
     window.location.href = '/';
 });
 
+// ============================================================
+// ZEPHYR CHAT (ZEPHYR TAB)
+// ============================================================
+const zephyrMessagesBox = document.getElementById('zephyr-messages-box');
+const zephyrInput = document.getElementById('zephyr-message-input');
+const zephyrSendBtn = document.getElementById('zephyr-send-btn');
+
+function addZephyrMessageDev(sender, content, isUser = false) {
+    if (!zephyrMessagesBox) return;
+    const msgDiv = document.createElement('div');
+    msgDiv.className = isUser ? 'message mine' : 'message other';
+    msgDiv.innerHTML = `
+        <div class="message-header">
+            <span class="message-sender">${sender}</span>
+        </div>
+        <div class="message-content">${content}</div>
+    `;
+    zephyrMessagesBox.appendChild(msgDiv);
+    zephyrMessagesBox.scrollTop = zephyrMessagesBox.scrollHeight;
+}
+
+function sendToZephyrDev() {
+    if (!zephyrInput) return;
+    const message = zephyrInput.value.trim();
+    if (!message) return;
+    
+    addZephyrMessageDev('Dev', message, true);
+    zephyrInput.value = '';
+    
+    socket.emit('zephyr-chat', {
+        message: message,
+        userId: 'dev'
+    });
+}
+
+socket.on('zephyr-reply', (data) => {
+    if (data.userId === 'dev') {
+        addZephyrMessageDev('Zephyr', data.reply);
+    }
+});
+
+socket.on('zephyr-error', (data) => {
+    addZephyrMessageDev('System', '❌ ' + data.error);
+});
+
+if (zephyrSendBtn) {
+    zephyrSendBtn.addEventListener('click', sendToZephyrDev);
+}
+if (zephyrInput) {
+    zephyrInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            sendToZephyrDev();
+        }
+    });
+}
+
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
 } else {

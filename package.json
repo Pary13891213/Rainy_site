@@ -14,6 +14,7 @@
     "mongoose": "^9.9.2",
     "multer": "^2.2.0",
     "multer-gridfs-storage": "^6.1.0",
+    "openai": "^7.5.0",
     "socket.io": "^4.7.2"
   }
 }
